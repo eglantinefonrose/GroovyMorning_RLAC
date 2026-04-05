@@ -1,0 +1,110 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.google.cloud.tools.jib' version '3.4.3'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.mockito:mockito-core:5.8.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.8.0'
+    testImplementation 'org.awaitility:awaitility:4.2.0'
+
+    implementation 'org.quartz-scheduler:quartz:2.3.2'
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'ch.qos.logback:logback-classic:1.4.14'
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+    implementation 'org.xerial:sqlite-jdbc:3.45.1.0'
+
+    implementation 'org.glassfish.jersey.containers:jersey-container-servlet:3.1.3'
+    implementation 'org.glassfish.jersey.inject:jersey-hk2:3.1.3'
+    implementation 'org.glassfish.jersey.media:jersey-media-json-jackson:3.1.3'
+    implementation 'org.eclipse.jetty:jetty-server:11.0.15'
+    implementation 'org.eclipse.jetty:jetty-servlet:11.0.15'
+
+    implementation 'io.socket:socket.io-client:2.1.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+application {
+    mainClass = 'org.example.api.RLACServerAPI'
+}
+
+jib {
+    from {
+        image = 'amazoncorretto:21-alpine'
+    }
+    to {
+        image = 'ghcr.io/eglantinefonrose/rlac-server'
+    }
+    container {
+        ports = ['8000']
+    }
+}
+
+task buildDockerImage(type: Exec) {
+    commandLine 'docker', 'build', '-t', 'rlac-server', '.'
+}
+
+task pushDockerImage(type: Exec) {
+    commandLine './gradlew', 'jib'
+}
+
+task runLocal(type: Exec) {
+    commandLine 'docker',  'compose', 'up', '-d'
+}
+
+task deployRemote(type: Exec) {
+    def remoteIp = project.findProperty('remoteIp') ?: "MISSING_IP"
+    commandLine 'bash', '-c', "scp docker-compose.yaml remote-user@${remoteIp}: && ssh remote-user@${remoteIp} 'docker-compose pull && docker-compose up -d'"
+
+    doFirst {
+        if (!project.hasProperty('remoteIp')) {
+            throw new InvalidUserDataException("Please provide the remote IP address using -PremoteIp=<ip-address>")
+        }
+    }
+}
+
+task prtHelp {
+    doLast {
+        println '''
+   ------------------------------------------------------------------------------------------------
+
+       PRTLABS DEV HELP - RLAC-JavaServer
+
+   ------------------------------------------------------------------------------------------------
+
+    Executing the RLAC-JavaServer
+
+       - Most common DEVLOCAL execution scenario:
+           -> Run locally with Docker Compose          gradle runLocal
+           -> Run application directly                 gradle run
+
+
+    Deployment tasks
+
+       -  Containerization and Remote Deploy:
+           -> Build local Docker image                 gradle buildDockerImage
+           -> Push to registry (Jib)                   gradle pushDockerImage
+           -> Deploy to remote server                  gradle deployRemote -PremoteIp=<ip-address>
+
+
+    Using the classical Gradle commands works too
+
+       -  Classical Java compiling        gradle compileJava
+       -  Classical testing               gradle test
+'''
+    }
+}

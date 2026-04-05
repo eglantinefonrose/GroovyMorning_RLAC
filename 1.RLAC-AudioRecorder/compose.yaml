@@ -1,0 +1,11 @@
+services:
+  rlac-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rlac-server
+    container_name: rlac-server
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./media:/app/media

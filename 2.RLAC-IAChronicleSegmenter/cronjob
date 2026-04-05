@@ -1,0 +1,2 @@
+# Exécuter à 6h55 tous les jours
+55 6 * * * root cd /app && python live_radio_segmenter.py >> /var/log/radio_segmenter.log 2>&1

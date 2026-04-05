@@ -1,0 +1,55 @@
+{
+  "testUser" : [ {
+    "nomDeChronique" : "journal de 7h",
+    "startTime" : 0,
+    "endTime" : 780
+  }, {
+    "nomDeChronique" : "Le grand reportage",
+    "startTime" : 960,
+    "endTime" : 1200
+  }, {
+    "nomDeChronique" : "Édito média",
+    "startTime" : 1200,
+    "endTime" : 1380
+  }, {
+    "nomDeChronique" : "les 80”",
+    "startTime" : 780,
+    "endTime" : 960
+  }, {
+    "nomDeChronique" : "Musicaline",
+    "startTime" : 1380,
+    "endTime" : 1680
+  }, {
+    "nomDeChronique" : "Météo",
+    "startTime" : 1680,
+    "endTime" : 1800
+  }, {
+    "nomDeChronique" : "Le journal de 7h30",
+    "startTime" : 1800,
+    "endTime" : 2580
+  }, {
+    "nomDeChronique" : "Édito politique",
+    "startTime" : 2580,
+    "endTime" : 2760
+  }, {
+    "nomDeChronique" : "Édito éco",
+    "startTime" : 2760,
+    "endTime" : 3000
+  }, {
+    "nomDeChronique" : "L’invité de 7h50",
+    "startTime" : 2940,
+    "endTime" : 3360
+  }, {
+    "nomDeChronique" : "Billet de Bertrant Chameroy",
+    "startTime" : 3360,
+    "endTime" : 3600
+  }, {
+    "nomDeChronique" : "Journal de 8h00",
+    "startTime" : 3600,
+    "endTime" : 4620
+  }, {
+    "nomDeChronique" : "Géopolitique",
+    "startTime" : 4620,
+    "endTime" : 4800
+  } ]
+}

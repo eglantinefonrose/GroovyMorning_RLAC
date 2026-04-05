@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Seulement les logs INFO et plus graves -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <!-- Vos logs uniquement -->
+    <logger name="org.example" level="INFO"/>
+    <logger name="recording.service" level="INFO"/>
+
+    <!-- Silencer tout le reste -->
+    <logger name="org.eclipse.jetty" level="ERROR"/>
+    <logger name="org.glassfish.jersey" level="ERROR"/>
+    <logger name="org.quartz" level="ERROR"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss} [%thread] %-5level %logger{0} - %msg%n</pattern>
+        </encoder>
+    </appender>
+</configuration>

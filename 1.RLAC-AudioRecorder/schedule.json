@@ -1,0 +1,538 @@
+{
+  "testUserForRecording#Le journal de 7h" : {
+    "hour" : 17,
+    "minute" : 55,
+    "duration" : 10,
+    "uuid" : "d195a845-ec39-40b4-9c74-2ff5abd5dbb5",
+    "createdAt" : 1772902482854,
+    "nextRunTime" : 1772902500000
+  },
+  "testUserForRecording#Les 80\"" : {
+    "hour" : 17,
+    "minute" : 55,
+    "duration" : 10,
+    "uuid" : "8c4f3207-19ec-4867-b19c-c3e89783fc49",
+    "createdAt" : 1772902482855,
+    "nextRunTime" : 1772902500000
+  },
+  "testUserForRecording#Le grand reportage" : {
+    "hour" : 18,
+    "minute" : 2,
+    "duration" : 10,
+    "uuid" : "ab63ffce-5fe6-47fc-b2eb-464a7b7812f8",
+    "createdAt" : 1772902886298,
+    "nextRunTime" : 1772902920000
+  },
+  "testUserForRecording#journal de 7h" : {
+    "hour" : 18,
+    "minute" : 2,
+    "duration" : 10,
+    "uuid" : "eed33ba1-4f57-4e9c-9f75-6b195b2bf762",
+    "createdAt" : 1772902886295,
+    "nextRunTime" : 1772902920000
+  },
+  "testUserForRecording#les 80”" : {
+    "hour" : 18,
+    "minute" : 2,
+    "duration" : 10,
+    "uuid" : "bda900e4-c9dd-4e79-aac4-61caf9014907",
+    "createdAt" : 1772902886298,
+    "nextRunTime" : 1772902920000
+  },
+  "testUserForRecording#Édito média" : {
+    "hour" : 18,
+    "minute" : 22,
+    "duration" : 180,
+    "uuid" : "b2a20be1-464c-44af-ace5-406c1799ba06",
+    "createdAt" : 1772902886288,
+    "nextRunTime" : 1772904120000
+  },
+  "testUserForRecording#Musicaline" : {
+    "hour" : 18,
+    "minute" : 25,
+    "duration" : 300,
+    "uuid" : "29f758b1-128c-4ee5-9cf9-3a5b68948dda",
+    "createdAt" : 1772902886289,
+    "nextRunTime" : 1772904300000
+  },
+  "testUserForRecording#Météo" : {
+    "hour" : 18,
+    "minute" : 30,
+    "duration" : 120,
+    "uuid" : "929adb0b-e294-4d67-bcd1-f92b350b2fd7",
+    "createdAt" : 1772902886290,
+    "nextRunTime" : 1772904600000
+  },
+  "testUserForRecording#Le journal de 7h30" : {
+    "hour" : 18,
+    "minute" : 32,
+    "duration" : 780,
+    "uuid" : "689f0c6b-b311-454e-8a92-d5c03b37f885",
+    "createdAt" : 1772902886291,
+    "nextRunTime" : 1772904720000
+  },
+  "testUserForRecording#Édito politique" : {
+    "hour" : 18,
+    "minute" : 45,
+    "duration" : 180,
+    "uuid" : "06fa16f4-6211-4d7b-9f22-f3794d2f7104",
+    "createdAt" : 1772902886292,
+    "nextRunTime" : 1772905500000
+  },
+  "testUserForRecording#Édito éco" : {
+    "hour" : 18,
+    "minute" : 48,
+    "duration" : 240,
+    "uuid" : "21e06c3e-d776-488a-96e8-25dd41cbb307",
+    "createdAt" : 1772902886292,
+    "nextRunTime" : 1772905680000
+  },
+  "testUserForRecording#L’invité de 7h50" : {
+    "hour" : 18,
+    "minute" : 51,
+    "duration" : 420,
+    "uuid" : "53dde484-68b8-452a-b5c0-2b445976e95f",
+    "createdAt" : 1772902886293,
+    "nextRunTime" : 1772905860000
+  },
+  "testUserForRecording#Billet de Bertrant Chameroy" : {
+    "hour" : 18,
+    "minute" : 58,
+    "duration" : 240,
+    "uuid" : "9650ec52-305e-407d-8aad-6ae951f4e512",
+    "createdAt" : 1772902886293,
+    "nextRunTime" : 1772906280000
+  },
+  "testUserForRecording#Journal de 8h00" : {
+    "hour" : 19,
+    "minute" : 2,
+    "duration" : 1020,
+    "uuid" : "82fe18fe-16f0-4bd2-9a71-aa8989eaf1b9",
+    "createdAt" : 1772902886294,
+    "nextRunTime" : 1772906520000
+  },
+  "testUserForRecording#Géopolitique" : {
+    "hour" : 19,
+    "minute" : 19,
+    "duration" : 180,
+    "uuid" : "a75f947c-81df-41e3-882e-86260b4d9225",
+    "createdAt" : 1772902886294,
+    "nextRunTime" : 1772907540000
+  },
+  "testUserForRecording_1772902949798#journal de 7h" : {
+    "hour" : 18,
+    "minute" : 3,
+    "duration" : 10,
+    "uuid" : "ab11bbfe-e8a6-45fe-beef-d646a71347fc",
+    "createdAt" : 1772902950058,
+    "nextRunTime" : 1772902980000
+  },
+  "testUserForRecording_1772902949798#les 80”" : {
+    "hour" : 18,
+    "minute" : 3,
+    "duration" : 10,
+    "uuid" : "aaf15429-e7a6-441c-893f-c242edf3106e",
+    "createdAt" : 1772902950059,
+    "nextRunTime" : 1772902980000
+  },
+  "testUserForRecording_1772902949798#Le grand reportage" : {
+    "hour" : 18,
+    "minute" : 3,
+    "duration" : 10,
+    "uuid" : "617052fd-cd92-4d0b-b664-cc5e97dea3c8",
+    "createdAt" : 1772902950059,
+    "nextRunTime" : 1772902980000
+  },
+  "testUserForRecording_1772902949798#Édito média" : {
+    "hour" : 18,
+    "minute" : 23,
+    "duration" : 180,
+    "uuid" : "680dae4b-f713-4b72-a46a-e6a33bd2a598",
+    "createdAt" : 1772902950045,
+    "nextRunTime" : 1772904180000
+  },
+  "testUserForRecording_1772902949798#Musicaline" : {
+    "hour" : 18,
+    "minute" : 26,
+    "duration" : 300,
+    "uuid" : "b8b76bb1-11b3-4af7-9d7a-9754e206e04f",
+    "createdAt" : 1772902950046,
+    "nextRunTime" : 1772904360000
+  },
+  "testUserForRecording_1772902949798#Météo" : {
+    "hour" : 18,
+    "minute" : 31,
+    "duration" : 120,
+    "uuid" : "171fea62-61a1-4767-b7ee-f13bb88ad284",
+    "createdAt" : 1772902950047,
+    "nextRunTime" : 1772904660000
+  },
+  "testUserForRecording_1772902949798#Le journal de 7h30" : {
+    "hour" : 18,
+    "minute" : 33,
+    "duration" : 780,
+    "uuid" : "f9a4aad0-37ca-4232-8c21-3b355bdfb8dd",
+    "createdAt" : 1772902950048,
+    "nextRunTime" : 1772904780000
+  },
+  "testUserForRecording_1772902949798#Édito politique" : {
+    "hour" : 18,
+    "minute" : 46,
+    "duration" : 180,
+    "uuid" : "06cb1f09-ce34-43cc-8ed9-0083991396ea",
+    "createdAt" : 1772902950050,
+    "nextRunTime" : 1772905560000
+  },
+  "testUserForRecording_1772902949798#Édito éco" : {
+    "hour" : 18,
+    "minute" : 49,
+    "duration" : 240,
+    "uuid" : "4dd043ea-c548-4a45-b13e-f00255fa5279",
+    "createdAt" : 1772902950051,
+    "nextRunTime" : 1772905740000
+  },
+  "testUserForRecording_1772902949798#L’invité de 7h50" : {
+    "hour" : 18,
+    "minute" : 52,
+    "duration" : 420,
+    "uuid" : "324e91d7-2c48-4681-bfcd-d717339a0cb5",
+    "createdAt" : 1772902950052,
+    "nextRunTime" : 1772905920000
+  },
+  "testUserForRecording_1772902949798#Billet de Bertrant Chameroy" : {
+    "hour" : 18,
+    "minute" : 59,
+    "duration" : 240,
+    "uuid" : "5377618b-9d7d-410f-a9ee-c7a9e69a49eb",
+    "createdAt" : 1772902950053,
+    "nextRunTime" : 1772906340000
+  },
+  "testUserForRecording_1772902949798#Journal de 8h00" : {
+    "hour" : 19,
+    "minute" : 3,
+    "duration" : 1020,
+    "uuid" : "967ab163-bd0f-4d72-97f3-e45594be3e48",
+    "createdAt" : 1772902950054,
+    "nextRunTime" : 1772906580000
+  },
+  "testUserForRecording_1772902949798#Géopolitique" : {
+    "hour" : 19,
+    "minute" : 20,
+    "duration" : 180,
+    "uuid" : "de8ab3e9-a734-4115-95b8-4e093e88f4fc",
+    "createdAt" : 1772902950057,
+    "nextRunTime" : 1772907600000
+  },
+  "testUserForRecording_1772903034866#journal de 7h" : {
+    "hour" : 18,
+    "minute" : 4,
+    "duration" : 10,
+    "uuid" : "9268f173-2efe-451e-9aa1-be56f03ea4a2",
+    "createdAt" : 1772903035141,
+    "nextRunTime" : 1772903040000
+  },
+  "testUserForRecording_1772903034866#les 80”" : {
+    "hour" : 18,
+    "minute" : 4,
+    "duration" : 10,
+    "uuid" : "6518e7b3-8e3c-4b5a-a710-532059286e05",
+    "createdAt" : 1772903035145,
+    "nextRunTime" : 1772903040000
+  },
+  "testUserForRecording_1772903034866#Le grand reportage" : {
+    "hour" : 18,
+    "minute" : 20,
+    "duration" : 240,
+    "uuid" : "d8ea1b02-dbfc-418b-ac51-7a144a07443f",
+    "createdAt" : 1772903035129,
+    "nextRunTime" : 1772904000000
+  },
+  "testUserForRecording_1772903034866#Édito média" : {
+    "hour" : 18,
+    "minute" : 24,
+    "duration" : 180,
+    "uuid" : "64783186-ee37-499a-8c4e-1a7c31432352",
+    "createdAt" : 1772903035130,
+    "nextRunTime" : 1772904240000
+  },
+  "testUserForRecording_1772903034866#Musicaline" : {
+    "hour" : 18,
+    "minute" : 27,
+    "duration" : 300,
+    "uuid" : "f15e65c1-033c-42af-aa56-a1639c2783a4",
+    "createdAt" : 1772903035134,
+    "nextRunTime" : 1772904420000
+  },
+  "testUserForRecording_1772903034866#Météo" : {
+    "hour" : 18,
+    "minute" : 32,
+    "duration" : 120,
+    "uuid" : "5e194af7-a4bb-489f-99ea-db2d22218e85",
+    "createdAt" : 1772903035135,
+    "nextRunTime" : 1772904720000
+  },
+  "testUserForRecording_1772903034866#Le journal de 7h30" : {
+    "hour" : 18,
+    "minute" : 34,
+    "duration" : 780,
+    "uuid" : "2bc33cfb-48c5-42ec-9fc3-b81f7f98d558",
+    "createdAt" : 1772903035136,
+    "nextRunTime" : 1772904840000
+  },
+  "testUserForRecording_1772903034866#Édito politique" : {
+    "hour" : 18,
+    "minute" : 47,
+    "duration" : 180,
+    "uuid" : "36f729c9-2e5c-4e48-a812-304868c4a940",
+    "createdAt" : 1772903035136,
+    "nextRunTime" : 1772905620000
+  },
+  "testUserForRecording_1772903034866#Édito éco" : {
+    "hour" : 18,
+    "minute" : 50,
+    "duration" : 240,
+    "uuid" : "cefbbca0-ce35-428e-b34b-9642aeee59b4",
+    "createdAt" : 1772903035137,
+    "nextRunTime" : 1772905800000
+  },
+  "testUserForRecording_1772903034866#L’invité de 7h50" : {
+    "hour" : 18,
+    "minute" : 53,
+    "duration" : 420,
+    "uuid" : "bf6528c8-c5c0-4701-8ee1-5fac0e3ad249",
+    "createdAt" : 1772903035137,
+    "nextRunTime" : 1772905980000
+  },
+  "testUserForRecording_1772903034866#Billet de Bertrant Chameroy" : {
+    "hour" : 19,
+    "minute" : 0,
+    "duration" : 240,
+    "uuid" : "9557e4ee-21db-465b-ac66-974b8b6ebacf",
+    "createdAt" : 1772903035138,
+    "nextRunTime" : 1772906400000
+  },
+  "testUserForRecording_1772903034866#Journal de 8h00" : {
+    "hour" : 19,
+    "minute" : 4,
+    "duration" : 1020,
+    "uuid" : "ce3ba888-5fc1-419a-b97a-dff779bfafa9",
+    "createdAt" : 1772903035139,
+    "nextRunTime" : 1772906640000
+  },
+  "testUserForRecording_1772903034866#Géopolitique" : {
+    "hour" : 19,
+    "minute" : 21,
+    "duration" : 180,
+    "uuid" : "d943ad2a-d936-4c7b-be08-298b5fa3b538",
+    "createdAt" : 1772903035140,
+    "nextRunTime" : 1772907660000
+  },
+  "testUserForRecording_1773091329231#journal de 7h" : {
+    "hour" : 22,
+    "minute" : 23,
+    "duration" : 10,
+    "uuid" : "731b5174-c12f-421f-a6cb-e7d0da62a949",
+    "createdAt" : 1773091329757,
+    "nextRunTime" : 1773091380000
+  },
+  "testUserForRecording_1773091329231#les 80 secondes" : {
+    "hour" : 22,
+    "minute" : 23,
+    "duration" : 10,
+    "uuid" : "0fae9556-ec5e-4ac5-86b5-bda63bf1bd80",
+    "createdAt" : 1773091329758,
+    "nextRunTime" : 1773091380000
+  },
+  "testUserForRecording_1773091329231#Le grand reportage" : {
+    "hour" : 22,
+    "minute" : 39,
+    "duration" : 240,
+    "uuid" : "383f922d-8f48-4e3d-a3dc-3bdcc6239290",
+    "createdAt" : 1773091329749,
+    "nextRunTime" : 1773092340000
+  },
+  "testUserForRecording_1773091329231#Edito media" : {
+    "hour" : 22,
+    "minute" : 43,
+    "duration" : 180,
+    "uuid" : "6fb446ee-599c-4d9d-88db-4f95f0cb8bbe",
+    "createdAt" : 1773091329749,
+    "nextRunTime" : 1773092580000
+  },
+  "testUserForRecording_1773091329231#Musicaline" : {
+    "hour" : 22,
+    "minute" : 46,
+    "duration" : 300,
+    "uuid" : "59b544fe-e685-48e2-9705-56034e5fd051",
+    "createdAt" : 1773091329750,
+    "nextRunTime" : 1773092760000
+  },
+  "testUserForRecording_1773091329231#Meteo" : {
+    "hour" : 22,
+    "minute" : 51,
+    "duration" : 120,
+    "uuid" : "5fd5a64d-19f6-46a3-aee9-0f1e74e0ac81",
+    "createdAt" : 1773091329751,
+    "nextRunTime" : 1773093060000
+  },
+  "testUserForRecording_1773091329231#Le journal de 7h30" : {
+    "hour" : 22,
+    "minute" : 53,
+    "duration" : 780,
+    "uuid" : "0acac73e-adf8-4b69-8b8c-0f8da0b2ca87",
+    "createdAt" : 1773091329752,
+    "nextRunTime" : 1773093180000
+  },
+  "testUserForRecording_1773091329231#Edito politique" : {
+    "hour" : 23,
+    "minute" : 6,
+    "duration" : 180,
+    "uuid" : "242548cc-eb90-41b5-bf84-93b16cc13117",
+    "createdAt" : 1773091329752,
+    "nextRunTime" : 1773093960000
+  },
+  "testUserForRecording_1773091329231#Edito eco" : {
+    "hour" : 23,
+    "minute" : 9,
+    "duration" : 240,
+    "uuid" : "1eb639f6-44ab-42f8-bdff-cce57df3356c",
+    "createdAt" : 1773091329753,
+    "nextRunTime" : 1773094140000
+  },
+  "testUserForRecording_1773091329231#L’invite de 7h50" : {
+    "hour" : 23,
+    "minute" : 12,
+    "duration" : 420,
+    "uuid" : "f9ebedb6-98c6-41fe-a5e8-e27c43625b9f",
+    "createdAt" : 1773091329754,
+    "nextRunTime" : 1773094320000
+  },
+  "testUserForRecording_1773091329231#Billet de Bertrant Chameroy" : {
+    "hour" : 23,
+    "minute" : 19,
+    "duration" : 240,
+    "uuid" : "137c8f24-c423-4267-8334-3388899010b3",
+    "createdAt" : 1773091329754,
+    "nextRunTime" : 1773094740000
+  },
+  "testUserForRecording_1773091329231#Journal de 8h00" : {
+    "hour" : 23,
+    "minute" : 23,
+    "duration" : 1020,
+    "uuid" : "7e12f482-9496-42a2-90af-e1213b889915",
+    "createdAt" : 1773091329755,
+    "nextRunTime" : 1773094980000
+  },
+  "testUserForRecording_1773091329231#Geopolitique" : {
+    "hour" : 23,
+    "minute" : 40,
+    "duration" : 180,
+    "uuid" : "a90d1e6d-0952-4db7-85a0-e16e85749967",
+    "createdAt" : 1773091329756,
+    "nextRunTime" : 1773096000000
+  },
+  "testUserForRecording_1773091400541#journal de 7h" : {
+    "hour" : 22,
+    "minute" : 24,
+    "duration" : 10,
+    "uuid" : "b0d7e1c8-ee37-450b-ac27-7e4732ccf1cd",
+    "createdAt" : 1773091401205,
+    "nextRunTime" : 1773091440000
+  },
+  "testUserForRecording_1773091400541#les 80 secondes" : {
+    "hour" : 22,
+    "minute" : 24,
+    "duration" : 10,
+    "uuid" : "6f7365eb-51d0-4c31-8c7c-14813683ad06",
+    "createdAt" : 1773091401206,
+    "nextRunTime" : 1773091440000
+  },
+  "testUserForRecording_1773091400541#Le grand reportage" : {
+    "hour" : 22,
+    "minute" : 40,
+    "duration" : 240,
+    "uuid" : "23dd1a6c-2f7b-4840-aa7c-5f23a50d7f2a",
+    "createdAt" : 1773091401192,
+    "nextRunTime" : 1773092400000
+  },
+  "testUserForRecording_1773091400541#Edito media" : {
+    "hour" : 22,
+    "minute" : 44,
+    "duration" : 180,
+    "uuid" : "b10ddf05-6fbf-4ba2-bcce-5e0d431c5894",
+    "createdAt" : 1773091401193,
+    "nextRunTime" : 1773092640000
+  },
+  "testUserForRecording_1773091400541#Musicaline" : {
+    "hour" : 22,
+    "minute" : 47,
+    "duration" : 300,
+    "uuid" : "f8cc074d-142b-4461-947e-59ed66d4f022",
+    "createdAt" : 1773091401194,
+    "nextRunTime" : 1773092820000
+  },
+  "testUserForRecording_1773091400541#Meteo" : {
+    "hour" : 22,
+    "minute" : 52,
+    "duration" : 120,
+    "uuid" : "34f39f8b-9122-46a6-bace-96f351d07240",
+    "createdAt" : 1773091401196,
+    "nextRunTime" : 1773093120000
+  },
+  "testUserForRecording_1773091400541#Le journal de 7h30" : {
+    "hour" : 22,
+    "minute" : 54,
+    "duration" : 780,
+    "uuid" : "e66eb656-e852-4b1c-8122-e3bb940b75d2",
+    "createdAt" : 1773091401197,
+    "nextRunTime" : 1773093240000
+  },
+  "testUserForRecording_1773091400541#Edito politique" : {
+    "hour" : 23,
+    "minute" : 7,
+    "duration" : 180,
+    "uuid" : "f5d057b2-8e35-4802-a088-06e213eb65ec",
+    "createdAt" : 1773091401198,
+    "nextRunTime" : 1773094020000
+  },
+  "testUserForRecording_1773091400541#Edito eco" : {
+    "hour" : 23,
+    "minute" : 10,
+    "duration" : 240,
+    "uuid" : "50af8a0a-f648-459c-8921-bace26db3c80",
+    "createdAt" : 1773091401200,
+    "nextRunTime" : 1773094200000
+  },
+  "testUserForRecording_1773091400541#L’invite de 7h50" : {
+    "hour" : 23,
+    "minute" : 13,
+    "duration" : 420,
+    "uuid" : "35c83db1-6f31-4fde-bd3d-ff5720f37d51",
+    "createdAt" : 1773091401201,
+    "nextRunTime" : 1773094380000
+  },
+  "testUserForRecording_1773091400541#Billet de Bertrant Chameroy" : {
+    "hour" : 23,
+    "minute" : 20,
+    "duration" : 240,
+    "uuid" : "05ef3a54-1986-446c-af1f-98004cbff984",
+    "createdAt" : 1773091401202,
+    "nextRunTime" : 1773094800000
+  },
+  "testUserForRecording_1773091400541#Journal de 8h00" : {
+    "hour" : 23,
+    "minute" : 24,
+    "duration" : 1020,
+    "uuid" : "9c7324e9-04d6-4fb3-a872-c059c390566b",
+    "createdAt" : 1773091401203,
+    "nextRunTime" : 1773095040000
+  },
+  "testUserForRecording_1773091400541#Geopolitique" : {
+    "hour" : 23,
+    "minute" : 41,
+    "duration" : 180,
+    "uuid" : "dd3e14b9-61e5-4139-a398-2dd5ee256eeb",
+    "createdAt" : 1773091401204,
+    "nextRunTime" : 1773096060000
+  }
+}
