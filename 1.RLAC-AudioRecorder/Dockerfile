@@ -1,17 +1,34 @@
-# Use an official OpenJDK runtime as a parent image
-FROM amazoncorretto:21-alpine
+# Stage 1: Build
+FROM gradle:8.12-jdk21-alpine AS build
+WORKDIR /app
+COPY . .
+RUN ./gradlew installDist --no-daemon -x test
+# Rename the distribution folder to a predictable name
+RUN mv build/install/$(ls build/install | head -n 1) build/install/app-dist
 
-# Set the working directory in the container
+# Stage 2: Runtime
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-# Create data directory for SQLite
-RUN mkdir -p /app/data
+# Install runtime dependencies (ffmpeg and curl)
+RUN apk add --no-cache ffmpeg curl
 
-# Copy the fat jar into the container at /app
-COPY build/libs/1.RLAC-JavaServer-1.0-SNAPSHOT.jar /app/application.jar
+# Create data and media directories for persistence
+RUN mkdir -p data media
 
-# Make port 8000 available to the world outside this container
+# Copy the built distribution
+COPY --from=build /app/build/install/app-dist/ .
+
+# Set environment variables
+ENV SERVER_PORT=8000
+ENV SERVER_HOST=0.0.0.0
+ENV FFMPEG_PATH=ffmpeg
+ENV DB_PATH=data/rlac.db
+
+# Expose the application port
 EXPOSE 8000
 
-# Run the jar file
-ENTRYPOINT ["java", "-jar", "application.jar"]
+# Start the application using the generated script in bin/
+# The script name usually matches the project name.
+# We find it automatically, excluding .bat files.
+ENTRYPOINT ["sh", "-c", "bin/$(ls bin | grep -v '\\.bat' | head -n 1)"]

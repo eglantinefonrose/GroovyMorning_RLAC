@@ -1,0 +1,36 @@
+services:
+  database:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: radiodb
+      POSTGRES_USER: radiouser
+      POSTGRES_PASSWORD: radiopass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend-python:
+    build: .
+    ports:
+      - "8001:8001"
+    environment:
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: radiodb
+      DB_USER: radiouser
+      DB_PASSWORD: radiopass
+      JAVA_API_URL: http://backend-java:8000
+    depends_on:
+      - database
+      - backend-java
+
+  # Example Java backend (assuming it exists elsewhere)
+  backend-java:
+    image: alpine:latest # Replace with real Java backend image or build
+    command: ["sh", "-c", "while true; do sleep 3600; done"] # Placeholder
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:

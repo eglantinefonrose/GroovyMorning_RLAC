@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class PlaylistService {
 
     private static final Logger logger = LoggerFactory.getLogger(PlaylistService.class);
-    private static final String FFMPEG_PATH = "/opt/homebrew/bin/ffmpeg";
+    private static final String FFMPEG_PATH = System.getenv().getOrDefault("FFMPEG_PATH", "ffmpeg");
 
     public String generatePlaylist(List<Chronicle> chronicles, String recordingPath, String userId) throws IOException, InterruptedException {
         File recordingDir = new File(recordingPath);

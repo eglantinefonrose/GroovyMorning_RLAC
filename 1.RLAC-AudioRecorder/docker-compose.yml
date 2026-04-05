@@ -1,0 +1,18 @@
+services:
+  rlac-recorder:
+    build: .
+    image: rlac-recorder:latest
+    container_name: rlac-recorder
+    ports:
+      - "8000:8000"
+    environment:
+      - SERVER_PORT=8000
+      - SERVER_HOST=0.0.0.0
+      - FFMPEG_PATH=ffmpeg
+      - DB_PATH=data/rlac.db
+    volumes:
+      - ./data:/app/data
+      - ./media:/app/media
+      - ./schedule.json:/app/schedule.json
+      - ./chronicles.json:/app/chronicles.json
+    restart: unless-stopped

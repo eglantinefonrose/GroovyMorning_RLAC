@@ -1,0 +1,15 @@
+.gradle
+.idea
+build
+out
+bin
+scripts
+*.db
+media
+data
+logs
+Dockerfile
+docker-compose.yml
+.git
+.gitignore
+*.md

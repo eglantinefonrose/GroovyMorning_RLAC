@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class FFmpegService {
     private static final Logger logger = LoggerFactory.getLogger(FFmpegService.class);
     private static final String AUDIO_PIPE_PATH = "/tmp/audio_pipe_java";
-    private static final String FFMPEG_PATH = "/opt/homebrew/bin/ffmpeg";
+    private static final String FFMPEG_PATH = System.getenv().getOrDefault("FFMPEG_PATH", "ffmpeg");
 
     private final Map<String, ChronicleRecordingTask> activeChronicleTasks = new ConcurrentHashMap<>();
     private Process continuousProcess;
