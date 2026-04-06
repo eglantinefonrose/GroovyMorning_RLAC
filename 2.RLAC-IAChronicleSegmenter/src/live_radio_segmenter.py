@@ -377,7 +377,7 @@ class UnifiedLiveSegmenter:
                 except: pass
 
 if __name__ == "__main__":
-    SIMU = True # True: écoute sur /tmp/audio_pipe, False: écoute sur le flux Live
+    SIMU = False # True: écoute sur /tmp/audio_pipe, False: écoute sur le flux Live
     
     # Chemin vers les jingles (ajusté pour Docker)
     # Le script est dans /app/src, les jingles sont dans /app/assets

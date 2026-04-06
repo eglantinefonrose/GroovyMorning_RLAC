@@ -2,9 +2,9 @@
 FROM python:3.12-slim
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    DEBIAN_FRONTEND=noninteractive
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Set work directory
 WORKDIR /app
@@ -31,6 +31,7 @@ COPY requirements.txt ./
 RUN uv pip install --system -r requirements.txt
 
 # Pre-download Whisper model (medium) to avoid downloading at runtime
+# Note: This step can take several minutes as it downloads ~1.5GB
 RUN python3 -c "import whisper; whisper.load_model('medium')"
 
 # Copy the rest of the application code

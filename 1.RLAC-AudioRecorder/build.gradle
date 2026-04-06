@@ -82,11 +82,11 @@ task prtHelp {
         println '''
    ------------------------------------------------------------------------------------------------
 
-       PRTLABS DEV HELP - RLAC-JavaServer
+       PRTLABS DEV HELP - 1.RLAC-AudioRecorder
 
    ------------------------------------------------------------------------------------------------
 
-    Executing the RLAC-JavaServer
+    Executing the 1.RLAC-AudioRecorder
 
        - Most common DEVLOCAL execution scenario:
            -> Run locally with Docker Compose          gradle runLocal
