@@ -1,0 +1,1 @@
+Dans cette nouvelle approche, on entraîne un modèle avec des fichiers ne contenant pas de pubs, et des fichiers qui contiennent uniquement de la pub.
