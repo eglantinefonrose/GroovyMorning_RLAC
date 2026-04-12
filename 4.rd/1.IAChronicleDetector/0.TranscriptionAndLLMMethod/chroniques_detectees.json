@@ -1,0 +1,89 @@
+{
+  "chroniques": [
+    {
+      "nom": "journal de 7h00",
+      "timecode_debut": "00:00:00,000",
+      "timecode_fin": "00:00:03,000"
+    },
+    {
+      "nom": "invité de 7h50",
+      "timecode_debut": "00:01:03,000",
+      "timecode_fin": "00:01:25,000"
+    },
+    {
+      "nom": "grand entretien (invité 8h20)",
+      "timecode_debut": "00:01:28,000",
+      "timecode_fin": "00:01:32,000"
+    },
+    {
+      "nom": "édito politique",
+      "timecode_debut": "00:07:29,000",
+      "timecode_fin": "00:07:39,000"
+    },
+    {
+      "nom": "météo (première édition)",
+      "timecode_debut": "inconnu",
+      "timecode_fin": "inconnu"
+    },
+    {
+      "nom": "météo (deuxième édition)",
+      "timecode_debut": "inconnu",
+      "timecode_fin": "inconnu"
+    },
+    {
+      "nom": "billet de Bertrand Chameroy",
+      "timecode_debut": "inconnu",
+      "timecode_fin": "inconnu"
+    },
+    {
+      "nom": "journal de 8h",
+      "timecode_debut": "inconnu",
+      "timecode_fin": "inconnu"
+    },
+    {
+      "nom": "journal de 7h30",
+      "timecode_debut": "inconnu",
+      "timecode_fin": "inconnu"
+    },
+    {
+      "nom": "80 secondes",
+      "timecode_debut": "inconnu",
+      "timecode_fin": "inconnu"
+    },
+    {
+      "nom": "grand reportage",
+      "timecode_debut": "inconnu",
+      "timecode_fin": "inconnu"
+    },
+    {
+      "nom": "édito éco",
+      "timecode_debut": "inconnu",
+      "timecode_fin": "inconnu"
+    },
+    {
+      "nom": "musicaline",
+      "timecode_debut": "inconnu",
+      "timecode_fin": "inconnu"
+    },
+    {
+      "nom": "géopolitique",
+      "timecode_debut": "inconnu",
+      "timecode_fin": "inconnu"
+    },
+    {
+      "nom": "dans l'oeil de",
+      "timecode_debut": "inconnu",
+      "timecode_fin": "inconnu"
+    },
+    {
+      "nom": "merci Véro",
+      "timecode_debut": "inconnu",
+      "timecode_fin": "inconnu"
+    },
+    {
+      "nom": "nom inconnu",
+      "timecode_debut": "inconnu",
+      "timecode_fin": "inconnu"
+    }
+  ]
+}

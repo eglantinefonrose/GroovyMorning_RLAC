@@ -1,0 +1,2 @@
+Avec des modèles gratuits, le système ne semble pas très performant, mais les LLM en ligne arrivent bien à détecter les chroniques (surtout en fournissant la liste des chroniques à détecter à l'avance).
+Nouvelle approche : bourrer le prompt de contexte (exemples de chroniques avec transcription). Le résultat n'est pas top mais quand même assez concluant
