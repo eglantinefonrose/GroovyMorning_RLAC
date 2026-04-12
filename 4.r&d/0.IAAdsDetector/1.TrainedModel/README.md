@@ -1,2 +1,0 @@
-Le but de ce test était d'essayer de détecter les pubs dans la grande matinale grâce au modèle pré-entrainé adetector, en l'entrant sur un extrait contenant un flux sans pub ainsi que de la pub.
-Le premier essai n'est pas concluant du tout.

@@ -1,1 +1,0 @@
-Cette approche semblait fastidieuse et pas forcément concluante, elle a été abandonnée (seulement une transcription a été réalisée)

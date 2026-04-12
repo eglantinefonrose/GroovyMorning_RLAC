@@ -1,0 +1,1 @@
+Dans cette nouvelle approche, on entraîne un modèle à partir de segments contenant des chroniques et des segments qui n'en contiennent pas.
