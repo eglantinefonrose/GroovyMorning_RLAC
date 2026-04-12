@@ -1,4 +1,4 @@
-from src.logic import AdvertisementClassifier, TrainingFile, TrainingConfig
+from src.logic import ChronicleClassifier, TrainingFile, TrainingConfig
 from pathlib import Path
 import argparse
 
@@ -28,7 +28,7 @@ def train():
         return
 
     print(f"Démarrage de l'entraînement avec {len(training_files)} fichiers...")
-    classifier = AdvertisementClassifier(model_type=args.model_type)
+    classifier = ChronicleClassifier(model_type=args.model_type)
     classifier.train_from_multiple_files(training_files)
     
     Path("models").mkdir(exist_ok=True)

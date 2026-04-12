@@ -14,7 +14,7 @@ Le modèle utilisé par défaut est un **Random Forest (Forêt Aléatoire)**.
 ### Pourquoi Random Forest ?
 - **Efficacité** : Il offre un excellent compromis entre vitesse d'entraînement et précision.
 - **Robustesse** : Il gère bien les données de grande dimension (nombreuses caractéristiques audio).
-- **Flexibilité** : Le projet supporte également d'autres architectures (via `src/main.py`) :
+- **Flexibilité** : Le projet supporte également d'autres architectures (via `src/logic.py`) :
     - **SVM** (Support Vector Machine) : Pour une précision accrue sur de petits jeux de données.
     - **MLP** (Multi-Layer Perceptron) : Un réseau de neurones simple pour capturer des relations complexes.
 
@@ -29,11 +29,13 @@ Pour chaque segment de 3 secondes, le système extrait une signature acoustique 
 
 ## Structure du Projet
 
-- `src/main.py` : Script principal pour l'entraînement et la détection.
+- `src/logic.py` : Logique centrale du projet (extraction, entraînement, détection).
+- `train_model.py` : Script pour entraîner le modèle.
+- `detect_chronicles.py` : Script pour détecter les chroniques dans un fichier audio.
 - `src/timecodes_files/` : Contient les annotations (vérité terrain) au format `MM:SS - MM:SS`.
 - `models/` : Stocke les modèles entraînés (`.pkl`).
-- `src/publicités/` : Dossier de sortie pour les segments détectés et extraits.
-- `training_config.txt` : Fichier de configuration pour l'entraînement multi-fichiers.
+- `chroniques_extraites/` : Dossier de sortie pour les segments détectés et extraits.
+- `src/training_config.txt` : Fichier de configuration pour l'entraînement multi-fichiers.
 
 ## Utilisation
 

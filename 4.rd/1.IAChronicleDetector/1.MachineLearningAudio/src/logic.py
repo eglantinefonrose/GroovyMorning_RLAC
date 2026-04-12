@@ -26,11 +26,11 @@ warnings.filterwarnings('ignore')
 class TrainingConfig:
     """Configuration pour l'entraînement"""
     segment_duration: float = 3.0  # Durée des segments en secondes
-    non_ad_ratio: float = 2.0  # Ratio non-pubs / pubs (2x plus de non-pubs)
+    non_chronicle_ratio: float = 2.0  # Ratio non-chroniques / chroniques (2x plus de non-chroniques)
     min_segment_energy: float = 0.01  # Énergie minimale pour ignorer le silence
     augment_data: bool = True  # Augmentation des données
-    non_ad_min_gap: float = 5.0  # Distance minimale des zones de pub pour les non-pubs
-    use_all_files_for_non_ads: bool = True  # Utiliser tous les fichiers pour les non-pubs
+    non_chronicle_min_gap: float = 5.0  # Distance minimale des zones de chronique pour les non-chroniques
+    use_all_files_for_non_chronicles: bool = True  # Utiliser tous les fichiers pour les non-chroniques
 
 @dataclass
 class TrainingFile:
@@ -57,7 +57,9 @@ class TimecodeLoader:
                 data = json.load(f)
                 if isinstance(data, list):
                     return [(item['start'], item['end']) for item in data]
-                elif isinstance(data, dict) and 'ads' in data:
+                elif isinstance(data, dict) and 'segments' in data:
+                    return [(s['start'], s['end']) for s in data['segments']]
+                elif isinstance(data, dict) and 'ads' in data: # Compatibilité
                     return [(ad['start'], ad['end']) for ad in data['ads']]
 
         elif file_path.suffix == '.csv':
@@ -195,11 +197,14 @@ class FeatureExtractor:
         return names
 
 class MultiAudioSegmenter:
+    """Segmente plusieurs fichiers audio à partir de leurs timecodes"""
+
     def __init__(self, feature_extractor, config: TrainingConfig):
         self.feature_extractor = feature_extractor
         self.config = config
 
-    def extract_ad_segments(self, audio: np.ndarray, sr: int, timecodes: List[Tuple[float, float]], source_name: str = "") -> List[Dict]:
+    def extract_chronicle_segments(self, audio: np.ndarray, sr: int, timecodes: List[Tuple[float, float]], source_name: str = "") -> List[Dict]:
+        """Extrait les segments correspondant aux chroniques (classe 1)"""
         segments = []
         duration = len(audio) / sr
         segment_samples = int(self.config.segment_duration * sr)
@@ -215,13 +220,14 @@ class MultiAudioSegmenter:
                 if np.mean(np.abs(seg_audio)) > self.config.min_segment_energy:
                     segments.append({
                         'audio': seg_audio, 'start': seg_start / sr, 'end': (seg_start / sr) + self.config.segment_duration,
-                        'label': 1, 'source': source_name, 'type': 'ad'
+                        'label': 1, 'source': source_name, 'type': 'chronicle'
                     })
         return segments
 
-    def extract_non_ad_segments(self, audio: np.ndarray, sr: int, ad_timecodes: List[Tuple[float, float]], n_segments: int, source_name: str = "") -> List[Dict]:
+    def extract_non_chronicle_segments(self, audio: np.ndarray, sr: int, chronicle_timecodes: List[Tuple[float, float]], n_segments: int, source_name: str = "") -> List[Dict]:
+        """Extrait des segments aléatoires hors des zones de chroniques (classe 0)"""
         duration = len(audio) / sr
-        forbidden = sorted([(max(0, s - self.config.non_ad_min_gap), min(duration, e + self.config.non_ad_min_gap)) for s, e in ad_timecodes])
+        forbidden = sorted([(max(0, s - self.config.non_chronicle_min_gap), min(duration, e + self.config.non_chronicle_min_gap)) for s, e in chronicle_timecodes])
         merged = []
         for zone in forbidden:
             if not merged or zone[0] > merged[-1][1]: merged.append(list(zone))
@@ -236,11 +242,13 @@ class MultiAudioSegmenter:
             if all(not (end_t > z[0] and start_t < z[1]) for z in merged):
                 seg_audio = audio[int(start_t * sr):int(start_t * sr) + segment_samples]
                 if np.mean(np.abs(seg_audio)) > self.config.min_segment_energy:
-                    segments.append({'audio': seg_audio, 'start': start_t, 'end': end_t, 'label': 0, 'source': source_name, 'type': 'non_ad'})
+                    segments.append({'audio': seg_audio, 'start': start_t, 'end': end_t, 'label': 0, 'source': source_name, 'type': 'non_chronicle'})
             attempts += 1
         return segments
 
-class AdvertisementClassifier:
+class ChronicleClassifier:
+    """Classifieur pour détecter les chroniques"""
+
     def __init__(self, model_type='random_forest'):
         self.model_type = model_type
         self.feature_extractor = FeatureExtractor()
@@ -261,21 +269,21 @@ class AdvertisementClassifier:
     def train_from_multiple_files(self, training_files: List[TrainingFile], config: TrainingConfig = None):
         config = config or TrainingConfig()
         segmenter = MultiAudioSegmenter(self.feature_extractor, config)
-        all_ads, all_non_ads, file_stats = [], [], []
+        all_chronicles, all_non_chronicles, file_stats = [], [], []
 
         for tf in training_files:
             if not Path(tf.audio_path).exists() or not Path(tf.timecodes_path).exists(): continue
             timecodes = TimecodeLoader.load_timecodes(tf.timecodes_path)
             if not timecodes: continue
             audio, sr = librosa.load(tf.audio_path, sr=self.feature_extractor.sr)
-            ads = segmenter.extract_ad_segments(audio, sr, timecodes, tf.name)
-            non_ads = segmenter.extract_non_ad_segments(audio, sr, timecodes, int(len(ads) * config.non_ad_ratio), tf.name)
-            all_ads.extend(ads)
-            all_non_ads.extend(non_ads)
-            file_stats.append({'name': tf.name, 'n_ads': len(ads), 'n_non_ads': len(non_ads)})
+            chronicles = segmenter.extract_chronicle_segments(audio, sr, timecodes, tf.name)
+            non_chronicles = segmenter.extract_non_chronicle_segments(audio, sr, timecodes, int(len(chronicles) * config.non_chronicle_ratio), tf.name)
+            all_chronicles.extend(chronicles)
+            all_non_chronicles.extend(non_chronicles)
+            file_stats.append({'name': tf.name, 'n_chronicles': len(chronicles), 'n_non_chronicles': len(non_chronicles)})
 
-        if not all_ads: return
-        all_segments = all_ads + all_non_ads
+        if not all_chronicles: return
+        all_segments = all_chronicles + all_non_chronicles
         random.shuffle(all_segments)
         
         features, labels = [], []
@@ -300,15 +308,15 @@ class AdvertisementClassifier:
     def _evaluate(self, X_test, y_test):
         y_pred = self.model.predict(X_test)
         print("\nPerformance sur le test:")
-        print(classification_report(y_test, y_pred, target_names=['Non-pub', 'Pub']))
+        print(classification_report(y_test, y_pred, target_names=['Non-chronique', 'Chronique']))
 
     def predict_segment(self, audio: np.ndarray, segment_duration: float = 3.0):
         feat = self.feature_extractor.extract_features(audio, segment_duration)
         feat_scaled = self.scaler.transform([feat])
         return self.model.predict(feat_scaled)[0], self.model.predict_proba(feat_scaled)[0][1]
 
-    def detect_ads_in_file(self, audio_path: str, segment_duration: float = 3.0, overlap: float = 1.0, threshold: float = 0.89, extract_ads: bool = True):
-        if extract_ads: Path("publicités").mkdir(exist_ok=True)
+    def detect_chronicles_in_file(self, audio_path: str, segment_duration: float = 3.0, overlap: float = 1.0, threshold: float = 0.89, extract_segments: bool = True):
+        if extract_segments: Path("chroniques_extraites").mkdir(exist_ok=True)
         audio, sr = librosa.load(audio_path, sr=self.feature_extractor.sr)
         duration = len(audio) / sr
         step = segment_duration - overlap
@@ -323,34 +331,34 @@ class AdvertisementClassifier:
             times.append(start_t)
 
         smoothed = np.convolve(probs, np.ones(3)/3, mode='same')
-        ads, current = [], None
+        chronicles, current = [], None
         for i, p in enumerate(smoothed):
             if p >= threshold:
                 if current is None: current = {'start': times[i], 'end': times[i] + segment_duration, 'conf': p}
                 else: current['end'] = times[i] + segment_duration; current['conf'] = max(current['conf'], p)
             elif current:
-                if current['end'] - current['start'] >= 5.0: ads.append(current)
+                if current['end'] - current['start'] >= 5.0: chronicles.append(current)
                 current = None
         
-        merged = self._merge_ads(ads)
-        if extract_ads: self._save_ads(audio, sr, merged, audio_path)
+        merged = self._merge_segments(chronicles)
+        if extract_segments: self._save_segments(audio, sr, merged, audio_path)
         return merged
 
-    def _merge_ads(self, ads, gap=5.0):
-        if not ads: return []
-        sorted_ads = sorted(ads, key=lambda x: x['start'])
-        merged = [sorted_ads[0]]
-        for n in sorted_ads[1:]:
+    def _merge_segments(self, segments, gap=5.0):
+        if not segments: return []
+        sorted_segs = sorted(segments, key=lambda x: x['start'])
+        merged = [sorted_segs[0]]
+        for n in sorted_segs[1:]:
             if n['start'] - merged[-1]['end'] <= gap:
                 merged[-1]['end'] = max(merged[-1]['end'], n['end'])
                 merged[-1]['conf'] = max(merged[-1]['conf'], n['conf'])
             else: merged.append(n)
         return merged
 
-    def _save_ads(self, audio, sr, ads, original_path):
+    def _save_segments(self, audio, sr, segments, original_path):
         base = Path(original_path).stem
-        for i, ad in enumerate(ads, 1):
-            sf.write(f"publicités/{base}_pub_{i:03d}_{int(ad['start'])}s.wav", audio[int(ad['start']*sr):int(ad['end']*sr)], sr)
+        for i, seg in enumerate(segments, 1):
+            sf.write(f"chroniques_extraites/{base}_segment_{i:03d}_{int(seg['start'])}s.wav", audio[int(seg['start']*sr):int(seg['end']*sr)], sr)
 
     def save_model(self, path: str):
         joblib.dump({'model': self.model, 'scaler': self.scaler, 'model_type': self.model_type, 'feature_names': self.feature_names, 'training_stats': self.training_stats}, path)

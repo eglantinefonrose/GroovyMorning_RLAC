@@ -1,4 +1,4 @@
-from src.logic import AdvertisementClassifier
+from src.logic import ChronicleClassifier
 import argparse
 from pathlib import Path
 
@@ -17,15 +17,15 @@ def detect():
         print(f"Erreur: Fichier audio non trouvé: {args.audio}")
         return
 
-    classifier = AdvertisementClassifier()
+    classifier = ChronicleClassifier()
     classifier.load_model(args.model)
     
     print(f"Analyse de {args.audio}...")
-    ads = classifier.detect_ads_in_file(args.audio, threshold=args.threshold, extract_ads=not args.no_extract)
+    segments = classifier.detect_chronicles_in_file(args.audio, threshold=args.threshold, extract_segments=not args.no_extract)
     
-    print(f"\nRésultats : {len(ads)} segments détectés.")
-    for i, ad in enumerate(ads, 1):
-        print(f"Segment #{i}: {ad['start']:.1f}s -> {ad['end']:.1f}s (Confiance: {ad['conf']:.1%})")
+    print(f"\nRésultats : {len(segments)} segments détectés.")
+    for i, seg in enumerate(segments, 1):
+        print(f"Segment #{i}: {seg['start']:.1f}s -> {seg['end']:.1f}s (Confiance: {seg['conf']:.1%})")
 
 if __name__ == "__main__":
     detect()
