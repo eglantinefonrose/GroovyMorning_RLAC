@@ -44,21 +44,29 @@ uv sync
 ```
 
 ### Entraînement
-Pour lancer un nouvel entraînement à partir des fichiers configurés :
+Pour lancer un nouvel entraînement à partir des fichiers configurés dans `src/training_config.txt` :
 ```bash
-python src/main.py
+python train_model.py
 ```
-Le script vous guidera interactivement pour choisir le modèle et les paramètres.
 
-### Détection Rapide
+### Détection
 Pour analyser un fichier audio avec un modèle déjà existant :
 ```bash
-python src/main.py --quick models/rlac-audio-segmenter-chroniques_model.pkl chemin/vers/votre_audio.mp3
+python detect_chronicles.py --model models/rlac-audio-segmenter-chroniques_model.pkl chemin/vers/votre_audio.mp3
 ```
+
+## Comment tester le modèle
+
+1. **Préparer les données** : Assurez-vous que vos fichiers audio et leurs fichiers de timecodes correspondants sont correctement référencés dans `src/training_config.txt`.
+2. **Entraîner** : Lancez `python train_model.py`. Cela générera un fichier `.pkl` dans le dossier `models/`.
+3. **Exécuter** : Utilisez le script `detect_chronicles.py` sur un nouvel enregistrement pour voir si les chroniques sont correctement identifiées.
+4. **Vérifier** : Les segments détectés seront extraits dans le dossier `publicités/` (si l'option n'est pas désactivée) et les timecodes seront affichés dans la console.
+
 
 ## Publication du modèle sur Hugging Face
 
 ```bash
+# Installation et login
 brew install hf
 hf auth login
 
