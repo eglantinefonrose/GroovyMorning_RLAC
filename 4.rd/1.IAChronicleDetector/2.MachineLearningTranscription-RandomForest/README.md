@@ -1,83 +1,68 @@
-# Détection Automatique de Chroniques Radio
+# IA Chronicle Detector - RandomForest Transcription Method
 
-Ce projet vise à détecter et segmenter automatiquement les chroniques (séquences thématiques) au sein de transcriptions de programmes radio (fichiers SRT). Il utilise des techniques d'apprentissage automatique pour identifier les moments où une chronique commence, se déroule et se termine.
+Ce projet propose une méthode de détection de chroniques radio basée sur l'analyse textuelle des transcriptions (SRT) en utilisant un algorithme **Random Forest**.
 
-## Analyse de transcriptions
+Il s'agit d'une approche légère, rapide et efficace qui ne nécessite pas de GPU.
 
-Dans le projet `./1.MachineLearningAudio` on faisait de l'analyse du SON. 
-Le modèle travaille sur des caractéristiques acoustiques.
-   * Entrées : Fréquences audio, Rythme, Texture sonore (MFCC, Spectral Contrast, etc.).
-   * Objectif : Détecter la signature sonore d'une chronique (générique, musique de fond spécifique) sans lire le texte.
+## Approche Technique
 
- Dans le projet `./2.MachineLearningTranscription` on fait de l'analyse du TEXTE. 
- Ici le modèle (Random Forest aussi) qui se trouve dans la classe RadioChroniqueClassifier (dans train.py) travaille sur des caractéristiques linguistiques.
-   * Entrées : Mots utilisés, sens des phrases (Embeddings CamemBERT), ponctuation et métadonnées de transcription.
-   * Objectif : Détecter une chronique en "lisant" ce qui est dit (par exemple, identifier des phrases de présentation ou des thématiques spécifiques).
-
-
-## Modèles d'IA
-
-Le projet propose deux architectures de modèles :
-
-1.  **Modèle Hybride (Recommandé) :** Une architecture moderne combinant :
-    *   **CamemBERT** : Pour l'extraction de représentations sémantiques riches du texte.
-    *   **Bi-LSTM** : Pour la modélisation de la séquence temporelle des segments.
-    *   **CRF (Conditional Random Fields)** : Pour garantir une cohérence dans la segmentation (ex: un segment "milieu de chronique" doit suivre un "début de chronique").
-    *   **Focal Loss** : Pour gérer le déséquilibre des classes (les débuts de chroniques sont rares).
-
-2.  **Modèle Random Forest (Classique) :** Un modèle robuste utilisant :
-    *   Des features textuelles (TF-IDF) et acoustiques/temporelles.
-    *   Une fenêtre glissante pour capturer le contexte local.
-    *   Plus léger et rapide à entraîner sur CPU.
-
-## Fonctionnalités
-
-*   **Extraction de features hybrides** : Word/char count, ponctuation, détection de jingles, heure de la journée, embeddings CamemBERT.
-*   **Support SRT personnalisé** : Gestion des index avec marqueurs temporels `[HH:MM:SS]`.
-*   **Post-traitement intelligent** : Lissage des probabilités, fusion des segments proches et filtrage par durée minimale.
-*   **Évaluation détaillée** : Calcul de la précision, du rappel, du score F1 et de l'IoU (Intersection over Union).
-
-## Installation
-
-Le projet utilise `uv` pour la gestion des dépendances.
-
-```bash
-# Installer les dépendances
-uv sync
-```
-
-## Utilisation
-
-### 1. Entraînement
-
-L'entraînement se configure via `training_config.txt`. Chaque ligne doit suivre le format : `chemin_srt|chemin_timecodes|nom_emission`.
-
-```bash
-# Lancer l'entraînement (par défaut le modèle hybride)
-uv run train.py
-```
-
-Les modèles seront sauvegardés dans le dossier `models/`.
-
-### 2. Prédiction
-
-Pour prédire les chroniques sur un nouveau fichier SRT :
-
-```bash
-uv run predict.py
-```
-
-Vous pouvez modifier le script `predict.py` pour pointer vers votre fichier SRT et votre modèle.
+Le modèle analyse le flux de transcription segment par segment en utilisant :
+1.  **Extraction de caractéristiques (Features)** :
+    *   Durée des segments et métadonnées temporelles.
+    *   Statistiques textuelles (nombre de mots, ponctuation).
+    *   **TF-IDF** : Analyse de l'importance des mots pour identifier le vocabulaire spécifique aux chroniques.
+2.  **Fenêtre Glissante (Contextual Window)** : Pour chaque segment, le modèle prend en compte les caractéristiques des segments adjacents (contexte local) pour améliorer la précision de la détection.
+3.  **Classification** : Un classifieur Random Forest robuste qui sépare les chroniques du reste de l'émission.
 
 ## Structure du Projet
 
-*   `train.py` : Définition des architectures (Random Forest, LSTM, Hybrid) et pipeline d'entraînement.
-*   `predict.py` : Pipeline d'inférence, post-traitement et évaluation.
-*   `utils.py` : Utilitaires de chargement SRT, parsing de timecodes et extraction de features.
-*   `models/` : Contient les modèles entraînés (`.pkl` pour Random Forest/Base, `.pt` pour PyTorch Hybrid).
+*   `train.py` : Script pour entraîner le modèle Random Forest à partir de fichiers SRT et de leurs timecodes de référence.
+*   `predict.py` : Script pour détecter les chroniques sur une nouvelle transcription.
+*   `utils.py` : Fonctions utilitaires pour le parsing SRT et le calcul des caractéristiques.
+*   `models/` : Dossier contenant le modèle entraîné (`.pkl`) et sa documentation.
 
-## Évaluation
+## Installation
 
-Le script de prédiction inclut une évaluation automatique si un fichier de "vérité terrain" (ground truth) est fourni. Il compare les intervalles prédits avec les intervalles réels en utilisant :
-*   **Tolérance aux bordures** : Match si le début et la fin sont proches à X secondes près.
-*   **IoU (Intersection over Union)** : Mesure le recouvrement global des segments.
+Ce projet est conçu pour être très léger.
+
+```bash
+# Avec uv (recommandé)
+uv sync
+
+# Ou avec pip
+pip install -r requirements.txt
+```
+
+*Note : Contrairement à la méthode hybride, ce projet ne nécessite pas PyTorch ni de modèles de langage lourds.*
+
+## Utilisation
+
+### Entraînement
+Modifiez `training_config.txt` pour pointer vers vos données, puis lancez :
+```bash
+python train.py
+```
+
+### Prédiction
+Pour lancer une détection sur un fichier SRT :
+```bash
+python predict.py
+```
+
+## Modèle
+Le modèle est sauvegardé sous forme de fichier `.pkl` dans le dossier `models/`.
+Documentation détaillée du modèle : [models/README.md](models/README.md)
+
+## Publication du modèle sur Hugging Face
+
+```bash
+# Installation et login
+brew install hf
+hf auth login
+
+# Upload the model into repo `eglantinefonrose/rlac-audiotranscript-segmenter-chroniques-randomforest`
+# Remark: The last `.` is the path within the repo
+hf upload eglantinefonrose/rlac-audiotranscript-segmenter-chroniques-randomforest ./models .
+```
+
+Le modèle est disponible sur: https://huggingface.co/eglantinefonrose/rlac-audiotranscript-segmenter-chroniques-randomforest

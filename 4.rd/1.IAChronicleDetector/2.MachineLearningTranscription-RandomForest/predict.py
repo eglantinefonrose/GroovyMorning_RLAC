@@ -6,22 +6,32 @@ from typing import List, Tuple
 import os
 
 def predict_chroniques(model_path: str, srt_file: str,
-                       confidence_threshold: float = 0.5,
-                       min_chronique_duration: float = 10.0,
+                       confidence_threshold: float = 0.4, # Seuil légèrement abaissé pour debug
+                       min_chronique_duration: float = 5.0, # Durée abaissée pour debug
                        max_gap_duration: float = 2.0,
-                       smoothing_window: int = 5) -> List[Tuple[float, float]]:
+                       smoothing_window: int = 3) -> List[Tuple[float, float]]:
     """Prédit les chroniques avec Random Forest"""
 
-    print(f"Utilisation du modèle Random Forest: {model_path}")
+    print(f"--- Diagnostic de prédiction ---")
+    print(f"Modèle: {model_path}")
+    print(f"Fichier SRT: {srt_file}")
+    
     classifier = RadioChroniqueClassifier.load_model(model_path)
     
     segments = load_transcription(srt_file)
-    if not segments: return []
+    if not segments:
+        print("Erreur: Aucun segment chargé depuis le SRT.")
+        return []
+    print(f"Segments chargés: {len(segments)}")
     
     X = classifier.prepare_features(segments, training=False)
     probs = classifier.classifier.predict_proba(X)[:, 1]
     
-    # Lissage des probabilités (moyenne mobile)
+    print(f"Probabilité max détectée: {np.max(probs):.4f}")
+    print(f"Probabilité moyenne: {np.mean(probs):.4f}")
+    print(f"Nombre de segments au-dessus du seuil ({confidence_threshold}): {np.sum(probs >= confidence_threshold)}")
+    
+    # Lissage des probabilités
     if smoothing_window > 1:
         smoothed_probs = np.convolve(probs, np.ones(smoothing_window)/smoothing_window, mode='same')
     else:
@@ -38,7 +48,6 @@ def predict_chroniques(model_path: str, srt_file: str,
             if current_start is None:
                 current_start = segments[i]['start']
             else:
-                # Vérifier les trous dans le SRT
                 if i > 0 and (segments[i]['start'] - segments[i-1]['end']) > max_gap_duration:
                     raw_chroniques.append((current_start, segments[i-1]['end']))
                     current_start = segments[i]['start']
@@ -50,6 +59,8 @@ def predict_chroniques(model_path: str, srt_file: str,
     if current_start is not None:
         raw_chroniques.append((current_start, segments[-1]['end']))
         
+    print(f"Blocs détectés avant filtrage: {len(raw_chroniques)}")
+    
     # Fusionner les blocs très proches
     merged_chroniques = []
     if raw_chroniques:
@@ -69,18 +80,27 @@ def predict_chroniques(model_path: str, srt_file: str,
         if (e - s) >= min_chronique_duration
     ]
     
+    if len(raw_chroniques) > 0 and len(final_chroniques) == 0:
+        print("Alerte: Des chroniques ont été détectées mais elles étaient toutes trop courtes.")
+        for s, e in raw_chroniques:
+            print(f"  - Bloc ignoré: {format_timecode(s)} - {format_timecode(e)} (durée: {e-s:.1f}s)")
+    
     return final_chroniques
 
 if __name__ == "__main__":
     # Configuration
     model_path = "models/radio_chronique_rf.pkl"
-    srt_file = "../../@assets/transcriptions/10241-26.03.2026-ITEMA_24454073-2026F10761S0085-NET_MFI_901E1674-BE5E-4736-8973-E89E8FDD16FC-22-0516b94cb96f2aff4a338087e57e07af.srt"
+    # Mise à jour du chemin vers le fichier réel
+    srt_file = "../../@assets/1.modelOutputs/0.transcriptions/1.transcriptions_whisper_ggml-large-v3-turbo/02_03_2026.srt"
     
     if not os.path.exists(model_path):
         print(f"Modèle non trouvé: {model_path}. Veuillez d'abord lancer train.py.")
+    elif not os.path.exists(srt_file):
+        print(f"Fichier SRT non trouvé: {srt_file}")
     else:
         chroniques = predict_chroniques(model_path, srt_file)
-        print(f"\nChroniques détectées: {len(chroniques)}")
+        print(f"\n=== RESULTAT FINAL ===")
+        print(f"Chroniques validées: {len(chroniques)}")
         for i, (start, end) in enumerate(chroniques, 1):
             print(f"{i}: {format_timecode(start)} - {format_timecode(end)}")
         save_predictions(chroniques, "predictions_output.txt")

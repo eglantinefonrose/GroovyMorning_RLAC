@@ -22,3 +22,10 @@ Mets à jour le code et les parties concernées du fichier README.md existant po
 ---
 
 Le code du projet contient plein de références à Ads ou Advertisement ou Pub (en français) car le projet a été fait à partir d'un copier/coller d'un projet qui visait à détecter des Ads/Pubs. Fais les changements de nom.
+
+---
+
+est-ce que tu peux faire la même chose pour 3.MachineLearningTranscription-Hybrid ? Je voudrais que le README ne parle que de l'approche hybrid
+
+---
+

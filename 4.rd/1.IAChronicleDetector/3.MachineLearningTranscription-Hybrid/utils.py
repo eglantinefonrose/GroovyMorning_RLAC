@@ -1,139 +1,120 @@
-import srt
 import re
 from datetime import timedelta
 from typing import List, Tuple, Dict
 import numpy as np
 
 
+def parse_timecode_to_timedelta(time_str: str) -> timedelta:
+    """Convertit un temps (HH:MM:SS,mmm ou HH:MM:SS.mmm) en timedelta"""
+    time_str = time_str.replace(',', '.')
+    parts = time_str.split(':')
+    if len(parts) == 3:
+        h, m, s = parts
+        return timedelta(hours=int(h), minutes=int(m), seconds=float(s))
+    return timedelta(0)
+
+
 def parse_timecode(timecode_str: str) -> float:
-    """Convertit un timecode MM:SS.ms en secondes"""
+    """Convertit un timecode MM:SS.ms en secondes (fichiers config)"""
     parts = timecode_str.replace(',', '.').split(':')
     if len(parts) == 2:
-        minutes = int(parts[0])
-        seconds = float(parts[1])
-        return minutes * 60 + seconds
+        return int(parts[0]) * 60 + float(parts[1])
     elif len(parts) == 3:
-        hours = int(parts[0])
-        minutes = int(parts[1])
-        seconds = float(parts[2])
-        return hours * 3600 + minutes * 60 + seconds
-    else:
-        return float(parts[0])
+        return int(parts[0]) * 3600 + int(parts[1]) * 60 + float(parts[2])
+    return float(parts[0])
 
 
 def parse_timecode_range(timecode_range: str) -> Tuple[float, float]:
-    """Parse une ligne de timecode 'start - end' ou 'start-end'"""
-    # Gérer différents séparateurs possibles
     if ' - ' in timecode_range:
         parts = timecode_range.strip().split(' - ')
     elif '-' in timecode_range:
         parts = timecode_range.strip().split('-')
     else:
-        raise ValueError(f"Format de ligne invalide (séparateur '-' manquant) : {timecode_range}")
-    
-    if len(parts) < 2:
-        raise ValueError(f"Format de ligne incomplet : {timecode_range}")
-        
+        raise ValueError(f"Format invalide : {timecode_range}")
     return parse_timecode(parts[0].strip()), parse_timecode(parts[1].strip())
 
 
 def load_timecodes(filepath: str) -> List[Tuple[float, float]]:
-    """Charge les timecodes depuis un fichier avec gestion d'erreurs"""
     timecodes = []
-    with open(filepath, 'r', encoding='utf-8') as f:
-        for i, line in enumerate(f, 1):
-            line = line.strip()
-            if not line or line.startswith('#'): # Ignorer lignes vides et commentaires
-                continue
-            try:
-                start, end = parse_timecode_range(line)
-                timecodes.append((start, end))
-            except Exception as e:
-                print(f"Attention: Ligne {i} ignorée dans {filepath} : {e}")
+    content = ""
+    for encoding in ['utf-8-sig', 'utf-8', 'latin-1']:
+        try:
+            with open(filepath, 'r', encoding=encoding) as f:
+                content = f.read()
+            break
+        except (UnicodeDecodeError, FileNotFoundError):
+            continue
+    if not content: return []
+    for line in content.splitlines():
+        line = line.strip()
+        if not line or line.startswith('#'): continue
+        try:
+            timecodes.append(parse_timecode_range(line))
+        except: continue
     return timecodes
 
 
 def load_transcription(filepath: str) -> List[Dict]:
-    """Charge une transcription SRT et gère les index modifiés [HH:MM:SS]"""
-    with open(filepath, 'r', encoding='utf-8') as f:
-        srt_content = f.read()
+    """Charge une transcription de manière agnostique (SRT, VTT, Log Whisper)"""
+    content = ""
+    for encoding in ['utf-8-sig', 'utf-8', 'latin-1']:
+        try:
+            with open(filepath, 'r', encoding=encoding) as f:
+                content = f.read()
+            break
+        except (UnicodeDecodeError, FileNotFoundError):
+            continue
+    if not content: return []
 
-    # 1. Extraire les heures réelles associées aux index (ex: "5 [07:00:19]")
-    # On crée un dictionnaire index -> heure
-    time_map = {}
-    for match in re.finditer(r'^(\d+)\s+\[(\d{2}:\d{2}:\d{2})\]', srt_content, re.MULTILINE):
-        idx = int(match.group(1))
-        time_str = match.group(2)
-        time_map[idx] = time_str
+    # Cherche : [? Timecode ]? --> [? Timecode ]? (Texte)
+    pattern = re.compile(
+        r'\[?(\d{1,2}:\d{2}:\d{2}[,. ]\d{3})\]?\s*-->\s*\[?(\d{1,2}:\d{2}:\d{2}[,. ]\d{3})\]?\s*(.*?)(?=\[?\d{1,2}:\d{2}:\d{2}|$)',
+        re.DOTALL | re.MULTILINE
+    )
 
-    # 2. Nettoyer le contenu pour qu'il soit au format SRT standard (juste l'index)
-    # pour que la lib srt puisse le parser sans erreur
-    clean_content = re.sub(r'^(\d+)\s+\[\d{2}:\d{2}:\d{2}\]', r'\1', srt_content, flags=re.MULTILINE)
-
-    try:
-        segments = list(srt.parse(clean_content))
-    except srt.SRTParseError as e:
-        print(f"Erreur de parsing SRT dans {filepath}: {e}")
-        return []
-
+    matches = list(pattern.finditer(content))
     result = []
-    for seg in segments:
-        text = seg.content.replace('\n', ' ')
-        
-        # 3. Ré-injecter l'heure dans le texte si elle était dans l'index
-        # Cela permet à extract_features_from_text de la trouver
-        if seg.index in time_map:
-            text = f"[{time_map[seg.index]}] {text}"
-            
-        result.append({
-            'index': seg.index,
-            'start': seg.start.total_seconds(),
-            'end': seg.end.total_seconds(),
-            'text': text
-        })
-
+    for i, match in enumerate(matches, 1):
+        start_str = match.group(1).strip()
+        end_str = match.group(2).strip()
+        text = match.group(3).strip()
+        text = re.sub(r'^\d+[\r\n]+', '', text).replace('\n', ' ').strip()
+        try:
+            start_td = parse_timecode_to_timedelta(start_str)
+            end_td = parse_timecode_to_timedelta(end_str)
+            result.append({
+                'index': i,
+                'start': start_td.total_seconds(),
+                'end': end_td.total_seconds(),
+                'text': text
+            })
+        except:
+            continue
     return result
 
 
 def label_segments(segments: List[Dict], chronique_timecodes: List[Tuple[float, float]]) -> List[int]:
-    """
-    Labelise chaque segment avec 3 classes :
-    0: Hors chronique
-    1: DEBUT de chronique (premier segment d'un bloc)
-    2: DANS la chronique (segments suivants)
-    """
     labels = []
     last_chronique_id = -1
-
     for segment in segments:
-        seg_start = segment['start']
-        seg_end = segment['end']
+        seg_start, seg_end = segment['start'], segment['end']
         label = 0
-
         for i, (ch_start, ch_end) in enumerate(chronique_timecodes):
-            # Vérifier le chevauchement
-            if (seg_start >= ch_start and seg_start < ch_end) or \
-               (seg_end > ch_start and seg_end <= ch_end) or \
-               (seg_start <= ch_start and seg_end >= ch_end):
-                
+            if (seg_start >= ch_start and seg_start < ch_end) or (seg_end > ch_start and seg_end <= ch_end) or (seg_start <= ch_start and seg_end >= ch_end):
                 if i != last_chronique_id:
-                    label = 1  # C'est une nouvelle chronique
+                    label = 1
                     last_chronique_id = i
                 else:
-                    label = 2  # C'est la suite de la même chronique
+                    label = 2
                 break
-        
         if label == 0:
             last_chronique_id = -1
-            
         labels.append(label)
-
     return labels
 
 
 def extract_time_feature(text: str) -> float:
-    """Extraie l'heure du marqueur [HH:MM:SS] et convertit en secondes depuis minuit"""
-    match = re.search(r'\[(\d{2}):(\d{2}):(\d{2})\]', text)
+    match = re.search(r'(\d{2}):(\d{2}):(\d{2})', text)
     if match:
         h, m, s = map(int, match.groups())
         return h * 3600 + m * 60 + s
@@ -141,14 +122,9 @@ def extract_time_feature(text: str) -> float:
 
 
 def extract_features_from_text(text: str) -> Dict:
-    """Extrait des features basiques du texte"""
-    # Détection des jingles avant nettoyage
     has_jingle = 1 if '[JINGLE]' in text.upper() else 0
-    
-    # Nettoyer les marqueurs pour les stats de texte
     clean_text = re.sub(r'\[.*?\]', '', text).strip()
     words = clean_text.split()
-    
     return {
         'word_count': len(words),
         'char_count': len(clean_text),
@@ -162,16 +138,13 @@ def extract_features_from_text(text: str) -> Dict:
 
 
 def format_timecode(seconds: float) -> str:
-    """Convertit des secondes en format MM:SS"""
     td = timedelta(seconds=seconds)
     total_seconds = int(td.total_seconds())
-    minutes = total_seconds // 60
-    secs = total_seconds % 60
+    minutes, secs = total_seconds // 60, total_seconds % 60
     return f"{minutes:02d}:{secs:02d}"
 
 
 def save_predictions(chroniques: List[Tuple[float, float]], output_path: str):
-    """Sauvegarde les chroniques détectées dans un fichier"""
     with open(output_path, 'w', encoding='utf-8') as f:
         for start, end in chroniques:
             f.write(f"{format_timecode(start)} - {format_timecode(end)}\n")

@@ -203,6 +203,11 @@ if __name__ == "__main__":
         all_labels.extend(label_segments(segments, load_timecodes(parts[1])))
 
     print(f"Entraînement hybride sur {len(all_segments)} segments...")
+    
+    if not all_segments:
+        print("Erreur: Aucun segment n'a été chargé. Vérifiez vos fichiers SRT et la configuration.")
+        exit(1)
+
     base_extractor = RadioChroniqueClassifier()
     X = base_extractor.prepare_features(all_segments, training=True)
     y = np.array(all_labels)

@@ -101,6 +101,10 @@ class RadioChroniqueClassifier:
 
         print(f"Total: {len(all_segments)} segments, {sum(1 for l in all_labels if l > 0)} segments de chroniques")
         
+        if not all_segments:
+            print("Erreur: Aucun segment n'a été chargé. Vérifiez vos fichiers SRT et la configuration.")
+            return
+
         X = self.prepare_features(all_segments, training=True)
         y = np.array(all_labels)
         # Pour RF simple, on simplifie les labels 1 et 2 en 1 (Chronique)

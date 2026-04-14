@@ -1,83 +1,65 @@
-# Détection Automatique de Chroniques Radio
+# IA Chronicle Detector - Hybrid Transcription Method
 
-Ce projet vise à détecter et segmenter automatiquement les chroniques (séquences thématiques) au sein de transcriptions de programmes radio (fichiers SRT). Il utilise des techniques d'apprentissage automatique pour identifier les moments où une chronique commence, se déroule et se termine.
+Ce projet propose une méthode avancée de détection de chroniques radio basée sur une architecture **Deep Learning Hybride** analysant les transcriptions textuelles (SRT).
 
-## Analyse de transcriptions
+Cette approche est conçue pour capturer à la fois le sens profond des paroles et la structure séquentielle d'une émission radio.
 
-Dans le projet `./1.MachineLearningAudio` on faisait de l'analyse du SON. 
-Le modèle travaille sur des caractéristiques acoustiques.
-   * Entrées : Fréquences audio, Rythme, Texture sonore (MFCC, Spectral Contrast, etc.).
-   * Objectif : Détecter la signature sonore d'une chronique (générique, musique de fond spécifique) sans lire le texte.
+## Approche Technique
 
- Dans le projet `./2.MachineLearningTranscription` on fait de l'analyse du TEXTE. 
- Ici le modèle (Random Forest aussi) qui se trouve dans la classe RadioChroniqueClassifier (dans train.py) travaille sur des caractéristiques linguistiques.
-   * Entrées : Mots utilisés, sens des phrases (Embeddings CamemBERT), ponctuation et métadonnées de transcription.
-   * Objectif : Détecter une chronique en "lisant" ce qui est dit (par exemple, identifier des phrases de présentation ou des thématiques spécifiques).
+Le modèle repose sur une architecture à trois étages :
+1.  **Compréhension Sémantique (CamemBERT)** : Chaque segment de texte est transformé en vecteurs de caractéristiques riches (embeddings) par le modèle de langage CamemBERT, permettant de comprendre le contexte et le sujet abordé.
+2.  **Modélisation Séquentielle (Bi-LSTM)** : Un réseau de neurones récurrent bidirectionnel analyse la suite des segments pour comprendre la progression de l'émission et identifier les transitions.
+3.  **Cohérence Temporelle (CRF)** : Une couche *Conditional Random Field* garantit que la séquence de labels prédite est logiquement possible (par exemple, gérer proprement le début, le milieu et la fin d'une chronique).
 
+L'entraînement utilise une **Focal Loss** pour surmonter le déséquilibre des classes (les débuts de chroniques étant des événements rares).
 
-## Modèles d'IA
+## Structure du Projet
 
-Le projet propose deux architectures de modèles :
-
-1.  **Modèle Hybride (Recommandé) :** Une architecture moderne combinant :
-    *   **CamemBERT** : Pour l'extraction de représentations sémantiques riches du texte.
-    *   **Bi-LSTM** : Pour la modélisation de la séquence temporelle des segments.
-    *   **CRF (Conditional Random Fields)** : Pour garantir une cohérence dans la segmentation (ex: un segment "milieu de chronique" doit suivre un "début de chronique").
-    *   **Focal Loss** : Pour gérer le déséquilibre des classes (les débuts de chroniques sont rares).
-
-2.  **Modèle Random Forest (Classique) :** Un modèle robuste utilisant :
-    *   Des features textuelles (TF-IDF) et acoustiques/temporelles.
-    *   Une fenêtre glissante pour capturer le contexte local.
-    *   Plus léger et rapide à entraîner sur CPU.
-
-## Fonctionnalités
-
-*   **Extraction de features hybrides** : Word/char count, ponctuation, détection de jingles, heure de la journée, embeddings CamemBERT.
-*   **Support SRT personnalisé** : Gestion des index avec marqueurs temporels `[HH:MM:SS]`.
-*   **Post-traitement intelligent** : Lissage des probabilités, fusion des segments proches et filtrage par durée minimale.
-*   **Évaluation détaillée** : Calcul de la précision, du rappel, du score F1 et de l'IoU (Intersection over Union).
+*   `train.py` : Script pour entraîner l'extracteur de caractéristiques et le classifieur séquentiel.
+*   `predict.py` : Script de détection utilisant le duo de modèles pour une précision maximale.
+*   `utils.py` : Utilitaires de traitement SRT et labellisation séquentielle.
+*   `models/` : Contient les deux fichiers indissociables :
+    *   `*_base.pkl` : L'extracteur de features et embeddings.
+    *   `*_hybrid.pt` : Le modèle PyTorch (LSTM+CRF).
 
 ## Installation
 
-Le projet utilise `uv` pour la gestion des dépendances.
+Cette méthode nécessite des bibliothèques de Deep Learning.
 
 ```bash
-# Installer les dépendances
+# Avec uv (recommandé)
 uv sync
+
+# Le projet utilise automatiquement le GPU (CUDA) ou l'accélération Apple Silicon (MPS) si disponibles.
 ```
 
 ## Utilisation
 
-### 1. Entraînement
-
-L'entraînement se configure via `training_config.txt`. Chaque ligne doit suivre le format : `chemin_srt|chemin_timecodes|nom_emission`.
-
+### Entraînement
+Configurez vos fichiers dans `training_config.txt`, puis :
 ```bash
-# Lancer l'entraînement (par défaut le modèle hybride)
-uv run train.py
+python train.py
 ```
 
-Les modèles seront sauvegardés dans le dossier `models/`.
-
-### 2. Prédiction
-
-Pour prédire les chroniques sur un nouveau fichier SRT :
-
+### Prédiction
+Pour lancer la détection sur un fichier SRT :
 ```bash
-uv run predict.py
+python predict.py
 ```
 
-Vous pouvez modifier le script `predict.py` pour pointer vers votre fichier SRT et votre modèle.
+## Modèle
+Une documentation détaillée de l'architecture est disponible dans : [models/README.md](models/README.md)
 
-## Structure du Projet
+## Publication du modèle sur Hugging Face
 
-*   `train.py` : Définition des architectures (Random Forest, LSTM, Hybrid) et pipeline d'entraînement.
-*   `predict.py` : Pipeline d'inférence, post-traitement et évaluation.
-*   `utils.py` : Utilitaires de chargement SRT, parsing de timecodes et extraction de features.
-*   `models/` : Contient les modèles entraînés (`.pkl` pour Random Forest/Base, `.pt` pour PyTorch Hybrid).
+```bash
+# Installation et login
+brew install hf
+hf auth login
 
-## Évaluation
+# Upload the model into repo `eglantinefonrose/rlac-audiotranscript-segmenter-chroniques-randomforest`
+# Remark: The last `.` is the path within the repo
+hf upload eglantinefonrose/rlac-audiotranscript-segmenter-chroniques-hybrid ./models .
+```
 
-Le script de prédiction inclut une évaluation automatique si un fichier de "vérité terrain" (ground truth) est fourni. Il compare les intervalles prédits avec les intervalles réels en utilisant :
-*   **Tolérance aux bordures** : Match si le début et la fin sont proches à X secondes près.
-*   **IoU (Intersection over Union)** : Mesure le recouvrement global des segments.
+Le modèle est disponible sur: https://huggingface.co/eglantinefonrose/rlac-audiotranscript-segmenter-chroniques-hybrid
