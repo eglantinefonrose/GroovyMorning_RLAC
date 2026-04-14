@@ -39,6 +39,22 @@ struct HeaderView: View {
             .pickerStyle(.segmented)
             .frame(width: 120)
             
+            HStack(spacing: 5) {
+                Text("Offset:")
+                TextField("Offset", value: $viewModel.config.timeOffset, formatter: NumberFormatter())
+                    .frame(width: 60)
+                    .textFieldStyle(.roundedBorder)
+                Text("s")
+                Button {
+                    viewModel.config.timeOffset = 0
+                    viewModel.saveConfig()
+                } label: {
+                    Image(systemName: "arrow.counterclockwise")
+                }
+                .buttonStyle(.plain)
+                .help("Reset Offset to 0")
+            }
+            
             Divider().frame(height: 20)
             
             Toggle(isOn: $viewModel.isEditingMode) {

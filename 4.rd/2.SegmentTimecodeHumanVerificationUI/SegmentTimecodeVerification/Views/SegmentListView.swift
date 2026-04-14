@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct SegmentListView: View {
     @ObservedObject var viewModel: AppViewModel
@@ -10,7 +11,17 @@ struct SegmentListView: View {
             } else if viewModel.selectedMediaURL == nil {
                 ContentUnavailableView("No Media Selected", systemImage: "play.circle", description: Text("Select a media file from the dropdown above."))
             } else if viewModel.segments.isEmpty {
-                ContentUnavailableView("No Segments Found", systemImage: "text.badge.xmark", description: Text("Could not find or parse segments in the .txt file."))
+                ContentUnavailableView {
+                    Label("No Segments Found", systemImage: "text.badge.xmark")
+                } description: {
+                    Text("Could not find a .txt file matching this audio.")
+                } actions: {
+                    Button("Select TXT Manually") {
+                        selectFile(extensions: ["txt"]) { url in
+                            viewModel.loadManualTXT(url: url)
+                        }
+                    }
+                }
             } else {
                 List(selection: $viewModel.selectedSegmentIndex) {
                     ForEach(0..<viewModel.segments.count, id: \.self) { index in
@@ -46,5 +57,19 @@ struct SegmentListView: View {
         let minutes = Int(time) / 60
         let seconds = Int(time) % 60
         return String(format: "%02d:%02d", minutes, seconds)
+    }
+    
+    private func selectFile(extensions: [String], completion: @escaping (URL) -> Void) {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = extensions.compactMap { UTType(filenameExtension: $0) }
+        
+        if panel.runModal() == .OK {
+            if let url = panel.url {
+                completion(url)
+            }
+        }
     }
 }

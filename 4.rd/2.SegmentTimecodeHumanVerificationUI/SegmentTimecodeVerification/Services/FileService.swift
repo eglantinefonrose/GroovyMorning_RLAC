@@ -15,9 +15,10 @@ class FileService {
         print("DEBUG: Found \(lines.count) lines in file")
         var segments: [Segment] = []
         
-        // Regex robuste : gère [HH:mm:ss] ou HH:mm:ss, avec ou sans crochets, avec ou sans millisecondes
-        let timestampPattern = #"\[?(\d{1,2}:\d{2}:\d{2}(?:[.,]\d{3})?)\]?"#
-        let pattern = #"^\s*"# + timestampPattern + #"\s*-\s*"# + timestampPattern + #"\s*[:\s\-]*(.*)$"#
+        // Regex pour le nouveau format : [HH:mm:ss.SSS] - [HH:mm:ss.SSS] Titre - Chroniqueur
+        // On capture : 1 -> Start, 2 -> End, 3 -> Titre complet
+        let timestampPattern = #"\[(\d{1,2}:\d{2}:\d{2}(?:[.,]\d+)?)\]"#
+        let pattern = #"^\s*"# + timestampPattern + #"\s*-\s*"# + timestampPattern + #"\s*(.*)$"#
         print("DEBUG: Using regex pattern: \(pattern)")
         
         let regex = try? NSRegularExpression(pattern: pattern, options: [])
@@ -27,7 +28,6 @@ class FileService {
             if trimmed.isEmpty { continue }
             
             if let match = regex?.firstMatch(in: trimmed, range: NSRange(trimmed.startIndex..., in: trimmed)) {
-                // Group 1: Start, Group 2: End, Group 3: Title
                 if let startRange = Range(match.range(at: 1), in: trimmed),
                    let endRange = Range(match.range(at: 2), in: trimmed),
                    let titleRange = Range(match.range(at: 3), in: trimmed) {
@@ -64,7 +64,7 @@ class FileService {
         }
         
         let content = segments.map { segment in
-            "\(formatTimestamp(segment.startTime)) - \(formatTimestamp(segment.endTime)) : \(segment.title)"
+            "\(formatTimestamp(segment.startTime)) - \(formatTimestamp(segment.endTime)) \(segment.title)"
         }.joined(separator: "\n")
         
         try content.write(to: url, atomically: true, encoding: .utf8)
@@ -91,6 +91,6 @@ class FileService {
         let minutes = (Int(time) % 3600) / 60
         let seconds = Int(time) % 60
         let milliseconds = Int((time.truncatingRemainder(dividingBy: 1)) * 1000)
-        return String(format: "%02d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds)
+        return String(format: "[%02d:%02d:%02d.%03d]", hours, minutes, seconds, milliseconds)
     }
 }

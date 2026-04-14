@@ -16,15 +16,19 @@ class AppViewModel: ObservableObject {
     
     @Published var segments: [Segment] = []
     @Published var srtBlocks: [SRTBlock] = []
+    private var currentTimecodeURL: URL?
+    
     @Published var selectedSegmentIndex: Int? {
         didSet {
-            if let index = selectedSegmentIndex {
-                Task { @MainActor in
-                    segments[index].isViewed = true
-                    if config.autoPlay {
-                        playCurrentSegment()
-                    }
-                }
+            // Logic moved to markAsViewed to avoid view update cycles
+        }
+    }
+    
+    func markAsViewed(index: Int) {
+        if !segments[index].isViewed {
+            segments[index].isViewed = true
+            if config.autoPlay {
+                playCurrentSegment()
             }
         }
     }
@@ -68,50 +72,45 @@ class AppViewModel: ObservableObject {
         let baseName = mediaURL.deletingPathExtension().lastPathComponent
         print("DEBUG: Loading data for base name: \(baseName)")
         
+        // Reset current data
+        segments = []
+        srtBlocks = []
+        selectedSegmentIndex = nil
+        
         // Load Audio
         audioPlayer.load(url: mediaURL)
         
         // Load SRT
         if let transcriptionPath = config.transcriptionDirectoryPath {
-            let srtURL = URL(fileURLWithPath: transcriptionPath).appendingPathComponent("\(baseName)_transcription.srt")
-            print("DEBUG: Looking for SRT at: \(srtURL.path)")
-            if FileManager.default.fileExists(atPath: srtURL.path) {
-                if let content = try? String(contentsOf: srtURL, encoding: .utf8) {
+            let exactURL = URL(fileURLWithPath: transcriptionPath).appendingPathComponent("\(baseName)_transcription.srt")
+
+            if FileManager.default.fileExists(atPath: exactURL.path) {
+                print("DEBUG: Loading SRT from: \(exactURL.path)")
+                if let content = try? String(contentsOf: exactURL, encoding: .utf8) {
                     srtBlocks = SRTParser.parse(content: content)
                     print("DEBUG: Parsed \(srtBlocks.count) SRT blocks")
                 }
             } else {
-                print("DEBUG: SRT file not found")
+                print("DEBUG: SRT file not found. Expected: \(exactURL.path)")
+                srtBlocks = []
             }
         }
-        
+
         // Load Timecodes
         if let timecodePath = config.timecodeDirectoryPath {
-            let timecodeDirURL = URL(fileURLWithPath: timecodePath)
-            let exactURL = timecodeDirURL.appendingPathComponent("\(baseName)_timecode_chronique.txt")
-            
-            var targetURL: URL? = nil
-            
+            let exactURL = URL(fileURLWithPath: timecodePath).appendingPathComponent("\(baseName)_transcription_chronique.txt")
+
             if FileManager.default.fileExists(atPath: exactURL.path) {
-                targetURL = exactURL
+                print("DEBUG: Loading Timecodes from: \(exactURL.path)")
+                currentTimecodeURL = exactURL
+                segments = FileService.shared.loadSegments(from: exactURL)
             } else {
-                print("DEBUG: Exact timecode file not found, searching for alternatives...")
-                // Search for any .txt file starting with baseName
-                if let files = try? FileManager.default.contentsOfDirectory(at: timecodeDirURL, includingPropertiesForKeys: nil) {
-                    targetURL = files.first { $0.lastPathComponent.hasPrefix(baseName) && $0.pathExtension == "txt" }
-                }
-            }
-            
-            if let foundURL = targetURL {
-                print("DEBUG: Loading Timecodes from: \(foundURL.path)")
-                segments = FileService.shared.loadSegments(from: foundURL)
-            } else {
-                print("DEBUG: No suitable Timecode file found in \(timecodePath)")
+                print("DEBUG: Timecode file not found. Expected: \(exactURL.path)")
+                currentTimecodeURL = nil
                 segments = []
             }
         }
-    }
-    
+        }
     func playCurrentSegment() {
         guard let index = selectedSegmentIndex else { return }
         audioPlayer.playPreview(segment: segments[index], x: config.defaultXSeconds, y: config.defaultYSeconds)
@@ -138,15 +137,11 @@ class AppViewModel: ObservableObject {
         }
     }
     
-    func updateSegmentTime(at index: Int, clickedTime: TimeInterval) {
+    func updateSegmentBoundary(at index: Int, newTime: TimeInterval, isStart: Bool) {
         var segment = segments[index]
-        // The clickedTime is relative to SRT (0-based), 
-        // we need to add offset to get absolute time for TXT
-        let absoluteTime = clickedTime + config.timeOffset
+        let absoluteTime = newTime + config.timeOffset
         
-        let midPoint = (segment.startTime + segment.endTime) / 2
-        
-        if absoluteTime < midPoint {
+        if isStart {
             segment.startTime = absoluteTime
         } else {
             segment.endTime = absoluteTime
@@ -155,6 +150,19 @@ class AppViewModel: ObservableObject {
         segment.isModified = true
         segments[index] = segment
         saveSegments()
+    }
+    
+    func loadManualSRT(url: URL) {
+        if let content = try? String(contentsOf: url, encoding: .utf8) {
+            srtBlocks = SRTParser.parse(content: content)
+            print("DEBUG: Manually loaded \(srtBlocks.count) SRT blocks from \(url.lastPathComponent)")
+        }
+    }
+    
+    func loadManualTXT(url: URL) {
+        print("DEBUG: Manually loading segments from \(url.path)")
+        currentTimecodeURL = url
+        segments = FileService.shared.loadSegments(from: url)
     }
     
     func syncOffset() {
@@ -166,12 +174,14 @@ class AppViewModel: ObservableObject {
     }
     
     func saveSegments() {
-        guard let mediaURL = selectedMediaURL, let timecodePath = config.timecodeDirectoryPath else { return }
-        let baseName = mediaURL.deletingPathExtension().lastPathComponent
-        let txtURL = URL(fileURLWithPath: timecodePath).appendingPathComponent("\(baseName)_timecode_chronique.txt")
+        guard let url = currentTimecodeURL else { 
+            print("ERROR: No timecode URL found to save segments")
+            return 
+        }
         
         do {
-            try FileService.shared.saveSegments(segments, to: txtURL)
+            try FileService.shared.saveSegments(segments, to: url)
+            print("DEBUG: Segments saved successfully to \(url.lastPathComponent)")
         } catch {
             print("Error saving segments: \(error)")
         }

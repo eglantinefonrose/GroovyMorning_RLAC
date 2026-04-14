@@ -15,24 +15,33 @@ class SRTParser {
             let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
             if trimmed.isEmpty { continue }
             
-            // Try to match the time range in the line
-            if let range = trimmed.range(of: #".*?(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\s*-->\s*(\d{1,2}:\d{2}:\d{2}[.,]\d{3}).*?"#, options: .regularExpression) {
+            // Try to match the time range in the line: [HH:mm:ss.SSS --> HH:mm:ss.SSS] Text
+            if let range = trimmed.range(of: #"(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\s*-->\s*(\d{1,2}:\d{2}:\d{2}[.,]\d{3})"#, options: .regularExpression) {
                 
                 let timePart = String(trimmed[range])
-                // Extract timestamps
                 let times = extractTimes(from: timePart)
                 
                 if times.count == 2 {
-                    // Extract text: everything after the timestamp block or inside the line
-                    // For format: [start --> end] Text
+                    // Text is everything outside the time range brackets
                     var text = trimmed
-                    text.removeSubrange(range)
+                    // Remove the timestamp part including its brackets if they exist
+                    let escapedTimePart = NSRegularExpression.escapedPattern(for: timePart)
+                    if let bracketRange = trimmed.range(of: "\\[\(escapedTimePart)\\]", options: .regularExpression) {
+                        text.removeSubrange(bracketRange)
+                    } else {
+                        text.removeSubrange(range)
+                    }
+                    
                     text = text.trimmingCharacters(in: CharacterSet(charactersIn: "[] ").union(.whitespacesAndNewlines))
                     
                     blocks.append(SRTBlock(id: idCounter, startTime: times[0], endTime: times[1], text: text))
                     idCounter += 1
                 }
             }
+        }
+        
+        if !blocks.isEmpty {
+            print("DEBUG: Line-based parser found \(blocks.count) blocks")
         }
         
         // If no blocks were found with the line-based method, it might be a standard multi-line SRT
