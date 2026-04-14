@@ -7,9 +7,6 @@
 **/uv.lock
 **/__pycache__
 *.pkl
-!4.rd/1.IAChronicleDetector/3.MachineLearningTranscription-Hybrid/models/README.md
-
-4.rd/1.IAChronicleDetector/3.MachineLearningTranscription-Hybrid/models/*
-!4.rd/1.IAChronicleDetector/3.MachineLearningTranscription-Hybrid/models/*.md
+4.rd/2.SegmentTimecodeHumanVerificationUI/.build
 4.rd/1.IAChronicleDetector/3.MachineLearningTranscription-Hybrid/models/**/*
 !4.rd/1.IAChronicleDetector/3.MachineLearningTranscription-Hybrid/models/**/*.md
