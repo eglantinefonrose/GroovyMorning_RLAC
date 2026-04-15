@@ -25,7 +25,16 @@ def predict_chroniques(model_path: str, srt_file: str,
     print(f"Segments chargés: {len(segments)}")
     
     X = classifier.prepare_features(segments, training=False)
-    probs = classifier.classifier.predict_proba(X)[:, 1]
+    
+    # Gestion du cas où le modèle n'a qu'une seule classe (ex: que des zéros pendant l'entraînement)
+    if len(classifier.classifier.classes_) == 1:
+        print(f"Attention: Le modèle n'a été entraîné que sur une seule classe ({classifier.classifier.classes_[0]}).")
+        if classifier.classifier.classes_[0] == 1:
+            probs = np.ones(len(X))
+        else:
+            probs = np.zeros(len(X))
+    else:
+        probs = classifier.classifier.predict_proba(X)[:, 1]
     
     print(f"Probabilité max détectée: {np.max(probs):.4f}")
     print(f"Probabilité moyenne: {np.mean(probs):.4f}")
@@ -91,7 +100,7 @@ if __name__ == "__main__":
     # Configuration
     model_path = "models/radio_chronique_rf.pkl"
     # Mise à jour du chemin vers le fichier réel
-    srt_file = "../../@assets/1.modelOutputs/0.transcriptions/1.transcriptions_whisper_ggml-large-v3-turbo/02_03_2026.srt"
+    srt_file = "../../@assets/1.modelOutputs/0.transcriptions/1.transcriptions_whisper_ggml-large-v3-turbo/26811-06.04.2026-ITEMA_24466243-2026F10761S0096-NET_MFI_8F75AA4E-79C7-4CF3-A0B7-2D7EBC1FB5B5-22-534f5f6ae83fc95044c42304b90ca1f7_transcription.srt"
     
     if not os.path.exists(model_path):
         print(f"Modèle non trouvé: {model_path}. Veuillez d'abord lancer train.py.")

@@ -8,5 +8,8 @@
 **/__pycache__
 *.pkl
 4.rd/2.SegmentTimecodeHumanVerificationUI/.build
+4.rd/1.IAChronicleDetector/4.TransformerDetection/models/**/*
+!4.rd/1.IAChronicleDetector/4.TransformerDetection/models/**/*.md
+4.rd/1.IAChronicleDetector/4.TransformerDetection/results
 4.rd/1.IAChronicleDetector/3.MachineLearningTranscription-Hybrid/models/**/*
 !4.rd/1.IAChronicleDetector/3.MachineLearningTranscription-Hybrid/models/**/*.md

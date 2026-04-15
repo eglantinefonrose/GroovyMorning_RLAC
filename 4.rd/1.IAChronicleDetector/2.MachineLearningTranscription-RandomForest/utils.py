@@ -1,4 +1,5 @@
 import re
+import os
 from datetime import timedelta
 from typing import List, Tuple, Dict
 import numpy as np
@@ -15,13 +16,24 @@ def parse_timecode_to_timedelta(time_str: str) -> timedelta:
 
 
 def parse_timecode(timecode_str: str) -> float:
-    """Convertit un timecode MM:SS.ms en secondes (fichiers config)"""
-    parts = timecode_str.replace(',', '.').split(':')
-    if len(parts) == 2:
-        return int(parts[0]) * 60 + float(parts[1])
-    elif len(parts) == 3:
-        return int(parts[0]) * 3600 + int(parts[1]) * 60 + float(parts[2])
-    return float(parts[0])
+    """Convertit un temps (HH:MM:SS.ms ou MM:SS.ms) en secondes"""
+    # Nettoyage : enlever les crochets, espaces, etc.
+    timecode_str = timecode_str.strip(' []\r\n\t')
+    timecode_str = timecode_str.replace(',', '.') # Gérer virgule ou point
+    
+    parts = timecode_str.split(':')
+    try:
+        if len(parts) == 3:
+            h, m, s = parts
+            return int(h) * 3600 + int(m) * 60 + float(s)
+        elif len(parts) == 2:
+            m, s = parts
+            return int(m) * 60 + float(s)
+        elif len(parts) == 1:
+            return float(parts[0])
+    except ValueError:
+        return 0.0
+    return 0.0
 
 
 def parse_timecode_range(timecode_range: str) -> Tuple[float, float]:
@@ -39,18 +51,24 @@ def load_timecodes(filepath: str) -> List[Tuple[float, float]]:
     content = ""
     for encoding in ['utf-8-sig', 'utf-8', 'latin-1']:
         try:
-            with open(filepath, 'r', encoding=encoding) as f:
-                content = f.read()
-            break
+            if os.path.exists(filepath):
+                with open(filepath, 'r', encoding=encoding) as f:
+                    content = f.read()
+                break
         except (UnicodeDecodeError, FileNotFoundError):
             continue
-    if not content: return []
+            
+    if not content:
+        return []
+        
     for line in content.splitlines():
         line = line.strip()
         if not line or line.startswith('#'): continue
         try:
-            timecodes.append(parse_timecode_range(line))
+            tc_range = parse_timecode_range(line)
+            timecodes.append(tc_range)
         except: continue
+        
     return timecodes
 
 

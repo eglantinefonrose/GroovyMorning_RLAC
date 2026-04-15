@@ -66,9 +66,12 @@ def load_transcription(filepath: str) -> List[Dict]:
             continue
     if not content: return []
 
-    # Cherche : [? Timecode ]? --> [? Timecode ]? (Texte)
+    # Cherche : [? Timecode --> Timecode ]? (Texte)
+    # Supporte : 
+    # 1. 00:00:00,000 --> 00:00:05,000  Texte
+    # 2. [00:00:00.000 --> 00:00:05.000]  Texte
     pattern = re.compile(
-        r'\[?(\d{1,2}:\d{2}:\d{2}[,. ]\d{3})\]?\s*-->\s*\[?(\d{1,2}:\d{2}:\d{2}[,. ]\d{3})\]?\s*(.*?)(?=\[?\d{1,2}:\d{2}:\d{2}|$)',
+        r'\[?(\d{1,2}:\d{2}:\d{2}[,. ]\d{3})\s*-->\s*(\d{1,2}:\d{2}:\d{2}[,. ]\d{3})\]?\s*(.*?)(?=\[?\d{1,2}:\d{2}:\d{2}|$)',
         re.DOTALL | re.MULTILINE
     )
 
