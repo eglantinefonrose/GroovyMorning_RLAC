@@ -242,6 +242,22 @@ Oui. Avec une configuration qui se fait directement sur l'écran principal dans 
 
 Rajoute un peu plus de contexte sur la provenance des Timecode, l'histoire des modèles whisper, etc. etc. pour que on comprenne mieux de quoi, il s'agit. Pour info, j'ai déplacé le document ailleurs dans la hiérarchie de répertoire. Retrouve-le avant de faire les modifications.
 
+---
+
+Analyse d'un point de vue sémantique les fichiers présents dans `1.modelOutputs/0.transcriptions/1.transcriptions_whisper_ggml-large-v3-turbo/`.
+C'est les deux heures de transcription de la grande matinale de France Inter
+Cette matinale est découpée en chronique, en section de pubs, en journaux d'informations.
+Est-ce que tu peux me trouver les Timecode qui correspondent à ces différentes chroniques.
+
+Pour t'aider, utilise les horaires théoriques du `1.modelOutputs/1.timecode-segments/1.geminiCLI/2.gemini-flash-avec-vrais-horaires-théoriques/06_04_2026_timecode_chronique_REAL_THEORITICAL.json`
+
+Met le résultat dans un fichier `1.modelOutputs/1.timecode-segments/1.geminiCLI/2.gemini-flash-avec-vrais-horaires-théoriques/2.round3/[nom_du_fichier_analysé]_timecode_chronique.txt`
+Pour `nom_du_fichier_analysé`, prend le nom du fichier de transcription que tu es entrain d'analyser, retire le préfixe '_transcription' et l'extension srt.
+Par exemple si tu analyses 'fff_transcription.srt', le fichier créé doit s'appeler 'fff_timecode_chronique.txt'.
+
+Il faut que tu ne relèves pas uniquement les chroniques, mais que tu classifies l'audio en entier (les publicités, les chroniques et les transitions).
+Utilise la convention suivante : [timecode début au format HH:MM:SS.MSMSMS] - [timecode fin au format HH:MM:SS.MSMSMS] Nom de la chronique / annonce / publicité - Auteur
+Retourne à la ligne à chaque chronique / annonce / publicité détecté.
 
 
 ## Conclusion

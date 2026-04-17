@@ -1,9 +1,9 @@
-[00:00:01.199] - [00:01:12.040] Le journal de 7h - Victor Dolan
-[00:01:12.040] - [00:21:29.580] Grand reportage
-[00:21:29.579] - [00:24:02.359] L'édito médias - Cyril Lacarrière
-[00:24:02.359] - [00:27:39.460] Musicaline - Aline Afanoukoué
+[00:00:01.199] - [00:14:06.159] Le journal de 7h - Victor Dolan
+[00:01:12.039] - [00:21:29.579] Grand reportage
+[00:21:29.578] - [00:24:02.358] L'édito médias - Cyril Lacarrière
+[00:24:02.358] - [00:27:39.460] Musicaline - Aline Afanoukoué
 [00:28:48.140] - [00:30:02.019] La météo - Marie-Pierre Planchon
-[00:30:02.019] - [00:42:18.519] Le journal de 7h30 - Victor Dolan
+[00:30:02.019] - [00:42:18.518] Le journal de 7h30 - Victor Dolan
 [00:43:02.619] - [00:46:08.099] L'édito politique -
 [00:46:08.099] - [00:49:00.760] L'édito éco -
 [00:57:57.940] - [01:01:10.079] Le billet de Bertrand Chameroy - Bertrand Chameroy

@@ -1,0 +1,52 @@
+[00:00:00.200] - [00:00:19.220] Introduction - Florence Paracuelos
+[00:00:19.220] - [00:01:16.080] Journal / Actualités (Introduction) - Sarah Mansoura
+[00:01:53.320] - [00:03:47.680] Reportage Messe de Pâques à Gaza - Rami El Meghari & Virginie Pironon
+[00:03:50.560] - [00:04:24.300] Actualités Proche-Orient (Liban, Iran) - Sarah Mansoura
+[00:04:30.640] - [00:05:52.320] Reportage Sauvetage aviateur américain - Camille Revelle
+[00:05:56.260] - [00:07:59.600] One Health Summit à Lyon - Rémi Brancato
+[00:07:59.600] - [00:08:10.900] Mission Artemis II (Lune) - Sarah Mansoura
+[00:08:10.900] - [00:09:52.320] Tirage au sort concerts Céline Dion - Alexis Morel
+[00:09:52.620] - [00:11:30.280] Présidence des intercommunalités / Strategie RN - Sarah Mansoura
+[00:11:32.720] - [00:13:24.120] Pièce de théâtre "L'art d'avoir toujours raison" - Camille Marigaud
+[00:13:27.280] - [00:13:38.680] Sport (Monaco bat Marseille) - Sarah Mansoura
+[00:13:42.920] - [00:15:15.900] 80 secondes (Lundi de Pâques au travail ou au repos) - Florence Paracuelos
+[00:15:15.900] - [00:15:48.320] Annonce chroniques et Invités - Florence Paracuelos
+[00:15:52.720] - [00:16:19.220] Annonce : Le Mag avec Camille - Sonia Devillers
+[00:16:31.760] - [00:20:18.940] Le Grand Reportage : Le détatouage - Vanessa Descouraux
+[00:20:24.960] - [00:23:01.680] L'édito média : Alliances TF1, M6 et France Télé - Cyril Lacarrière
+[00:23:07.600] - [00:27:13.960] Musique Aline : Miles Davis (Live at the Plugged Nickel) - Aline Afanoukoué
+[00:27:16.800] - [00:27:47.160] Publicité : Volkswagen Tiroc
+[00:27:47.160] - [00:28:17.120] Publicité : EDF (80 ans)
+[00:28:19.520] - [00:30:03.320] Météo - Marie-Pierre Planchon
+[00:30:03.320] - [00:30:46.560] Présentation des éditos et invités - Florence Paracuelos
+[00:30:46.560] - [00:35:02.120] Journal de 7h30 - Kévin Dufraîche
+[00:31:00.420] - [00:32:42.700] Reportage Prisons françaises - Paul Thillier
+[00:33:32.200] - [00:35:00.120] Reportage Vietnam / Prix gasoil - Sébastien Berriot
+[00:35:04.860] - [00:36:13.940] Actualités (Restos du Coeur, Intérim) - Kévin Dufraîche
+[00:36:14.880] - [00:37:55.300] Rapport Prisme Emploi / Intérim - Lou Bourdie
+[00:37:56.940] - [00:39:55.800] En Marche / Renaissance (10 ans) - Mathieu Bonnour
+[00:39:58.300] - [00:41:57.220] Sport (Pogacar / Tour des Flandres) - Fanny Lechevestrier
+[00:42:02.700] - [00:42:27.620] Annonce : Le code a changé (podcast) - Xavier Delaporte
+[00:42:37.480] - [00:45:24.560] L'édito politique : Bali Bagayoko (Maire de Saint-Denis) - Patrick Cohen
+[00:45:33.300] - [00:48:29.260] L'édito éco : Délits d'initié / Trump / Guerre - Dominique Seux
+[00:48:35.120] - [00:57:34.940] Invité de 7h50 : Marc Duguin - Benjamin Duhamel
+[00:57:43.080] - [01:00:10.080] Chronique humoristique (Benjamin Duhamel, enfant viking) - Daniel Morin
+[01:00:13.920] - [01:06:05.100] Journal de 8h00 - Hélène Philly
+[01:01:46.300] - [01:03:07.100] Reportage Alexei Moskaliov (père russe ayant fui) - Virginie Pironon
+[01:03:20.760] - [01:04:56.340] Analyse Attaque de drones en Ukraine - Luc Alazo
+[01:06:01.460] - [01:08:00.200] Analyse Trump / Pétrole / Afrique du Sud - Winnie Claret
+[01:08:28.060] - [01:09:46.220] Gendarme victime de racisme - Marion Aquilina
+[01:09:49.600] - [01:11:06.860] Procès Patrick Balkany - Jean-Philippe Deniau
+[01:11:13.120] - [01:12:47.480] Filtre anti-arnaque en Belgique - Xavier Demagny
+[01:12:54.060] - [01:13:54.000] Ski dans les Pyrénées - Thomas Vinclair
+[01:14:13.120] - [01:16:03.840] Muséum d'histoire naturelle (400 ans) - Sandy Dauphin
+[01:16:11.460] - [01:18:02.920] Météo - Marie-Pierre Planchon
+[01:18:11.060] - [01:21:18.020] Géopolitique : Doctrine mosaïque iranienne - Pierre Haski
+[01:21:26.240] - [01:22:21.140] Annonces et Partenariat - Florence Paracuelos
+[01:22:25.140] - [01:46:02.080] Le Grand Entretien : Science et Désinformation - Jean-François Delfraissy & Patrick Cohen
+[01:46:09.280] - [01:46:39.960] Publicité : Kia PV5 Cargo
+[01:46:39.960] - [01:46:59.320] Publicité : EDF (80 ans)
+[01:47:09.320] - [01:47:46.920] Annonce : Le Portrait de 9h (Gus Van Sant) - Sonia Devillers
+[01:47:52.440] - [01:53:13.360] La revue de presse : Lapins et perruches - Nora Amadi
+[01:53:32.860] - [01:56:13.860] Un monde nouveau : Prédiction via réseaux sociaux - Mathilde Serrel
+[01:56:19.520] - [02:00:32.820] Chronique bien-être : Anglicismes et langues européennes - Véro Cléderman-Pilouchet

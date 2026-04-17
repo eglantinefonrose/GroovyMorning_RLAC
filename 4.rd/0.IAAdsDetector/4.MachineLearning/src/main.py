@@ -970,6 +970,77 @@ class AdvertisementClassifier:
         if self.training_stats:
             print(f"   Entraîné sur {self.training_stats.get('n_files', 0)} fichier(s)")
 
+    def calculate_quality_score(self, predictions: List[Dict], 
+                                ground_truth: List[Tuple[float, float]], 
+                                processing_time: float = 0,
+                                audio_duration: float = 3600) -> Dict:
+        """
+        Calcule une note de qualité sur 100 points pour la détection de publicités.
+        """
+        if not ground_truth:
+            return {"total_score": 0, "details": "No ground truth provided"}
+        
+        # Conversion des prédictions au format (start, end)
+        pr_intervals = [(ad['start'], ad['end']) for ad in predictions]
+        
+        # 1. Fiabilité de Détection (40 pts)
+        max_time = int(max(max([e for s, e in ground_truth]), max([e for s, e in pr_intervals] or [0])) + 1)
+        gt_mask = np.zeros(max_time)
+        pr_mask = np.zeros(max_time)
+        
+        for s, e in ground_truth:
+            gt_mask[int(s):int(e)] = 1
+        for s, e in pr_intervals:
+            pr_mask[int(s):int(e)] = 1
+            
+        intersection = np.sum(np.logical_and(gt_mask, pr_mask))
+        precision = intersection / np.sum(pr_mask) if np.sum(pr_mask) > 0 else 0
+        recall = intersection / np.sum(gt_mask) if np.sum(gt_mask) > 0 else 0
+        f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+        
+        score_reliability = f1 * 40
+
+        # 2. Précision Temporelle (30 pts)
+        errors = []
+        for gt_s, gt_e in ground_truth:
+            best_err = 999.0
+            for pr_s, pr_e in pr_intervals:
+                err = abs(gt_s - pr_s) + abs(gt_e - pr_e)
+                if err < best_err:
+                    best_err = err
+            if best_err != 999.0:
+                errors.append(best_err)
+        
+        mae = np.mean(errors) if errors else 10.0
+        score_precision = max(0, 30 * (1 - mae / 10.0))
+
+        # 3. Expérience Utilisateur (20 pts)
+        num_predictions = len(pr_intervals)
+        num_gt = len(ground_truth)
+        diff_segments = abs(num_predictions - num_gt)
+        score_ux = max(0, 20 - (diff_segments * 4))
+
+        # 4. Efficacité Technique (10 pts)
+        if processing_time > 0 and audio_duration > 0:
+            ratio = processing_time / audio_duration
+            score_efficiency = max(0, 10 * (1 - ratio * 2))
+        else:
+            score_efficiency = 5
+
+        total_score = score_reliability + score_precision + score_ux + score_efficiency
+        
+        return {
+            "total_score": round(total_score, 1),
+            "details": {
+                "reliability_f1": round(score_reliability, 1),
+                "temporal_precision": round(score_precision, 1),
+                "user_experience": round(score_ux, 1),
+                "technical_efficiency": round(score_efficiency, 1),
+                "f1_value": round(f1, 3),
+                "mae_seconds": round(mae, 2)
+            }
+        }
+
 
 def create_timecode_template():
     """Crée un fichier template pour les timecodes"""

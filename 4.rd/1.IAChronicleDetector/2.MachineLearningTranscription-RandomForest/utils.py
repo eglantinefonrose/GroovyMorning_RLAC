@@ -185,3 +185,86 @@ def save_predictions(chroniques: List[Tuple[float, float]], output_path: str):
         for start, end in chroniques:
             f.write(f"{format_timecode(start)} - {format_timecode(end)}\n")
     print(f"Prédictions sauvegardées dans {output_path}")
+
+
+def calculate_quality_score(predictions: List[Tuple[float, float]], 
+                            ground_truth: List[Tuple[float, float]], 
+                            processing_time: float = 0,
+                            audio_duration: float = 3600) -> Dict:
+    """
+    Calcule une note de qualité sur 100 points.
+    1. Précision Temporelle (30 pts)
+    2. Fiabilité de Détection (40 pts) - F1 Score
+    3. Expérience Utilisateur (20 pts)
+    4. Efficacité Technique (10 pts)
+    """
+    if not ground_truth:
+        return {"total_score": 0, "details": "No ground truth provided"}
+    
+    # 1. Fiabilité de Détection (40 pts)
+    # Calcul simple du F1 basé sur le recouvrement temporel
+    tp = 0.0
+    fp = 0.0
+    fn = 0.0
+    
+    # On discrétise le temps par pas de 1s pour simplifier
+    max_time = int(max(max([e for s, e in ground_truth]), max([e for s, e in predictions] or [0])) + 1)
+    gt_mask = np.zeros(max_time)
+    pr_mask = np.zeros(max_time)
+    
+    for s, e in ground_truth:
+        gt_mask[int(s):int(e)] = 1
+    for s, e in predictions:
+        pr_mask[int(s):int(e)] = 1
+        
+    intersection = np.sum(np.logical_and(gt_mask, pr_mask))
+    precision = intersection / np.sum(pr_mask) if np.sum(pr_mask) > 0 else 0
+    recall = intersection / np.sum(gt_mask) if np.sum(gt_mask) > 0 else 0
+    f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+    
+    score_reliability = f1 * 40
+
+    # 2. Précision Temporelle (30 pts)
+    # MAE sur les bornes des segments correspondants
+    errors = []
+    for gt_s, gt_e in ground_truth:
+        # Trouver la prédiction la plus proche
+        best_err = 999.0
+        for pr_s, pr_e in predictions:
+            err = abs(gt_s - pr_s) + abs(gt_e - pr_e)
+            if err < best_err:
+                best_err = err
+        if best_err != 999.0:
+            errors.append(best_err)
+    
+    mae = np.mean(errors) if errors else 10.0
+    score_precision = max(0, 30 * (1 - mae / 10.0)) # 0 pts si > 10s d'erreur totale
+
+    # 3. Expérience Utilisateur (20 pts)
+    # Pénalité pour les micro-segments ou les coupures trop nombreuses
+    num_predictions = len(predictions)
+    num_gt = len(ground_truth)
+    diff_segments = abs(num_predictions - num_gt)
+    score_ux = max(0, 20 - (diff_segments * 4))
+
+    # 4. Efficacité Technique (10 pts)
+    # Si processing_time / audio_duration < 0.1 (10x plus vite que le temps réel)
+    if processing_time > 0 and audio_duration > 0:
+        ratio = processing_time / audio_duration
+        score_efficiency = max(0, 10 * (1 - ratio * 2)) # 0 pts si > 50% du temps réel
+    else:
+        score_efficiency = 5 # Score par défaut si non mesuré
+
+    total_score = score_reliability + score_precision + score_ux + score_efficiency
+    
+    return {
+        "total_score": round(total_score, 1),
+        "details": {
+            "reliability_f1": round(score_reliability, 1),
+            "temporal_precision": round(score_precision, 1),
+            "user_experience": round(score_ux, 1),
+            "technical_efficiency": round(score_efficiency, 1),
+            "f1_value": round(f1, 3),
+            "mae_seconds": round(mae, 2)
+        }
+    }

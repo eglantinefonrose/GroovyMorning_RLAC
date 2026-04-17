@@ -17,25 +17,27 @@ struct ContentView: View {
         }
         .focusable()
         .onKeyPress(.downArrow) {
+            if viewModel.isShowingAddSegment { return .ignored }
             viewModel.selectNextSegment()
             return .handled
         }
         .onKeyPress(.upArrow) {
+            if viewModel.isShowingAddSegment { return .ignored }
             viewModel.selectPreviousSegment()
             return .handled
         }
-        .onKeyPress(.space) {
-            viewModel.toggleEditMode()
-            return .handled
-        }
         .onKeyPress { keyPress in
-            if keyPress.characters == "l" {
-                viewModel.playCurrentSegment()
-                return .handled
-            }
+            if viewModel.isShowingAddSegment { return .ignored }
+            
             if keyPress.characters == "s" {
                 viewModel.saveSegments()
                 return .handled
+            }
+            if keyPress.key == .delete {
+                if let index = viewModel.selectedSegmentIndex {
+                    viewModel.deleteSegment(at: index)
+                    return .handled
+                }
             }
             return .ignored
         }

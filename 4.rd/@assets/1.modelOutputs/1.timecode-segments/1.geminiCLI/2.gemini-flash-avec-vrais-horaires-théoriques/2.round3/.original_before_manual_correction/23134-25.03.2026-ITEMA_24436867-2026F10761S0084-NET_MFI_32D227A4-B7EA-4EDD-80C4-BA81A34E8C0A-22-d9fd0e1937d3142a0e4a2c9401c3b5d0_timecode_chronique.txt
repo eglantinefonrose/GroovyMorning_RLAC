@@ -1,0 +1,52 @@
+[00:00:00.000] - [00:00:15.480] Introduction - Florence Paracuelos
+[00:00:15.480] - [00:01:26.620] Journal / Actualités (Introduction) - Anaïs Fegard
+[00:01:47.440] - [00:03:11.180] Plan de paix USA-Iran - Camille Magnard
+[00:03:15.940] - [00:04:17.000] Choc pétrolier - Roland Lescure
+[00:04:24.300] - [00:04:44.400] Actualités (INSEE, Liban) - Anaïs Fegard
+[00:04:44.400] - [00:06:37.060] Déserts médicaux / Bus Diagnostic Coeur à Châteauroux - Manon Klein
+[00:06:39.400] - [00:07:01.180] Alerte Cadmium dans l'alimentation - Alice Cachaner
+[00:07:01.180] - [00:07:42.800] Sécurité / Projet de loi criminalité organisée - Laurent Nouniez
+[00:07:42.800] - [00:09:16.900] Edouard Philippe / Campagne présidentielle - Julien Nenny
+[00:09:30.340] - [00:11:13.860] Musées en péril (Louvre, Muséum d'histoire naturelle) - Sandi Dauphin
+[00:11:15.620] - [00:13:13.360] Sport (Foot féminin, Téléfoot, Mohamed Salah) - Louise Adélaïde Boisnard
+[00:13:16.220] - [00:15:13.680] 80 secondes (Documentaire "Allô la France" / Cabines téléphoniques) - Florence Paracuelos
+[00:15:13.680] - [00:15:44.400] Annonce chroniques et Invités - Florence Paracuelos
+[00:15:45.980] - [00:16:08.920] Annonce : Le Mag avec Camille - Sonia Devillers
+[00:16:15.820] - [00:20:31.420] Le Grand Reportage : Vol de données personnelles - Xavier Demany
+[00:21:00.160] - [00:23:23.040] L'édito média : Audition de Vincent Bolloré à l'Assemblée - Cyril Lacarrière
+[00:23:26.000] - [00:27:28.920] Musique Aline : Véronique Samson - Aline Afanoukoué
+[00:27:30.160] - [00:28:00.200] Annonces masterclass Mehdi Maïzi - Florence Paracuelos
+[00:28:00.200] - [00:28:31.720] Publicité : Renault 5 E-Tech
+[00:28:34.020] - [00:30:03.220] Météo - Céline Dacosta
+[00:30:03.220] - [00:30:35.460] Présentation des éditos et invités - Florence Paracuelos
+[00:30:36.300] - [00:35:33.120] Journal de 7h30 - Kevin Dufraîche
+[00:31:44.440] - [00:33:11.000] Sécurité / Projet de loi (inclus journal) - Marion Aquilina
+[00:34:12.280] - [00:35:32.420] Reportage Marins français bloqués dans le Golfe (inclus journal) - Laurent Kramer
+[00:35:34.060] - [00:37:46.640] Reportage Israéliens d'origine iranienne (inclus journal) - Thibaut Lefebvre
+[00:38:01.740] - [00:40:02.520] Emploi des jeunes et IA (inclus journal) - Mathilde Dehimi
+[00:40:06.980] - [00:41:45.340] Alerte Cadmium (inclus journal) - Alice Cachaner
+[00:41:46.640] - [00:43:22.440] Reportage Guirec Soudé (tour du monde à l'envers) - Jérôme Vall
+[00:44:05.520] - [00:44:10.260] Annonce : Libre antenne amour et sexe - Bérangère Krief
+[00:44:12.820] - [00:47:09.500] L'édito politique : Le PS et les alliances avec LFI - Patrick Cohen
+[00:47:21.860] - [00:50:04.440] L'édito éco : Bilan économique de Lionel Jospin - Dominique Seux
+[00:50:11.620] - [00:59:40.360] Invité de 7h50 : Frédéric Ancel - Benjamin Duhamel
+[01:00:07.860] - [01:06:05.100] Journal de 8h00 - Hélène Philly
+[01:01:46.300] - [01:03:07.100] Reportage Alexei Moskaliov (père russe ayant fui) - Virginie Pironon
+[01:03:20.760] - [01:04:56.340] Analyse Attaque de drones en Ukraine - Luc Alazo
+[01:05:02.040] - [01:06:00.480] Analyse Plan de paix Trump / Iran - (inclus journal)
+[01:06:33.980] - [01:08:06.200] Analyse Choc pétrolier - Delphine Simon
+[01:08:37.840] - [01:09:52.360] Analyse Discordes à gauche / Jospin - Victoria Koussa
+[01:10:48.700] - [01:12:22.260] Procès victime de viol / extorsion - Jean-Philippe Deniau
+[01:12:54.080] - [01:14:08.400] Reportage Gel dans les vergers - François Sauvestre
+[01:14:13.120] - [01:16:03.060] Reportage Retour de Daniel Day-Lewis - Corinne Pellissier
+[01:16:06.420] - [01:18:40.160] Météo - Céline Dacosta
+[01:18:42.500] - [01:21:04.900] Géopolitique : Le Liban et l'ambassadeur d'Iran - Pierre Haski
+[01:22:04.220] - [01:23:01.740] Annonces et Partenariats - (Voix off)
+[01:23:05.940] - [01:46:02.080] Le Grand Entretien : Marine Le Pen - Benjamin Duhamel & Florence Paracuelos
+[01:46:43.980] - [01:47:08.480] Publicité : Penny Lane
+[01:47:09.260] - [01:47:19.360] Publicité : PFG
+[01:47:19.360] - [01:47:45.420] Publicité : Orange Pro
+[01:47:48.220] - [01:48:28.880] Annonce : Le Portrait de 9h (Quentin Fillon Maillet) - Sonia Devillers
+[01:48:29.720] - [01:53:13.360] La revue de presse : Libertés associatives et censure - Nora Amadi
+[01:53:32.860] - [01:56:12.620] Un monde nouveau : Esthétique du divorce sur les réseaux - Mathilde Serrel
+[01:56:19.520] - [01:59:56.060] Chronique musicale : Production d'un track - Mozyman

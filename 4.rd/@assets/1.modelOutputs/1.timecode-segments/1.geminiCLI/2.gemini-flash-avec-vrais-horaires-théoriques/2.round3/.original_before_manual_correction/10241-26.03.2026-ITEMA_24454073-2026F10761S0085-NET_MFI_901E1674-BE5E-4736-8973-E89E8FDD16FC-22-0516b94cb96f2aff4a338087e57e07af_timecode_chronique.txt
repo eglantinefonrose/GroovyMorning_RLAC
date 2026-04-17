@@ -1,0 +1,25 @@
+[00:00:01.200] - [00:13:20.220] La Grande Matinale (Journal de 7h) - Anaïs Fegard
+[00:13:20.220] - [00:15:08.360] 80 secondes de mystère (Le renard dans la ville) - Florence Paracuelos
+[00:15:42.680] - [00:16:02.500] Publicité - Affaires Sensibles (Série Mafia)
+[00:16:13.120] - [00:20:13.940] Grand Reportage (Logements à Hong Kong) - Sébastien Berriot
+[00:20:13.940] - [00:23:07.380] L'édito Média (Loana et la télé-réalité) - Cyril Lacarrière
+[00:23:07.380] - [00:26:48.040] Musicaline (Ness - Des pieds et des mains) - Aline Afanouko
+[00:26:53.680] - [00:27:15.400] Publicité - Alain Afflelou (Magic Clip)
+[00:27:17.720] - [00:27:26.660] Publicité - Utopia
+[00:27:26.660] - [00:29:36.360] La météo - Céline Dacosta
+[00:29:37.800] - [00:42:01.420] Le journal de 7h30 - Kevin Dufraîche
+[00:42:28.660] - [00:45:31.260] L'édito politique (Union des droites) - Patrick Cohen
+[00:45:41.900] - [00:48:24.360] L'édito éco (Prix des carburants) - Dominique Seux
+[00:48:39.460] - [00:57:22.160] L'invité de 7h50 (Journalisme au Liban) - Rima Abdulmalak
+[00:57:33.200] - [01:00:03.460] Chronique (Le nouveau studio de la matinale) - Daniel Morin
+[01:01:03.000] - [01:16:08.700] Le journal de 8h - Hélène Philly
+[01:16:17.980] - [01:17:23.000] La météo - Céline Dacosta
+[01:17:30.360] - [01:20:39.440] Géopolitique (Qui dirige l'Iran ?) - Pierre Haski
+[01:20:46.320] - [01:21:19.280] Publicité - Bérangère Krief (Libre antenne)
+[01:21:19.280] - [01:21:42.980] Publicité - Grand Frais
+[01:22:06.040] - [01:45:34.980] Le Grand Entretien (Choc pétrolier et Règle d'or) - Thierry Breton
+[01:45:41.300] - [01:46:08.600] Publicité - Orange Pro
+[01:46:08.600] - [01:46:18.480] Publicité - PFG
+[01:47:00.760] - [01:52:53.460] Dans l'œil de Nora Amadi (Justice restaurative) - Nora Amadi
+[01:52:53.460] - [01:55:27.540] Un monde nouveau (Harcèlement scolaire) - Mathilde Serrel
+[01:55:33.580] - [01:59:12.700] Chronique (Les gens en retard) - David Castello-Lopes

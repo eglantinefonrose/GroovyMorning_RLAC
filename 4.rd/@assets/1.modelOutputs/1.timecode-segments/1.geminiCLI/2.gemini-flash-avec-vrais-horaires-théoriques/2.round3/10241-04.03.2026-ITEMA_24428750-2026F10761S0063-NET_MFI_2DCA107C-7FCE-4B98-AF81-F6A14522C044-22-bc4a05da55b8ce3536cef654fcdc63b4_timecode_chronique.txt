@@ -1,0 +1,23 @@
+[00:00:00.000] - [00:13:10.000] Le journal de 7h - Simon Lesbarou / Victor Dolan
+[00:13:10.179] - [00:14:31.019] Les 80'' - Simon Lesbarou
+[00:14:38.940] - [00:15:10.820] Transition / Annonces - Simon Lesbarou
+[00:15:15.100] - [00:16:03.379] Publicité - Mon tout-petit France Inter
+[00:16:04.840] - [00:20:08.759] Le Grand reportage de France Inter - Lise Roseveil
+[00:20:13.019] - [00:23:13.440] L'édito médias - Cyril Lacarrière
+[00:23:22.400] - [00:27:22.338] Musicaline - Aline Afanoukoué
+[00:27:28.740] - [00:28:24.298] Publicité - Renault / Utopia / Obésité
+[00:28:25.358] - [00:29:44.960] La météo - Marie-Pierre Planchon
+[00:29:46.019] - [00:41:55.139] Le journal de 7h30 - Laurence Thomas
+[00:42:53.039] - [00:46:05.380] L'édito politique - Maxence Lambrec
+[00:46:06.460] - [00:48:58.340] L'édito éco - Dominique Seux
+[00:49:04.500] - [00:57:33.860] L'invité de 7h50 - Alexandra Bensaïd (Invité : Eli Barnavi)
+[00:57:40.159] - [01:00:27.079] Le billet de Bertrand Chameroy - Bertrand Chameroy
+[01:00:31.960] - [01:17:14.680] Le journal de 8h - Hélène Fily
+[01:17:15.859] - [01:20:40.579] Géopolitique - Pierre Haski
+[01:20:41.939] - [01:21:19.039] Publicité - Ubi40 / Renault / Utopia / Mon tout-petit France Inter
+[01:21:26.159] - [01:44:58.300] L'invité de 8h20 : le grand entretien - Simon Lebaron / Alexandra Bensaïd (Invité : Mathilde Panot)
+[01:45:02.380] - [01:45:14.800] Publicité - Grand bien vous fasse / Grand Frais / Collecto
+[01:45:15.739] - [01:46:06.659] Pubicité-GrandFrai
+[01:46:48.340] - [01:52:58.720] Dans l'œil de Nora Hamadi - Nora Hamadi
+[01:53:00.220] - [01:56:13.359] Un monde nouveau - Mathilde Serrel
+[01:56:14.819] - [02:00:12.800] Moziman - Moziman

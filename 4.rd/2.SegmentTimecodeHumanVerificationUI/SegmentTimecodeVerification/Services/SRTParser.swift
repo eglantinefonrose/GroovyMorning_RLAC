@@ -5,8 +5,8 @@ class SRTParser {
         let lines = content.components(separatedBy: .newlines)
         var blocks: [SRTBlock] = []
         
-        // Regex to match timestamps like 00:00:00.000 or 00:00:00,000
-        let timePattern = #"(\d{1,2}:\d{2}:\d{2}[.,]\d{3})"#
+        // Regex to match timestamps like 00:00:00.0 or 00:00:00.000
+        let timePattern = #"(\d{1,2}:\d{2}:\d{2}[.,]\d{1,3})"#
         let rangePattern = "\(timePattern)\\s*-->\\s*\(timePattern)"
         
         var idCounter = 1

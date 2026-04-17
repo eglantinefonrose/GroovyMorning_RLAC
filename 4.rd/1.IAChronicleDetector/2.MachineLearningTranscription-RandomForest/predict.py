@@ -1,7 +1,8 @@
 import numpy as np
 import joblib
+import time
 from train import RadioChroniqueClassifier
-from utils import load_transcription, format_timecode, save_predictions
+from utils import load_transcription, format_timecode, save_predictions, calculate_quality_score, load_timecodes
 from typing import List, Tuple
 import os
 
@@ -9,9 +10,11 @@ def predict_chroniques(model_path: str, srt_file: str,
                        confidence_threshold: float = 0.4, # Seuil légèrement abaissé pour debug
                        min_chronique_duration: float = 5.0, # Durée abaissée pour debug
                        max_gap_duration: float = 2.0,
-                       smoothing_window: int = 3) -> List[Tuple[float, float]]:
+                       smoothing_window: int = 3,
+                       gt_file: str = None) -> Tuple[List[Tuple[float, float]], dict]:
     """Prédit les chroniques avec Random Forest"""
 
+    start_time = time.time()
     print(f"--- Diagnostic de prédiction ---")
     print(f"Modèle: {model_path}")
     print(f"Fichier SRT: {srt_file}")
@@ -21,7 +24,7 @@ def predict_chroniques(model_path: str, srt_file: str,
     segments = load_transcription(srt_file)
     if not segments:
         print("Erreur: Aucun segment chargé depuis le SRT.")
-        return []
+        return [], {}
     print(f"Segments chargés: {len(segments)}")
     
     X = classifier.prepare_features(segments, training=False)
@@ -37,8 +40,6 @@ def predict_chroniques(model_path: str, srt_file: str,
         probs = classifier.classifier.predict_proba(X)[:, 1]
     
     print(f"Probabilité max détectée: {np.max(probs):.4f}")
-    print(f"Probabilité moyenne: {np.mean(probs):.4f}")
-    print(f"Nombre de segments au-dessus du seuil ({confidence_threshold}): {np.sum(probs >= confidence_threshold)}")
     
     # Lissage des probabilités
     if smoothing_window > 1:
@@ -67,8 +68,6 @@ def predict_chroniques(model_path: str, srt_file: str,
                 
     if current_start is not None:
         raw_chroniques.append((current_start, segments[-1]['end']))
-        
-    print(f"Blocs détectés avant filtrage: {len(raw_chroniques)}")
     
     # Fusionner les blocs très proches
     merged_chroniques = []
@@ -89,27 +88,37 @@ def predict_chroniques(model_path: str, srt_file: str,
         if (e - s) >= min_chronique_duration
     ]
     
-    if len(raw_chroniques) > 0 and len(final_chroniques) == 0:
-        print("Alerte: Des chroniques ont été détectées mais elles étaient toutes trop courtes.")
-        for s, e in raw_chroniques:
-            print(f"  - Bloc ignoré: {format_timecode(s)} - {format_timecode(e)} (durée: {e-s:.1f}s)")
+    processing_time = time.time() - start_time
+    audio_duration = segments[-1]['end'] if segments else 3600
     
-    return final_chroniques
+    quality_report = {}
+    if gt_file and os.path.exists(gt_file):
+        ground_truth = load_timecodes(gt_file)
+        quality_report = calculate_quality_score(final_chroniques, ground_truth, processing_time, audio_duration)
+        
+    return final_chroniques, quality_report
 
 if __name__ == "__main__":
     # Configuration
     model_path = "models/radio_chronique_rf.pkl"
-    # Mise à jour du chemin vers le fichier réel
     srt_file = "../../@assets/1.modelOutputs/0.transcriptions/1.transcriptions_whisper_ggml-large-v3-turbo/26811-06.04.2026-ITEMA_24466243-2026F10761S0096-NET_MFI_8F75AA4E-79C7-4CF3-A0B7-2D7EBC1FB5B5-22-534f5f6ae83fc95044c42304b90ca1f7_transcription.srt"
-    
+    gt_file = "../../@assets/1.modelOutputs/1.timecode-segments/1.geminiCLI/2.gemini-flash-avec-vrais-horaires-théoriques/26811-06.04.2026-ITEMA_24466243-2026F10761S0096-NET_MFI_8F75AA4E-79C7-4CF3-A0B7-2D7EBC1FB5B5-22-534f5f6ae83fc95044c42304b90ca1f7_timecode_chronique.txt"
+
     if not os.path.exists(model_path):
         print(f"Modèle non trouvé: {model_path}. Veuillez d'abord lancer train.py.")
     elif not os.path.exists(srt_file):
         print(f"Fichier SRT non trouvé: {srt_file}")
     else:
-        chroniques = predict_chroniques(model_path, srt_file)
+        chroniques, quality = predict_chroniques(model_path, srt_file, gt_file=gt_file)
         print(f"\n=== RESULTAT FINAL ===")
         print(f"Chroniques validées: {len(chroniques)}")
         for i, (start, end) in enumerate(chroniques, 1):
             print(f"{i}: {format_timecode(start)} - {format_timecode(end)}")
+        
+        if quality:
+            print(f"\n=== NOTE DE QUALITÉ : {quality['total_score']}/100 ===")
+            print(f"Détails :")
+            for k, v in quality['details'].items():
+                print(f"  - {k}: {v}")
+                
         save_predictions(chroniques, "predictions_output.txt")

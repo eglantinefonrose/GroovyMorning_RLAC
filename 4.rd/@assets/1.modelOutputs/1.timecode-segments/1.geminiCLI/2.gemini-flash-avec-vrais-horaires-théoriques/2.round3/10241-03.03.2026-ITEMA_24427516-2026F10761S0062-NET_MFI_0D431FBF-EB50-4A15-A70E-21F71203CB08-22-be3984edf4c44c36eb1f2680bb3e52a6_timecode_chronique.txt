@@ -1,0 +1,25 @@
+[00:00:00.000] - [00:13:14.000] Le journal de 7h - Simon Lesbarou / Victor Dolan
+[00:13:14.000] - [00:14:22.000] Les 80'' - Simon Lesbarou
+[00:14:22.000] - [00:14:51.000] Transition / Annonces - Simon Lesbarou
+[00:14:51.000] - [00:15:11.000] Publicité - La Terre au carré
+[00:15:11.000] - [00:19:18.000] Le Grand reportage de France Inter - Arthur Sarada
+[00:19:18.000] - [00:22:05.000] L'édito médias - Cyril Lacarrière
+[00:22:05.000] - [00:26:53.000] Musicaline - Aline Afanoukoué
+[00:26:53.000] - [00:27:07.000] Publicité - Collecto (Crédit Agricole)
+[00:27:07.000] - [00:28:30.000] La météo - Marie-Pierre Planchon
+[00:28:30.000] - [00:29:22.000] Transition / Annonces - Simon Lesbarou
+[00:29:22.000] - [00:41:31.260] Le journal de 7h30 - Laurence Thomas
+[00:41:31.260] - [00:41:41.639] Annonce-SimonLebaron
+[00:41:43.000] - [00:42:13.920] Publicité - EDF / La Terre au carré
+[00:42:23.239] - [00:45:19.639] L'édito politique - Maxence Lambrec
+[00:45:22.000] - [00:48:18.139] L'édito éco - Dominique Seux
+[00:48:24.039] - [00:57:08.699] L'invité de 7h50 - Alexandra Bensaïd (Invité : Catherine Vautrin)
+[00:57:15.000] - [00:59:42.699] Le billet de Bertrand Chameroy - Bertrand Chameroy
+[00:59:43.119] - [01:17:24.739] Le journal de 8h - Hélène Fily
+[01:17:24.739] - [01:20:44.220] Géopolitique - Pierre Haski
+[01:20:44.899] - [01:21:18.560] Publicité - Mon tout-petit France Inter
+[01:21:27.260] - [01:46:43.100] L'invité de 8h20 : le grand entretien - Simon Lebaron / Alexandra Bensaïd (Invités : Hugo Micheron & Justin Vaïsse)
+[01:46:43.659] - [01:47:56.260] Publicité / Transition magazine - Sonia de Villers
+[01:47:58.500] - [01:53:41.659] Dans l'œil de Nora Hamadi - Nora Hamadi
+[01:53:41.000] - [01:56:20.720] Un monde nouveau - Mathilde Serrel
+[01:56:22.180] - [01:59:51.779] Merci Sophia - Sophia Aram

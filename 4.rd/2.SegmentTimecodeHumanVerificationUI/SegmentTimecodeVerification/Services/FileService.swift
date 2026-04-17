@@ -5,9 +5,10 @@ class FileService {
     static let shared = FileService()
     
     func loadSegments(from url: URL) -> [Segment] {
-        print("DEBUG: Loading segments from \(url.path)")
-        guard let content = try? String(contentsOf: url, encoding: .utf8) else { 
-            print("ERROR: Could not read file at \(url.path)")
+        let path = (url.path as NSString).expandingTildeInPath
+        print("DEBUG: Loading segments from \(path)")
+        guard let content = try? String(contentsOfFile: path, encoding: .utf8) else { 
+            print("ERROR: Could not read file at \(path)")
             return [] 
         }
         
@@ -59,7 +60,7 @@ class FileService {
         }
         
         let backupFile = backupDir.appendingPathComponent(url.lastPathComponent)
-        if !FileManager.default.fileExists(atPath: backupFile.path) {
+        if FileManager.default.fileExists(atPath: url.path) && !FileManager.default.fileExists(atPath: backupFile.path) {
             try FileManager.default.copyItem(at: url, to: backupFile)
         }
         

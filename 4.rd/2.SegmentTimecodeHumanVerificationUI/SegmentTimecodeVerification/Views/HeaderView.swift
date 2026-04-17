@@ -61,7 +61,7 @@ struct HeaderView: View {
                 Label("Edit Mode", systemImage: "pencil.and.outline")
             }
             .toggleStyle(.button)
-            .help("Toggle edit mode (Space)")
+            .help("Toggle edit mode")
             
             Divider().frame(height: 20)
             
@@ -79,7 +79,7 @@ struct HeaderView: View {
                 Button {
                     viewModel.playCurrentSegment()
                 } label: {
-                    Label("Preview (L)", systemImage: "play.circle")
+                    Label("Preview", systemImage: "play.circle")
                 }
             }
             
@@ -105,6 +105,7 @@ struct HeaderView: View {
                     selectDirectory { path in
                         viewModel.config.transcriptionDirectoryPath = path
                         viewModel.saveConfig()
+                        viewModel.refreshCurrentMedia()
                     }
                 } label: {
                     Label("SRT Folder", systemImage: "captions.bubble.fill")
@@ -119,6 +120,7 @@ struct HeaderView: View {
                     selectDirectory { path in
                         viewModel.config.timecodeDirectoryPath = path
                         viewModel.saveConfig()
+                        viewModel.refreshCurrentMedia()
                     }
                 } label: {
                     Label("TXT Folder", systemImage: "doc.text.fill")

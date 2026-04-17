@@ -1,95 +1,208 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-struct TranscriptionView: View {
-    @ObservedObject var viewModel: AppViewModel
+struct BlockView: View {
+    let block: SRTBlock
+    let isSelected: Bool
+    let isMatch: Bool
+    let selectionColor: Color
+    let onTap: () -> Void
     
     var body: some View {
-        VStack {
-            if let index = viewModel.selectedSegmentIndex {
-                let segment = viewModel.segments[index]
-                
+        Text(block.text)
+            .padding(8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(isSelected ? selectionColor.opacity(0.3) : (isMatch ? Color.yellow.opacity(0.4) : Color.gray.opacity(0.1)))
+            .border(isMatch ? Color.yellow : Color.clear, width: 2)
+            .cornerRadius(4)
+            .onTapGesture(perform: onTap)
+    }
+}
+
+struct EditColumnView: View {
+    let title: String
+    let icon: String
+    let color: Color
+    let prefix: String
+    let blocks: [SRTBlock]
+    let selectedTime: TimeInterval
+    let searchText: String
+    let isSameTime: (TimeInterval, TimeInterval) -> Bool
+    let onSelect: (TimeInterval) -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label(title, systemImage: icon)
+                .font(.headline).foregroundColor(color)
+                .padding(.horizontal)
+                .padding(.top, 8)
+            
+            ScrollViewReader { proxy in
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        if viewModel.isEditingMode {
-                            // Edition mode: Separate Start and End
-                            VStack(alignment: .leading, spacing: 10) {
-                                Label("Edit START boundary", systemImage: "arrow.right.to.line")
-                                    .font(.headline).foregroundColor(.blue)
-                                
-                                let startContext = getContextBlocks(for: segment.startTime)
-                                ForEach(startContext) { block in
-                                    Text(block.text)
-                                        .padding(8)
-                                        .background(isSameTime(block.startTime, segment.startTime) ? Color.blue.opacity(0.3) : Color.gray.opacity(0.1))
-                                        .cornerRadius(4)
-                                        .onTapGesture {
-                                            viewModel.updateSegmentBoundary(at: index, newTime: block.startTime, isStart: true)
-                                        }
-                                }
-                            }
-                            
-                            Divider()
-                            
-                            VStack(alignment: .leading, spacing: 10) {
-                                Label("Edit END boundary", systemImage: "arrow.left.to.line")
-                                    .font(.headline).foregroundColor(.orange)
-                                
-                                let endContext = getContextBlocks(for: segment.endTime)
-                                ForEach(endContext) { block in
-                                    Text(block.text)
-                                        .padding(8)
-                                        .background(isSameTime(block.startTime, segment.endTime) ? Color.orange.opacity(0.3) : Color.gray.opacity(0.1))
-                                        .cornerRadius(4)
-                                        .onTapGesture {
-                                            viewModel.updateSegmentBoundary(at: index, newTime: block.startTime, isStart: false)
-                                        }
-                                }
-                            }
-                        } else if viewModel.config.validationMode == .text {
-                            // Text Validation mode
-                            VStack(alignment: .leading, spacing: 20) {
-                                VStack(alignment: .leading, spacing: 5) {
-                                    Label("Start Context (\(viewModel.config.defaultXSeconds)s)", systemImage: "arrow.right.to.line")
-                                        .font(.caption)
-                                        .foregroundColor(.blue)
-                                    Text(getSnippet(start: segment.startTime - viewModel.config.timeOffset, end: segment.startTime + Double(viewModel.config.defaultXSeconds) - viewModel.config.timeOffset))
-                                        .font(.system(.body, design: .monospaced))
-                                        .padding()
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .background(Color.blue.opacity(0.1))
-                                        .cornerRadius(8)
-                                }
-                                
-                                VStack(alignment: .leading, spacing: 5) {
-                                    Label("End Context (\(viewModel.config.defaultYSeconds)s)", systemImage: "arrow.left.to.line")
-                                        .font(.caption)
-                                        .foregroundColor(.orange)
-                                    Text(getSnippet(start: max(segment.startTime - viewModel.config.timeOffset, segment.endTime - Double(viewModel.config.defaultYSeconds) - viewModel.config.timeOffset), end: segment.endTime - viewModel.config.timeOffset))
-                                        .font(.system(.body, design: .monospaced))
-                                        .padding()
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .background(Color.orange.opacity(0.1))
-                                        .cornerRadius(8)
-                                }
-                            }
-                        } else {
-                            // Visualisation mode
-                            let segmentBlocks = viewModel.srtBlocks.filter { 
-                                $0.startTime >= (segment.startTime - viewModel.config.timeOffset) && 
-                                $0.endTime <= (segment.endTime - viewModel.config.timeOffset) 
-                            }
-                            Text(segmentBlocks.map { $0.text }.joined(separator: " "))
-                                .font(.body)
-                                .lineSpacing(5)
+                    LazyVStack(alignment: .leading, spacing: 8) {
+                        ForEach(blocks) { block in
+                            BlockView(
+                                block: block,
+                                isSelected: isSameTime(block.startTime, selectedTime),
+                                isMatch: !searchText.isEmpty && block.text.localizedCaseInsensitiveContains(searchText),
+                                selectionColor: color,
+                                onTap: { onSelect(block.startTime) }
+                            )
+                            .id("\(prefix)-\(block.id)")
                         }
                     }
                     .padding()
                 }
                 .onAppear {
-                    viewModel.markAsViewed(index: index)
+                    scrollToSelected(proxy: proxy)
                 }
-                .id(index)
+                .onChange(of: blocks) { _, _ in
+                    scrollToSelected(proxy: proxy)
+                }
+                .onChange(of: searchText) { _, newValue in
+
+                    if !newValue.isEmpty, let firstMatch = blocks.first(where: { $0.text.localizedCaseInsensitiveContains(newValue) }) {
+                        withAnimation {
+                            proxy.scrollTo("\(prefix)-\(firstMatch.id)", anchor: .center)
+                        }
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func scrollToSelected(proxy: ScrollViewProxy) {
+        if let selectedBlock = blocks.first(where: { isSameTime($0.startTime, selectedTime) }) {
+            DispatchQueue.main.async {
+                withAnimation {
+                    proxy.scrollTo("\(prefix)-\(selectedBlock.id)", anchor: .center)
+                }
+            }
+        }
+    }
+}
+
+struct TranscriptionView: View {
+    @ObservedObject var viewModel: AppViewModel
+    @State private var searchText: String = ""
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            if let error = viewModel.errorMessage {
+                Text(error)
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.red)
+            }
+            
+            if viewModel.isEditingMode && viewModel.selectedSegmentId != nil {
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.secondary)
+                    TextField("Rechercher dans la transcription...", text: $searchText)
+                        .textFieldStyle(.roundedBorder)
+                    if !searchText.isEmpty {
+                        Button {
+                            searchText = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding()
+                .background(Color(NSColor.windowBackgroundColor))
+            }
+
+            if let segmentId = viewModel.selectedSegmentId,
+               let currentIndex = viewModel.segments.firstIndex(where: { $0.id == segmentId }) {
+                let segment = viewModel.segments[currentIndex]
+                let previousSegment = currentIndex > 0 ? viewModel.segments[currentIndex - 1] : nil
+                let nextSegment = currentIndex < viewModel.segments.count - 1 ? viewModel.segments[currentIndex + 1] : nil
+                
+                Group {
+                    if viewModel.isEditingMode {
+                        // Edition mode: Two independent columns sharing space
+                        HStack(spacing: 0) {
+                            EditColumnView(
+                                title: "Edit END boundary",
+                                icon: "arrow.left.to.line",
+                                color: .orange,
+                                prefix: "end",
+                                blocks: getBlocksInRange(start: segment.endTime - 120, end: max(nextSegment?.startTime ?? segment.endTime, segment.endTime + 600) + 60),
+                                selectedTime: segment.endTime,
+                                searchText: searchText,
+                                isSameTime: isSameTime,
+                                onSelect: { viewModel.updateSegmentBoundary(at: currentIndex, newTime: $0, isStart: false) }
+                            )
+                            
+                            Divider()
+                            
+                            EditColumnView(
+                                title: "Edit START boundary",
+                                icon: "arrow.right.to.line",
+                                color: .blue,
+                                prefix: "start",
+                                blocks: getBlocksInRange(start: min(previousSegment?.endTime ?? segment.startTime, segment.startTime - 600) - 60, end: segment.startTime + 120),
+                                selectedTime: segment.startTime,
+                                searchText: searchText,
+                                isSameTime: isSameTime,
+                                onSelect: { viewModel.updateSegmentBoundary(at: currentIndex, newTime: $0, isStart: true) }
+                            )
+                        }
+                        .frame(maxHeight: .infinity)
+                    } else {
+                        // Regular modes: Single ScrollView
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 20) {
+                                if viewModel.config.validationMode == .text {
+                                    // Text Validation mode
+                                    VStack(alignment: .leading, spacing: 20) {
+                                        VStack(alignment: .leading, spacing: 5) {
+                                            Label("Start Context (\(viewModel.config.defaultXSeconds)s)", systemImage: "arrow.right.to.line")
+                                                .font(.caption)
+                                                .foregroundColor(.blue)
+                                            Text(getSnippet(start: segment.startTime - viewModel.config.timeOffset, end: segment.startTime + Double(viewModel.config.defaultXSeconds) - viewModel.config.timeOffset))
+                                                .font(.system(.body, design: .monospaced))
+                                                .padding()
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                                .background(Color.blue.opacity(0.1))
+                                                .cornerRadius(8)
+                                        }
+                                        
+                                        VStack(alignment: .leading, spacing: 5) {
+                                            Label("End Context (\(viewModel.config.defaultYSeconds)s)", systemImage: "arrow.left.to.line")
+                                                .font(.caption)
+                                                .foregroundColor(.orange)
+                                            Text(getSnippet(start: max(segment.startTime - viewModel.config.timeOffset, segment.endTime - Double(viewModel.config.defaultYSeconds) - viewModel.config.timeOffset), end: segment.endTime - viewModel.config.timeOffset))
+                                                .font(.system(.body, design: .monospaced))
+                                                .padding()
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                                .background(Color.orange.opacity(0.1))
+                                                .cornerRadius(8)
+                                        }
+                                    }
+                                } else {
+                                    // Visualisation mode
+                                    let segmentBlocks = viewModel.srtBlocks.filter { 
+                                        $0.startTime >= (segment.startTime - viewModel.config.timeOffset) && 
+                                        $0.endTime <= (segment.endTime - viewModel.config.timeOffset) 
+                                    }
+                                    Text(segmentBlocks.map { $0.text }.joined(separator: " "))
+                                        .font(.body)
+                                        .lineSpacing(5)
+                                }
+                            }
+                            .padding()
+                        }
+                    }
+                }
+                .onAppear {
+                    viewModel.markAsViewed(id: segment.id)
+                }
+                .id(segment.id)
             } else if viewModel.srtBlocks.isEmpty {
                 VStack(spacing: 20) {
                     ContentUnavailableView {
@@ -156,10 +269,11 @@ struct TranscriptionView: View {
         }
     }
     
-    private func getContextBlocks(for absoluteTime: TimeInterval) -> [SRTBlock] {
-        let adjustedTime = absoluteTime - viewModel.config.timeOffset
+    private func getBlocksInRange(start: TimeInterval, end: TimeInterval) -> [SRTBlock] {
+        let adjustedStart = start - viewModel.config.timeOffset
+        let adjustedEnd = end - viewModel.config.timeOffset
         return viewModel.srtBlocks.filter {
-            $0.endTime >= adjustedTime - 30 && $0.startTime <= adjustedTime + 30
+            $0.endTime >= adjustedStart && $0.startTime <= adjustedEnd
         }
     }
 }
