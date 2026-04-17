@@ -14,11 +14,25 @@ uv sync
 
 ## Entraînement
 
-Pour entraîner le modèle avec les données présentes dans `@assets` :
+Il est recommandé d'utiliser `uv` pour garantir la reproductibilité, particulièrement sur machine distante :
 
 ```bash
-python train.py
+# Installation des dépendances
+uv sync
+
+# Lancement de l'entraînement
+uv run train.py --epochs 4
 ```
+
+*Note : L'entraînement sur machine distante (PC NVIDIA) est privilégié pour bénéficier de l'accélération CUDA.*
+
+## Monitoring & Logs (WandB)
+
+Le projet utilise **Weights & Biases (WandB)** pour le suivi des métriques en temps réel.
+
+1. **Installation** : `uv add wandb`
+2. **Connexion** : `uv run wandb login`
+3. **Tableau de bord** : Les courbes de Loss et de F1-score sont consultables sur votre interface WandB sous le projet **`RLAC`**.
 
 Le modèle sera sauvegardé dans le dossier `models/camembert_chronicle`.
 

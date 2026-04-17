@@ -18,6 +18,8 @@ from transformers import (
     EarlyStoppingCallback
 )
 import torch
+import wandb
+import socket
 
 # Configuration des chemins
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -25,11 +27,36 @@ SRT_DIR = os.path.join(BASE_DIR, "@assets/1.modelOutputs/0.transcriptions/1.tran
 TC_DIR = os.path.join(BASE_DIR, "@assets/1.modelOutputs/1.timecode-segments/1.geminiCLI/2.gemini-flash-avec-vrais-horaires-théoriques/2.round3")
 OUTPUT_MODEL_DIR = "models/camembert_chronicle"
 
-def train_transformer(srt_files, tc_files, model_name="cmarkea/distilcamembert-base", epochs=4):
+def train_transformer(srt_files, tc_files, model_name="cmarkea/distilcamembert-base", epochs=4, tags=None):
     """
-    Entraîne un modèle CamemBERT distillé. 
-    Plus léger et rapide que la version base, idéal pour une itération rapide.
+    Entraîne un modèle CamemBERT avec monitoring complet.
     """
+    # Détection automatique du matériel
+    hardware_info = "CPU"
+    if torch.cuda.is_available():
+        hardware_info = torch.cuda.get_device_name(0)
+    elif torch.backends.mps.is_available():
+        hardware_info = "Mac Apple Silicon (MPS)"
+
+    # Initialisation de WandB avec Config enrichie et Tags
+    wandb.init(
+        project="RLAC",
+        tags=tags if tags else [],
+        config={
+            "model_architecture": "CamemBERT",
+            "model_variant": model_name,
+            "is_distilled": "distil" in model_name.lower(),
+            "epochs": epochs,
+            "batch_size": 16,
+            "max_length": 128,
+            "learning_rate": 2e-5,
+            "dataset_size": len(srt_files),
+            "machine": socket.gethostname(),
+            "hardware": hardware_info,
+            "tc_dir": os.path.basename(TC_DIR) # Pour savoir quelle version des timecodes on utilise
+        }
+    )
+
     print(f"\n--- Initialisation de {model_name} (Version Distillée Rapide) ---")
     
     tokenizer = CamembertTokenizer.from_pretrained(model_name)
@@ -53,7 +80,7 @@ def train_transformer(srt_files, tc_files, model_name="cmarkea/distilcamembert-b
         per_device_eval_batch_size=16,
         warmup_steps=100,
         weight_decay=0.01,
-        logging_steps=50,
+        logging_steps=10, # Plus fréquent pour WandB
         eval_strategy="steps", 
         eval_steps=100,
         save_strategy="steps",
@@ -62,7 +89,9 @@ def train_transformer(srt_files, tc_files, model_name="cmarkea/distilcamembert-b
         load_best_model_at_end=True,
         metric_for_best_model="f1",
         fp16=torch.cuda.is_available(), 
-        learning_rate=2e-5, 
+        learning_rate=2e-5,
+        report_to="wandb", # Envoi des logs à WandB
+        run_name=f"train-{model_name.split('/')[-1]}"
     )
     
     def compute_metrics(pred):

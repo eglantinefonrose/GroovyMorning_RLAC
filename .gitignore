@@ -13,3 +13,5 @@
 4.rd/1.IAChronicleDetector/4.TransformerDetection/results
 4.rd/1.IAChronicleDetector/3.MachineLearningTranscription-Hybrid/models/**/*
 !4.rd/1.IAChronicleDetector/3.MachineLearningTranscription-Hybrid/models/**/*.md
+4.rd/1.IAChronicleDetector/4.TransformerDetection/wandb
+4.rd/1.IAChronicleDetector/4.TransformerDetection/tea_debug.log

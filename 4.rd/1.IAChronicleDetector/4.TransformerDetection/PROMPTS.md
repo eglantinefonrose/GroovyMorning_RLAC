@@ -116,9 +116,7 @@ Tu peux libérer tes 10 Go immédiatement avec : `rm -rf results/*`
 ------
 
 
-Stocke dans un fichier PROMPTS.md tous les prompts que je t'ai envoyé depuis le début de cette session. Sépare les par `\n
----
-
+Stocke dans un fichier PROMPTS.md tous les prompts que je t'ai envoyé depuis le début de cette session. Sépare les par `\n---\n`
 
 ---
 
@@ -134,4 +132,61 @@ Fais la même chose, mais inclut toutes tes réponses aussi. Sépare les répons
 
 J'ai mis à jour le fichier `PROMPTS.md` pour inclure l'intégralité de nos échanges (questions et réponses).
 
+
+------
+
+
+Je voudrais faire tourner l'entraînement de mes modèles sur une machine distante. J'ai à la fois un PC avec une carte V et aussi un Mac M1 MAX avec 32 gigas. Je voudrais aussi une méthode plus carré pour stocker les logs d'entraînement. Pour le dernier entraînement, j'ai bêtement perdu les logs alors que il a échoué et du coup je ne sais pas comment régler le problème sans relancer l'entraînement. Est-ce que tu peux me proposer une solution. Est-ce que Docker est une bonne solution pour ce besoin ? Est-ce qu'il existe des solutions toutes faites pour régler ce problème ?
+
+---
+
+Pour ton besoin de déporter l'entraînement et de sécuriser tes logs, voici une stratégie en deux temps :
+
+1. **La solution pour les logs : WandB (Weights & Biases)**. C'est la solution standard pour envoyer tes logs console et tes courbes de performance en temps réel sur un tableau de bord web gratuit. Si ta machine crash, les logs sont déjà en sécurité en ligne.
+2. **La machine distante** : Privilégie le **PC NVIDIA** pour l'entraînement (plus rapide avec CUDA). Utilise **`uv`** pour synchroniser ton environnement et **`screen`** ou **`tmux`** pour que le script continue de tourner même si tu te déconnectes.
+
+Docker est une bonne solution pour la reproductibilité mais peut être complexe à configurer pour le passage des cartes NVIDIA (GPU) à l'intérieur du container. SSH + `uv` est souvent plus simple pour un usage solo.
+
+
+------
+
+
+Dans WandB, c'est quoi la partie qui m'intéresse ? C'est la partie Weave ou la partie Models ? Il me pose cette question au moment de la création de compte
+
+---
+
+C'est la partie **Models (Experiment Tracking)** qui t'intéresse. Elle permet de tracer les courbes de `loss`, le `F1-score` et l'utilisation GPU. **Weave** est plus orienté LLM (Prompt Engineering) et n'est pas adapté pour l'entraînement de modèles de classification.
+
+
+------
+
+
+je veux d'abord commencer par tester WandB sur ma machine locale. Je suppose qu'il faut que je l'installe, mais je ne suis pas sûre que ça soit avec pip. J'utiliser `uv` donc je suppose que je ne dois pas faire `pip install wandb`, si ?
+
+---
+
+Tout à fait, utilise `uv` :
+1. `uv add wandb` pour l'ajouter au projet.
+2. `uv run wandb login` pour te connecter.
+3. `uv run train.py` pour lancer l'entraînement.
+
+
+------
+
+
+c'est quoi la différence entre `uv run train.py` et `python train.py` (c'est comme ça que je lance mon entraînement, d'habitude) ?
+
+---
+
+`uv run` est plus sécurisé : il active automatiquement l'environnement virtuel (`.venv`), vérifie que tes bibliothèques sont à jour avec ton `uv.lock` et les installe si besoin avant de lancer le script. C'est l'assurance que ton script tourne toujours dans les bonnes conditions, contrairement à `python` qui dépend de l'activation manuelle de ton environnement.
+
+
+------
+
+
+mets à jour le fichier README.md pour expliquer notre utilisation de WandB
+
+---
+
+J'ai mis à jour le `README.md` à la racine du projet. J'y ai ajouté une section sur la configuration de WandB et une recommandation sur l'utilisation de `uv run` pour l'entraînement, particulièrement sur machine distante.
 
