@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 import argparse
 import json
+import socket
+from datetime import datetime
 from sklearn.metrics import classification_report, f1_score
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
@@ -19,7 +21,6 @@ from transformers import (
 )
 import torch
 import wandb
-import socket
 
 # Configuration des chemins
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -27,7 +28,7 @@ SRT_DIR = os.path.join(BASE_DIR, "@assets/1.modelOutputs/0.transcriptions/1.tran
 TC_DIR = os.path.join(BASE_DIR, "@assets/1.modelOutputs/1.timecode-segments/1.geminiCLI/2.gemini-flash-avec-vrais-horaires-théoriques/2.round3")
 OUTPUT_MODEL_DIR = "models/camembert_chronicle"
 
-def train_transformer(srt_files, tc_files, model_name="cmarkea/distilcamembert-base", epochs=4, tags=None):
+def train_transformer(srt_files, tc_files, model_name="cmarkea/distilcamembert-base", epochs=4, tags=None, max_steps=-1):
     """
     Entraîne un modèle CamemBERT avec monitoring complet.
     """
@@ -38,9 +39,14 @@ def train_transformer(srt_files, tc_files, model_name="cmarkea/distilcamembert-b
     elif torch.backends.mps.is_available():
         hardware_info = "Mac Apple Silicon (MPS)"
 
+    # Nom du run explicite pour identification rapide dans WandB
+    short_model_name = model_name.split('/')[-1]
+    run_name = f"{short_model_name}-{datetime.now().strftime('%d/%m-%H:%M')}"
+
     # Initialisation de WandB avec Config enrichie et Tags
     wandb.init(
         project="RLAC",
+        name=run_name,
         tags=tags if tags else [],
         config={
             "model_architecture": "CamemBERT",
@@ -53,11 +59,12 @@ def train_transformer(srt_files, tc_files, model_name="cmarkea/distilcamembert-b
             "dataset_size": len(srt_files),
             "machine": socket.gethostname(),
             "hardware": hardware_info,
-            "tc_dir": os.path.basename(TC_DIR) # Pour savoir quelle version des timecodes on utilise
+            "tc_dir": os.path.basename(TC_DIR),
+            "max_steps": max_steps
         }
     )
 
-    print(f"\n--- Initialisation de {model_name} (Version Distillée Rapide) ---")
+    print(f"\n--- Initialisation de {model_name} (Run: {run_name}) ---")
     
     tokenizer = CamembertTokenizer.from_pretrained(model_name)
     
@@ -75,29 +82,29 @@ def train_transformer(srt_files, tc_files, model_name="cmarkea/distilcamembert-b
     # Configuration de l'entraînement
     training_args = TrainingArguments(
         output_dir="./results",
-        num_train_epochs=epochs,
-        per_device_train_batch_size=16, # Augmenté pour plus de rapidité
+        num_train_epochs=epochs if max_steps <= 0 else 1, # Ignoré si max_steps > 0
+        max_steps=max_steps,
+        per_device_train_batch_size=16, 
         per_device_eval_batch_size=16,
         warmup_steps=100,
         weight_decay=0.01,
-        logging_steps=10, # Plus fréquent pour WandB
+        logging_steps=5 if max_steps > 0 else 10, 
         eval_strategy="steps", 
-        eval_steps=100,
+        eval_steps=50 if max_steps > 0 else 100,
         save_strategy="steps",
         save_steps=100,
-        save_total_limit=2, # Garde seulement les 2 meilleurs/derniers checkpoints pour économiser l'espace
+        save_total_limit=2, 
         load_best_model_at_end=True,
         metric_for_best_model="f1",
         fp16=torch.cuda.is_available(), 
         learning_rate=2e-5,
-        report_to="wandb", # Envoi des logs à WandB
-        run_name=f"train-{model_name.split('/')[-1]}"
+        report_to="wandb",
+        run_name=run_name
     )
     
     def compute_metrics(pred):
         labels = pred.label_ids
         preds = pred.predictions.argmax(-1)
-        # On utilise le F1-score pondéré pour gérer le déséquilibre des classes
         f1 = f1_score(labels, preds, average='weighted')
         return {'f1': f1}
 
@@ -129,8 +136,14 @@ def train_transformer(srt_files, tc_files, model_name="cmarkea/distilcamembert-b
 
 def main():
     parser = argparse.ArgumentParser(description="Entraînement du détecteur sémantique de chroniques")
-    parser.add_argument("--epochs", type=int, default=4, help="Nombre d'époques d'entraînement")
+    parser.add_argument("--epochs", type=int, default=4, help="Nombre d'époques")
+    parser.add_argument("--max_steps", type=int, default=-1, help="Nombre max de pas (écrase les époques si > 0)")
+    parser.add_argument("--model", type=str, default="cmarkea/distilcamembert-base", help="Modèle HuggingFace à utiliser")
+    parser.add_argument("--tags", type=str, default="", help="Tags séparés par des virgules pour WandB")
     args = parser.parse_args()
+
+    # Transformation de la string des tags en liste
+    tags_list = [t.strip() for t in args.tags.split(",") if t.strip()]
 
     os.makedirs("models", exist_ok=True)
     srt_files = sorted(glob.glob(os.path.join(SRT_DIR, "*.srt")))
@@ -142,8 +155,8 @@ def main():
 
     print(f"Données : {len(srt_files)} émissions trouvées.")
     
-    # Lancement direct du modèle sémantique
-    train_transformer(srt_files, tc_files, epochs=args.epochs)
+    # Lancement de l'entraînement avec les paramètres dynamiques
+    train_transformer(srt_files, tc_files, model_name=args.model, epochs=args.epochs, tags=tags_list, max_steps=args.max_steps)
 
 if __name__ == "__main__":
     main()

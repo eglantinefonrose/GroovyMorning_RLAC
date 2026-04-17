@@ -20,9 +20,18 @@ Il est recommandé d'utiliser `uv` pour garantir la reproductibilité, particuli
 # Installation des dépendances
 uv sync
 
-# Lancement de l'entraînement
-uv run train.py --epochs 4
+# Lancement de l'entraînement (Valeurs par défaut)
+uv run train.py
+
+# Personnalisation de l'entraînement
+uv run train.py --epochs 10 --model "almanach/camembert-base" --tags "nvidia,final-run"
 ```
+
+### Paramètres disponibles :
+- `--epochs` : Nombre de passages complets sur le dataset (par défaut : 4).
+- `--model` : Modèle HuggingFace à utiliser (par défaut : `cmarkea/distilcamembert-base`).
+- `--tags` : Liste de tags séparés par des virgules pour l'organisation des logs/métriques dans WandB.
+- `--max_steps` : Nombre maximum de pas d'entraînement. Pratique pour des tests rapides (ex: `--max_steps 50`). Écrase le paramètre `--epochs` si > 0.
 
 *Note : L'entraînement sur machine distante (PC NVIDIA) est privilégié pour bénéficier de l'accélération CUDA.*
 

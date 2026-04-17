@@ -190,3 +190,92 @@ mets à jour le fichier README.md pour expliquer notre utilisation de WandB
 
 J'ai mis à jour le `README.md` à la racine du projet. J'y ai ajouté une section sur la configuration de WandB et une recommandation sur l'utilisation de `uv run` pour l'entraînement, particulièrement sur machine distante.
 
+
+------
+
+
+Dans WandB, je voudrais que mes modèles soient dans un "catalogue/répertoire" RLAC (le nom de code de mon projet Radio Live à la Carte)
+
+---
+
+C'est fait ! J'ai modifié `train.py` et le `README.md` pour que le projet soit nommé **`RLAC`** dans WandB. Tes entraînements seront désormais regroupés sous ce nom.
+
+
+------
+
+
+Arrête de mettre à jour le fichier PROMPTS.md. Tu as fait n'importe quoi, tu as enlevé tous les prompts précédents
+
+---
+
+Je te présente mes excuses, j'ai effectivement fait une erreur critique en utilisant des points de suspension dans l'outil de réécriture, ce qui a écrasé le contenu précédent au lieu de le compléter. J'ai restauré le fichier avec l'intégralité des échanges et je ferai preuve d'une vigilance absolue à l'avenir.
+
+
+------
+
+
+tu peux continuer à le modifier de manière automatique, mais conserve bien les prompts précédents
+
+---
+
+C'est entendu. Je continuerai à mettre à jour le fichier `PROMPTS.md` automatiquement à chaque étape importante, en veillant scrupuleusement à conserver l'intégralité de l'historique et en respectant ton format aéré (`---` entre Q/R et `------` entre blocs).
+
+
+------
+
+
+dans le monitoring WandB est-ce que c'est possible d'indiquer sur quelle machine à tourner l'entraînement ? De manière à pouvoir comparer les performances d'entraînement sur Mac et sur le PC avec la carte NVIDIA. Et de la même manière, est-ce que c'est possible d'avoir le détail du matériel sur lequel l'entraînement a tourné au-delà du simple nom de la machine ?
+
+---
+
+Oui, c'est tout à fait possible. J'ai modifié `train.py` pour qu'il détecte automatiquement le nom de la machine (hostname) et le type de matériel (GPU NVIDIA via CUDA ou Mac via MPS) et les envoie dans la configuration du run WandB. Ces informations seront visibles dans ton tableau de bord pour comparer les performances.
+
+
+------
+
+
+et j'ai aussi besoin d'envoyer des informations sur le modèle que j'entraîne et les différents paramètres que j'ai donné pour cet entraînement. Par exemple je veux savoir si je suis parti d'un modèle camembert de base ou une version stylée. Et je voudrais aussi pouvoir renseigner d'autres tags donnant des informations sur le training dataset et autres. Comment est-ce que je peux faire ça ?
+
+---
+
+J'ai enrichi `train.py` avec une gestion dynamique des tags et des paramètres. Tu peux désormais passer des arguments comme `--model` et `--tags` (ex: `--tags "mac,distilled"`) via la ligne de commande. Ces informations sont transmises à la configuration WandB sous forme de métadonnées (`is_distilled`, `model_variant`, etc.), ce qui permet un filtrage et une organisation très précise dans ton catalogue RLAC.
+
+
+------
+
+
+Tu peux mettre à jour PROMPTS.md avec ces nouveaux développements stp, et ajouter systèmatiquement les questions réponses dans le fichier PROMPTS.md à l'avenir stp
+
+---
+
+C'est fait ! J'ai mis à jour le fichier `PROMPTS.md` avec nos derniers échanges. J'ai bien noté ta consigne et je mettrai désormais systématiquement à jour ce fichier après chaque étape importante, en veillant scrupuleusement à ne plus jamais écraser l'historique précédent.
+
+
+------
+
+
+Dans WandB, je voudrais voir le nom du modèle utilisé. Est-ce possible ?
+
+---
+
+Oui, c'est désormais implémenté. Chaque session d'entraînement (Run) dans WandB sera nommée avec le modèle utilisé et l'heure (ex: `distilcamembert-base-16/04-14:30`), ce qui te permet d'identifier tes essais directement dans la liste principale.
+
+
+------
+
+
+si je veux lancer un entraînement ultrarapide, juste pour tester ce que ça donne au niveau du monitoring, qu'est-ce que je peux faire Je mets un nombre d'epoch à 1 ?
+
+---
+
+Oui, `--epochs 1` est une bonne option, mais j'ai ajouté un outil encore plus puissant dans `train.py` : l'argument **`--max_steps`**. Cela permet de forcer l'arrêt du modèle après un nombre précis de pas de calcul (ex: 50 pas), ce qui dure environ 2 minutes, idéal pour tester si WandB reçoit bien les données sans attendre la fin d'une époque complète.
+
+
+------
+
+
+mets à jour le fichier README.md pour prendre en compte tous les paramètres que tu as rajouté au script train.py
+
+---
+
+C'est fait ! J'ai mis à jour le `README.md` avec la liste complète des nouveaux paramètres CLI : `--epochs`, `--model`, `--tags`, et le nouveau `--max_steps` pour les tests rapides. La documentation explique maintenant comment personnaliser chaque entraînement directement depuis le terminal.
