@@ -30,8 +30,11 @@ uv run train.py --epochs 10 --model "almanach/camembert-base" --tags "nvidia,fin
 ### Paramètres disponibles :
 - `--epochs` : Nombre de passages complets sur le dataset (par défaut : 4).
 - `--model` : Modèle HuggingFace à utiliser (par défaut : `cmarkea/distilcamembert-base`).
-- `--tags` : Liste de tags séparés par des virgules pour l'organisation des logs/métriques dans WandB.
-- `--max_steps` : Nombre maximum de pas d'entraînement. Pratique pour des tests rapides (ex: `--max_steps 50`). Écrase le paramètre `--epochs` si > 0.
+- `--tags` : Liste de tags séparés par des virgules pour l'organisation dans WandB.
+- `--max_steps` : Nombre maximum de pas d'entraînement (écrase `--epochs` si > 0).
+- `--srt_dir` : Répertoire contenant les fichiers `.srt` (par défaut : le dossier `@assets` local).
+- `--tc_dir` : Répertoire contenant les fichiers `.txt` de timecodes (par défaut : le dossier `@assets` local).
+
 
 *Note : L'entraînement sur machine distante (PC NVIDIA) est privilégié pour bénéficier de l'accélération CUDA.*
 

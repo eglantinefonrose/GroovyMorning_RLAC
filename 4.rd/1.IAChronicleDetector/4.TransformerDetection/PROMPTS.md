@@ -47,7 +47,7 @@ Est-ce que tu peux ajouter ces modifications, et modifier le README dans le doss
 
 ---
 
-C'est fait ! J'ai optimisé `train.py` pour un entraînement "nerveux" et mis à jour la documentation.
+C'est fait ! J'ai optimisé `train.py` pour un entraînement "nerveux" et mi à jour la documentation.
 
 ### Résumé des changements :
 1.  **Changement de modèle** : Passage de `CamemBERT-base` (110M params) à **`DistilCamemBERT`** (68M params).
@@ -279,3 +279,23 @@ mets à jour le fichier README.md pour prendre en compte tous les paramètres qu
 ---
 
 C'est fait ! J'ai mis à jour le `README.md` avec la liste complète des nouveaux paramètres CLI : `--epochs`, `--model`, `--tags`, et le nouveau `--max_steps` pour les tests rapides. La documentation explique maintenant comment personnaliser chaque entraînement directement depuis le terminal.
+
+
+------
+
+
+Dans la ligne `print("ERREUR : Fichiers 'srt' manquants pour l'entrainement du modèle.")`, rajoute le path dans lequel ces fichiers ont été recherchés
+
+---
+
+C'est fait ! J'ai mis à jour le message d'erreur dans `train.py` pour qu'il affiche dynamiquement le chemin du répertoire dans lequel les fichiers `.srt` n'ont pas été trouvés, facilitant ainsi le débugging des chemins.
+
+
+------
+
+
+rajoute un paramètre permettant de configurer à la main, le répertoire SRT_DIR et le répertoire TC_DIR (utile pour le cas où on entraîne le modèle sur une autre machine et où les données sont à un autre endroit)
+
+---
+
+J'ai ajouté les paramètres `--srt_dir` et `--tc_dir` au script `train.py`. Les chemins par défaut sont toujours calculés par rapport à la structure de ton projet, mais tu peux désormais les écraser manuellement pour pointer vers n'importe quel dossier sur une machine distante. J'ai également mis à jour le `README.md` pour documenter ces nouvelles options.

@@ -22,13 +22,10 @@ from transformers import (
 import torch
 import wandb
 
-# Configuration des chemins
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-SRT_DIR = os.path.join(BASE_DIR, "@assets/1.modelOutputs/0.transcriptions/1.transcriptions_whisper_ggml-large-v3-turbo")
-TC_DIR = os.path.join(BASE_DIR, "@assets/1.modelOutputs/1.timecode-segments/1.geminiCLI/2.gemini-flash-avec-vrais-horaires-théoriques/2.round3")
+# Chemin par défaut du modèle de sortie
 OUTPUT_MODEL_DIR = "models/camembert_chronicle"
 
-def train_transformer(srt_files, tc_files, model_name="cmarkea/distilcamembert-base", epochs=4, tags=None, max_steps=-1):
+def train_transformer(srt_files, tc_files, tc_dir_path, model_name="cmarkea/distilcamembert-base", epochs=4, tags=None, max_steps=-1):
     """
     Entraîne un modèle CamemBERT avec monitoring complet.
     """
@@ -59,7 +56,7 @@ def train_transformer(srt_files, tc_files, model_name="cmarkea/distilcamembert-b
             "dataset_size": len(srt_files),
             "machine": socket.gethostname(),
             "hardware": hardware_info,
-            "tc_dir": os.path.basename(TC_DIR),
+            "tc_dir": os.path.basename(tc_dir_path),
             "max_steps": max_steps
         }
     )
@@ -135,28 +132,37 @@ def train_transformer(srt_files, tc_files, model_name="cmarkea/distilcamembert-b
     print(f"\nModèle sémantique sauvegardé dans {OUTPUT_MODEL_DIR}")
 
 def main():
+    # Détermination du BASE_DIR pour les chemins par défaut
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    DEFAULT_SRT_DIR = os.path.join(BASE_DIR, "@assets/1.modelOutputs/0.transcriptions/1.transcriptions_whisper_ggml-large-v3-turbo")
+    DEFAULT_TC_DIR = os.path.join(BASE_DIR, "@assets/1.modelOutputs/1.timecode-segments/1.geminiCLI/2.gemini-flash-avec-vrais-horaires-théoriques/2.round3")
+
     parser = argparse.ArgumentParser(description="Entraînement du détecteur sémantique de chroniques")
     parser.add_argument("--epochs", type=int, default=4, help="Nombre d'époques")
     parser.add_argument("--max_steps", type=int, default=-1, help="Nombre max de pas (écrase les époques si > 0)")
     parser.add_argument("--model", type=str, default="cmarkea/distilcamembert-base", help="Modèle HuggingFace à utiliser")
     parser.add_argument("--tags", type=str, default="", help="Tags séparés par des virgules pour WandB")
+    parser.add_argument("--srt_dir", type=str, default=DEFAULT_SRT_DIR, help="Répertoire contenant les fichiers .srt")
+    parser.add_argument("--tc_dir", type=str, default=DEFAULT_TC_DIR, help="Répertoire contenant les fichiers de timecodes .txt")
+    
     args = parser.parse_args()
 
     # Transformation de la string des tags en liste
     tags_list = [t.strip() for t in args.tags.split(",") if t.strip()]
 
     os.makedirs("models", exist_ok=True)
-    srt_files = sorted(glob.glob(os.path.join(SRT_DIR, "*.srt")))
-    tc_files = sorted(glob.glob(os.path.join(TC_DIR, "*.txt")))
+    
+    srt_files = sorted(glob.glob(os.path.join(args.srt_dir, "*.srt")))
+    tc_files = sorted(glob.glob(os.path.join(args.tc_dir, "*.txt")))
     
     if not srt_files or not tc_files:
-        print("ERREUR : Fichiers manquants.")
+        print(f"ERREUR : Fichiers manquants dans {args.srt_dir} ou {args.tc_dir}.")
         return
 
     print(f"Données : {len(srt_files)} émissions trouvées.")
     
     # Lancement de l'entraînement avec les paramètres dynamiques
-    train_transformer(srt_files, tc_files, model_name=args.model, epochs=args.epochs, tags=tags_list, max_steps=args.max_steps)
+    train_transformer(srt_files, tc_files, tc_dir_path=args.tc_dir, model_name=args.model, epochs=args.epochs, tags=tags_list, max_steps=args.max_steps)
 
 if __name__ == "__main__":
     main()
