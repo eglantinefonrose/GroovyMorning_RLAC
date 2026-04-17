@@ -12,6 +12,22 @@ pip install -r requirements.txt
 uv sync
 ```
 
+## Synchronisation des Assets (Hugging Face)
+
+Les données d'entraînement (SRT et Timecodes) ne sont pas stockées sur GitHub. Elles sont synchronisées via Hugging Face Datasets.
+
+### Pousser les données (Upload)
+Pour envoyer vos données locales vers Hugging Face :
+```bash
+uv run hf_push_assets.py eglantinefonrose/rlac-audiotranscript-segmenter-training-dataset
+```
+
+### Récupérer les données (Download)
+Pour configurer une nouvelle machine (distante ou locale) :
+```bash
+uv run hf_pull_assets.py eglantinefonrose/rlac-audiotranscript-segmenter-training-dataset
+```
+
 ## Entraînement
 
 Il est recommandé d'utiliser `uv` pour garantir la reproductibilité, particulièrement sur machine distante :
@@ -53,15 +69,18 @@ Le modèle sera sauvegardé dans le dossier `models/camembert_chronicle`.
 Pour lancer la détection sur une nouvelle transcription au format `.srt` :
 
 ```bash
-python predict.py ../../@assets/1.modelOutputs/0.transcriptions/1.transcriptions_whisper_ggml-large-v3-turbo/26811-06.04.2026-ITEMA_24466243-2026F10761S0096-NET_MFI_8F75AA4E-79C7-4CF3-A0B7-2D7EBC1FB5B5-22-534f5f6ae83fc95044c42304b90ca1f7_transcription.srt
+python predict.py <chemin_vers_fichier.srt>
 ```
 
 ## Structure du projet
 
 - `train.py` : Script d'entraînement.
 - `predict.py` : Script de détection.
+- `evaluate_model_precision.py` : Script d'évaluation de la précision (40% Cardinalité / 60% Alignement).
+- `hf_push_assets.py` / `hf_pull_assets.py` : Scripts de synchronisation des données via Hugging Face.
 - `src/dataset.py` : Gestionnaire de données PyTorch avec fenêtre contextuelle.
 - `src/utils.py` : Utilitaires pour le parsing des fichiers SRT et des timecodes.
+- `src/evaluation.py` : Logique de scoring RLAC.
 - `models/` : Dossier où le modèle entraîné est stocké.
 
 ## Résultats

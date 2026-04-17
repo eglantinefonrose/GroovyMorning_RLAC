@@ -13,6 +13,7 @@ dependencies = [
     "protobuf",
     "accelerate>=1.1.0",
     "wandb>=0.26.0",
+    "huggingface-hub>=1.10.2",
 ]
 
 [tool.uv]
