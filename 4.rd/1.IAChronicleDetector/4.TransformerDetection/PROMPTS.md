@@ -299,3 +299,33 @@ rajoute un paramètre permettant de configurer à la main, le répertoire SRT_DI
 ---
 
 J'ai ajouté les paramètres `--srt_dir` et `--tc_dir` au script `train.py`. Les chemins par défaut sont toujours calculés par rapport à la structure de ton projet, mais tu peux désormais les écraser manuellement pour pointer vers n'importe quel dossier sur une machine distante. J'ai également mis à jour le `README.md` pour documenter ces nouvelles options.
+
+
+------
+
+
+Dans le code, j'ai une partie qui sert à évaluer la performance des critères selon certains critères. Est-ce que tu peux m'expliquer comment ça fonctionne ?
+
+---
+
+Le système d'évaluation repose sur la comparaison entre les prédictions du modèle et la "Vérité Terrain" (tes fichiers de timecodes). Le script calcule principalement le **F1-score pondéré**, une métrique qui équilibre la précision (ne pas se tromper de chronique) et le rappel (trouver toutes les chroniques), tout en gérant le fait que les chroniques sont rares par rapport au silence. Le modèle sauvegarde automatiquement la version qui obtient le meilleur score sur les données de validation.
+
+
+------
+
+
+Comment est-ce qu'il sait si il a bien détecté les chroniques ? À quoi se réfère-t-il ?
+
+---
+
+Le modèle se réfère exclusivement à tes fichiers `.txt` de timecodes. Le script transforme ces horaires en "labels" (0 pour non-chronique, 1 pour chronique) pour chaque segment de texte. Pendant l'entraînement, le modèle propose une réponse et la compare immédiatement à la bonne réponse stockée. S'ils sont d'accord, il marque un point ; s'ils divergent, il ajuste ses paramètres internes pour ne plus refaire l'erreur.
+
+
+------
+
+
+Enlève la logique qui permet d'évaluer la performance des modèles selon certains critères
+
+---
+
+J'ai supprimé toute la logique de validation et d'évaluation du script `train.py`. Le modèle utilise désormais **100% des données** pour son entraînement sans en réserver pour les tests. Les étapes de calcul du F1-score, d'arrêt précoce et les rapports finaux ont été enlevés pour simplifier et accélérer le processus d'apprentissage intensif.

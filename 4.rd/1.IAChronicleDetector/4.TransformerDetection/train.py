@@ -7,8 +7,6 @@ import argparse
 import json
 import socket
 from datetime import datetime
-from sklearn.metrics import classification_report, f1_score
-from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 from src.utils import load_transcription, load_timecodes, label_segments
 from src.dataset import ChronicleDataset
@@ -16,8 +14,7 @@ from transformers import (
     CamembertTokenizer, 
     CamembertForSequenceClassification, 
     Trainer, 
-    TrainingArguments,
-    EarlyStoppingCallback
+    TrainingArguments
 )
 import torch
 import wandb
@@ -27,7 +24,8 @@ OUTPUT_MODEL_DIR = "models/camembert_chronicle"
 
 def train_transformer(srt_files, tc_files, tc_dir_path, model_name="cmarkea/distilcamembert-base", epochs=4, tags=None, max_steps=-1):
     """
-    Entraîne un modèle CamemBERT avec monitoring complet.
+    Entraîne un modèle CamemBERT en utilisant toutes les données disponibles.
+    Logique d'évaluation supprimée.
     """
     # Détection automatique du matériel
     hardware_info = "CPU"
@@ -40,7 +38,7 @@ def train_transformer(srt_files, tc_files, tc_dir_path, model_name="cmarkea/dist
     short_model_name = model_name.split('/')[-1]
     run_name = f"{short_model_name}-{datetime.now().strftime('%d/%m-%H:%M')}"
 
-    # Initialisation de WandB avec Config enrichie et Tags
+    # Initialisation de WandB
     wandb.init(
         project="RLAC",
         name=run_name,
@@ -65,71 +63,44 @@ def train_transformer(srt_files, tc_files, tc_dir_path, model_name="cmarkea/dist
     
     tokenizer = CamembertTokenizer.from_pretrained(model_name)
     
-    # Séparation au niveau des fichiers (émissions) pour éviter les fuites de données
-    train_srt, val_srt = train_test_split(srt_files, test_size=0.15, random_state=42)
-    
-    print(f"Préparation du dataset (Train: {len(train_srt)}, Val: {len(val_srt)} emissions)...")
-    # max_length réduit à 128 pour doubler la vitesse d'entraînement
-    train_dataset = ChronicleDataset(train_srt, tc_files, tokenizer, max_length=128, window_size=2)
-    val_dataset = ChronicleDataset(val_srt, tc_files, tokenizer, max_length=128, window_size=2)
+    print(f"Préparation du dataset ({len(srt_files)} émissions utilisées pour l'entraînement)...")
+    # Utilisation de TOUTES les données pour l'entraînement
+    train_dataset = ChronicleDataset(srt_files, tc_files, tokenizer, max_length=128, window_size=2)
     
     # Chargement du modèle avec une tête de classification pour 2 classes (Chronique vs Non-Chronique)
     model = CamembertForSequenceClassification.from_pretrained(model_name, num_labels=2)
     
-    # Configuration de l'entraînement
+    # Configuration de l'entraînement (sans validation)
     training_args = TrainingArguments(
         output_dir="./results",
-        num_train_epochs=epochs if max_steps <= 0 else 1, # Ignoré si max_steps > 0
+        num_train_epochs=epochs if max_steps <= 0 else 1,
         max_steps=max_steps,
         per_device_train_batch_size=16, 
-        per_device_eval_batch_size=16,
         warmup_steps=100,
         weight_decay=0.01,
-        logging_steps=5 if max_steps > 0 else 10, 
-        eval_strategy="steps", 
-        eval_steps=50 if max_steps > 0 else 100,
+        logging_steps=10, 
         save_strategy="steps",
-        save_steps=100,
+        save_steps=500, # Moins fréquent puisqu'on ne cherche plus le "meilleur" via validation
         save_total_limit=2, 
-        load_best_model_at_end=True,
-        metric_for_best_model="f1",
         fp16=torch.cuda.is_available(), 
         learning_rate=2e-5,
         report_to="wandb",
         run_name=run_name
     )
     
-    def compute_metrics(pred):
-        labels = pred.label_ids
-        preds = pred.predictions.argmax(-1)
-        f1 = f1_score(labels, preds, average='weighted')
-        return {'f1': f1}
-
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=train_dataset,
-        eval_dataset=val_dataset,
-        compute_metrics=compute_metrics,
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
+        train_dataset=train_dataset
     )
     
-    print("Début de l'entraînement sémantique (Fine-tuning CamemBERT)...")
+    print("Début de l'entraînement sémantique intensif (100% data)...")
     trainer.train()
-    
-    # Évaluation finale détaillée
-    print("\nÉvaluation finale sur l'ensemble de validation...")
-    predictions = trainer.predict(val_dataset)
-    y_pred = predictions.predictions.argmax(-1)
-    y_true = predictions.label_ids
-    
-    print("\nRapport de classification sémantique :")
-    print(classification_report(y_true, y_pred, target_names=["Silence/Bruit", "Chronique"]))
     
     # Sauvegarde
     model.save_pretrained(OUTPUT_MODEL_DIR)
     tokenizer.save_pretrained(OUTPUT_MODEL_DIR)
-    print(f"\nModèle sémantique sauvegardé dans {OUTPUT_MODEL_DIR}")
+    print(f"\nModèle sauvegardé avec succès dans {OUTPUT_MODEL_DIR}")
 
 def main():
     # Détermination du BASE_DIR pour les chemins par défaut
@@ -156,12 +127,12 @@ def main():
     tc_files = sorted(glob.glob(os.path.join(args.tc_dir, "*.txt")))
     
     if not srt_files or not tc_files:
-        print(f"ERREUR : Fichiers manquants dans {args.srt_dir} ou {args.tc_dir}.")
+        print(f"ERREUR : Fichiers 'srt' manquants pour l'entrainement du modèle dans {args.srt_dir}.")
         return
 
     print(f"Données : {len(srt_files)} émissions trouvées.")
     
-    # Lancement de l'entraînement avec les paramètres dynamiques
+    # Lancement de l'entraînement
     train_transformer(srt_files, tc_files, tc_dir_path=args.tc_dir, model_name=args.model, epochs=args.epochs, tags=tags_list, max_steps=args.max_steps)
 
 if __name__ == "__main__":
