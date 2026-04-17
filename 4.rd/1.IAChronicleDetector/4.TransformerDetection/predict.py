@@ -98,10 +98,3 @@ if __name__ == "__main__":
     parser.add_argument("srt_path")
     args = parser.parse_args()
     predict(args.srt_path)
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("srt_path")
-    args = parser.parse_args()
-    predict(args.srt_path)

@@ -329,3 +329,84 @@ Enlève la logique qui permet d'évaluer la performance des modèles selon certa
 ---
 
 J'ai supprimé toute la logique de validation et d'évaluation du script `train.py`. Le modèle utilise désormais **100% des données** pour son entraînement sans en réserver pour les tests. Les étapes de calcul du F1-score, d'arrêt précoce et les rapports finaux ont été enlevés pour simplifier et accélérer le processus d'apprentissage intensif.
+
+
+------
+
+
+Je voudrais intégrer une méthode de score des modèles qui permet d'estimer leurs performances. Je pensais juger si le bon nombre de chronique a été détecté dans un premier temps et noter également si les chroniques sont plus ou moins décalés dans le temps. Qu'en penses-tu ?
+
+---
+
+C'est une excellente approche. Pour évaluer la performance d'un modèle de détection de segments (comme des chroniques), il est en effet crucial de ne pas se contenter d'une précision binaire (vrai/faux), mais de mesurer la **fidélité structurelle** (le compte) et la **précision temporelle** (le décalage).
+
+Voici comment nous pourrions structurer cette méthode de score :
+1. **Erreur de Compte (Cardinalité)** : Calculer la différence absolue entre le nombre de chroniques attendues et détectées.
+2. **Précision Temporelle (Alignment)** : Mesurer la distance temporelle entre les points de début/fin (MSE ou MAE sur les frontières).
+3. **Score Global Pondéré** : Combiner ces éléments pour donner une note globale.
+
+
+------
+
+
+Je voudrais que tu créé un petit script evaluate_model_precision.py pour tester cela sur un exemple concret où on dispose à la fois du SRT et du fichier de Timecodes (TC). Il faut que tu lances ce programme à chaque fin de training d'un modèle (train.py), et que tu calcules également le score par chronique que tu exportes avec la moyenne dans un fichier csv
+
+---
+
+J'ai créé `evaluate_model_precision.py` et je l'ai intégré à la fin de `train.py`. 
+1. **src/evaluation.py** : Nouveau module de calcul de métriques (IoU, Score F1 temporel, Décalage moyen, Erreur de cardinalité).
+2. **evaluate_model_precision.py** : Script qui prédit, compare à la vérité terrain et génère un **CSV** (`results/evaluation_results.csv`) détaillé par chronique.
+3. **train.py** : Appelle automatiquement l'évaluation après la sauvegarde du modèle et logue les résultats (`eval/f1_score`, etc.) sur WandB.
+
+
+------
+
+
+Comment est-ce que tu détectes qu'une chronique est détectée ou non ? Explique-moi juste, ne modifie pas le code
+
+---
+
+La détection repose sur trois étapes :
+1. **L'IoU (Intersection over Union)** : On mesure le taux de recouvrement temporel entre le segment prédit et le segment réel.
+2. **L'appariement (Greedy Matching)** : On couple les segments qui ont le meilleur IoU ensemble, en s'assurant qu'un segment n'est pas compté deux fois.
+3. **Le Seuil** : Pour les stats (F1), on utilise un seuil de **0.5**. Pour le "OUI/NON" du CSV, j'ai mis **0.1** pour être plus souple et voir si le modèle a au moins "touché" la chronique.
+
+
+------
+
+
+Si une chronique est longue, alors elle considérée comme détectée alors qu'elle ne l'est pas forcément, comme par exemple dans le cas où une seule chronique durant du début à la fin de l'audio est détectée. Sans toucher au code, as-tu une idée de comment régler ce soucis ?
+
+---
+
+C'est un problème classique. L'IoU règle cela naturellement car il divise l'intersection par l'**Union**. Si une chronique réelle fait 5 min et que la prédiction fait 60 min, l'Union est énorme (60 min) et l'intersection petite (5 min). L'IoU sera proche de **0.08**, soit bien en dessous du seuil de détection (0.5). De plus, l'appariement 1-pour-1 empêche ce bloc géant de "valider" les autres chroniques de l'émission.
+
+
+------
+
+
+Si je ne comprends pas pourquoi, tu fais une technique de comparaison aussi compliquée. Le premier truc, c'est de comparer le nombre de chroniques. C'est juste une comparaison entre deux nombres et c'est très facile à faire. Ça peut compter pour 40 % de la note d'évaluation du modèle. Autre point, on sait que les chroniques sont dans un ordre chronologique. Pour comparer, j'ai l'impression que tu dois itérer sur les chroniques de la ground truth en vérifiant, si les chroniques prédite collent avec les horaires des chroniques de la ground truth. Tu dois bien sûr, mesurer le décalage entre la chronique vraie (ground truth) et la chronique prédite pour obtenir une note pour cette chronique. Si un moment tu vois que ça ne colle pas, peut-être que la prédiction s'est trompée et a loupé certaines chroniques, mais qu'elle retombe sur ses pattes plus loin. Donc il faut chercher la prochaine chronique qui correspond à à peu près et continuer à faire l'évaluation. Remets ma description au carré pour que je puisse la relire et qu'on décide si implémente ce nouvel algorithme d'évaluation
+
+---
+
+Voici l'algorithme "au carré" :
+1. **Note de Cardinalité (40%)** : Comparaison simple entre $N_{pred}$ et $N_{gt}$. On pénalise chaque écart.
+2. **Note d'Alignement Séquentiel (60%)** :
+    - On itère sur chaque chronique de la Ground Truth.
+    - On cherche la prédiction la plus proche (IoU).
+    - On calcule un score de 0 à 100% basé sur le décalage en secondes (ex: 0 si > 60s de décalage).
+    - On passe à la suite si une chronique est manquée pour "retomber sur ses pattes".
+
+
+------
+
+
+Ok pour cette formulation. Inclus ça dans un document README-Training-method.md et implémente ça dans le code au lieu de la méthode précédente. Continue à produire un fichier CSV avec le résultat
+
+---
+
+C'est fait ! 
+1. **README-Training-method.md** : Créé pour documenter cette logique 40/60.
+2. **src/evaluation.py** : Réécrit pour intégrer la pénalité de cardinalité et l'alignement séquentiel avec tolérance (60s).
+3. **evaluate_model_precision.py** : Mis à jour pour exporter le `score_chronique` individuel dans le CSV.
+4. **train.py** : Logue désormais `rlac-eval/score_global`, `rlac-eval/cardinality_score` et `rlac-eval/alignment_score` sur WandB.

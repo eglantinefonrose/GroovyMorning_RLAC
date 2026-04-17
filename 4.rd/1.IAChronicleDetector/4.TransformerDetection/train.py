@@ -10,6 +10,7 @@ from datetime import datetime
 from tqdm import tqdm
 from src.utils import load_transcription, load_timecodes, label_segments
 from src.dataset import ChronicleDataset
+from evaluate_model_precision import evaluate_model_precision
 from transformers import (
     CamembertTokenizer, 
     CamembertForSequenceClassification, 
@@ -101,6 +102,28 @@ def train_transformer(srt_files, tc_files, tc_dir_path, model_name="cmarkea/dist
     model.save_pretrained(OUTPUT_MODEL_DIR)
     tokenizer.save_pretrained(OUTPUT_MODEL_DIR)
     print(f"\nModèle sauvegardé avec succès dans {OUTPUT_MODEL_DIR}")
+
+    # --- ÉVALUATION AUTOMATIQUE ---
+    if srt_files and tc_files:
+        print("\nLancement de l'évaluation automatique sur le premier fichier...")
+        # On prend le premier fichier pour l'évaluation
+        test_srt = srt_files[0]
+        base_name = os.path.basename(test_srt).split('_')[0]
+        # Trouver le TC correspondant
+        test_tc = next((f for f in tc_files if base_name in f), None)
+        
+        if test_tc:
+            eval_metrics = evaluate_model_precision(test_srt, test_tc)
+            # Log des métriques d'évaluation dans WandB avec préfixe rlac-
+            wandb.log({
+                "rlac-eval/score_global": eval_metrics["score_global"],
+                "rlac-eval/cardinality_score": eval_metrics["cardinality_score"],
+                "rlac-eval/alignment_score": eval_metrics["alignment_score"],
+                "rlac-eval/n_gt": eval_metrics["n_gt"],
+                "rlac-eval/n_pred": eval_metrics["n_pred"]
+            })
+        else:
+            print(f"Avertissement : Impossible de trouver le fichier TC pour {test_srt}")
 
 def main():
     # Détermination du BASE_DIR pour les chemins par défaut
