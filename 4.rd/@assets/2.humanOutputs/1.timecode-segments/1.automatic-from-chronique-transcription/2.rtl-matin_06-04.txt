@@ -1,0 +1,23 @@
+00:34:32.700 - 00:36:52.060 : angle-eco
+01:50:26.640 - 02:03:09.080 : c-est-notre-epoque
+01:07:22.620 - 01:17:16.920 : face-a-fogiel
+00:36:54.320 - 00:47:48.600 : invite-7h40
+01:31:10.340 - 01:34:43.500 : jimmy-mohamed
+00:01:33.640 - 00:12:35.280 : journal-7h-RTL
+00:52:32.380 - 01:02:56.360 : journal-8h
+02:03:51.220 - 02:07:36.180 : la-pepite
+01:24:17.420 - 01:27:15.140 : le-monde-en-marche
+01:47:11.800 - 01:49:09.480 : le-vrai-du-faux
+01:22:52.980 - 01:24:16.880 : meteo-7-jours
+00:48:04.760 - 00:52:31.180 : oeil-philippe
+01:28:21.900 - 01:33:02.700 : olivier-dauvers
+01:04:30.580 - 01:06:32.280 : question-internationale
+
+
+NON TROUVÉES :
+RTL-evenement (00:12:40.440 - 00:15:55.960)
+edito-etienne-grenelle (00:16:55.880 - )
+journal-9h (01:40:53.660 - 01:50:04.080)
+laurent-gerra (01:34:58.060 - )
+meteo-7h30
+visage-du-jour

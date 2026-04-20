@@ -1,0 +1,23 @@
+01:53:26.620 - 02:05:12.080 : c-est-notre-epoque
+00:13:08.240 - 00:16:08.040 : evenement-RTL
+01:07:49.120 - 01:18:46.160 : face-a-fogiel
+00:37:17.840 - 00:46:49.600 : invite-7h40
+00:01:40.480 - 00:13:05.140 : journal-7h
+00:52:22.080 - 01:03:25.800 : journal-8h
+01:44:25.400 - 01:52:58.080 : journal-de-9h
+01:25:20.580 - 01:28:14.180 : le-monde-en-marche
+01:49:44.740 - 01:51:48.880 : le-vrai-du-faux
+00:47:09.360 - 00:52:22.080 : oeil-philippe
+01:29:17.700 - 01:33:28.540 : olivier-dauvers
+01:04:40.340 - 01:07:01.640 : question-internationale
+
+
+NON TROUVÉES :
+angle-eco
+ca-va-beaucoup-mieux
+edito-etienne-gernelle
+la-pepite
+laurent-gerra
+meteo-7h30
+meteo-a-7-jours
+visage-du-jour

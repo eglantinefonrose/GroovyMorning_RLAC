@@ -111,7 +111,8 @@ def transcribe_audio(file_path, output_path, whisper_cli_path, model_path):
     cmd = [
         whisper_cli_path,
         "-m", model_path,
-        "-f", file_path
+        "-f", file_path,
+        "-l", "fr"  # Forcer la langue en français pour éviter les erreurs/traductions en anglais
     ]
     
     try:
