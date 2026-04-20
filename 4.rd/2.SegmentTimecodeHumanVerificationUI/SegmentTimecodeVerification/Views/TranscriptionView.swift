@@ -27,15 +27,46 @@ struct EditColumnView: View {
     let blocks: [SRTBlock]
     let selectedTime: TimeInterval
     let searchText: String
+    let timeOffset: TimeInterval
     let isSameTime: (TimeInterval, TimeInterval) -> Bool
     let onSelect: (TimeInterval) -> Void
+    let onManualUpdate: (TimeInterval) -> Void
+    
+    @State private var manualTimeString: String = ""
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label(title, systemImage: icon)
-                .font(.headline).foregroundColor(color)
-                .padding(.horizontal)
-                .padding(.top, 8)
+            VStack(alignment: .leading, spacing: 4) {
+                Label(title, systemImage: icon)
+                    .font(.headline).foregroundColor(color)
+                
+                HStack {
+                    TextField("Timecode", text: $manualTimeString, onCommit: {
+                        if let parsed = parseTime(manualTimeString) {
+                            onManualUpdate(parsed)
+                        }
+                    })
+                    .textFieldStyle(.roundedBorder)
+                    .frame(width: 120)
+                    .font(.system(.body, design: .monospaced))
+                    
+                    Button("Appliquer") {
+                        if let parsed = parseTime(manualTimeString) {
+                            onManualUpdate(parsed)
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                }
+            }
+            .padding(.horizontal)
+            .padding(.top, 8)
+            .onAppear {
+                manualTimeString = formatPreciseTime(selectedTime - timeOffset)
+            }
+            .onChange(of: selectedTime) { _, newValue in
+                manualTimeString = formatPreciseTime(newValue - timeOffset)
+            }
             
             ScrollViewReader { proxy in
                 ScrollView {
@@ -80,6 +111,37 @@ struct EditColumnView: View {
                 }
             }
         }
+    }
+
+    private func formatPreciseTime(_ time: TimeInterval) -> String {
+        let hours = Int(time) / 3600
+        let minutes = (Int(time) % 3600) / 60
+        let seconds = Int(time) % 60
+        let ms = Int((time.truncatingRemainder(dividingBy: 1)) * 1000)
+        if hours > 0 {
+            return String(format: "%02d:%02d:%02d.%03d", hours, minutes, seconds, ms)
+        } else {
+            return String(format: "%02d:%02d.%03d", minutes, seconds, ms)
+        }
+    }
+    
+    private func parseTime(_ string: String) -> TimeInterval? {
+        let clean = string.replacingOccurrences(of: ",", with: ".")
+        let parts = clean.components(separatedBy: ":")
+        
+        if parts.count == 3 {
+            let h = Double(parts[0]) ?? 0
+            let m = Double(parts[1]) ?? 0
+            let s = Double(parts[2]) ?? 0
+            return h * 3600 + m * 60 + s
+        } else if parts.count == 2 {
+            let m = Double(parts[0]) ?? 0
+            let s = Double(parts[1]) ?? 0
+            return m * 60 + s
+        } else if let s = Double(clean) {
+            return s
+        }
+        return nil
     }
 }
 
@@ -127,20 +189,6 @@ struct TranscriptionView: View {
                         // Edition mode: Two independent columns sharing space
                         HStack(spacing: 0) {
                             EditColumnView(
-                                title: "Edit END boundary",
-                                icon: "arrow.left.to.line",
-                                color: .orange,
-                                prefix: "end",
-                                blocks: getBlocksInRange(start: segment.endTime - 120, end: max(nextSegment?.startTime ?? segment.endTime, segment.endTime + 600) + 60),
-                                selectedTime: segment.endTime,
-                                searchText: searchText,
-                                isSameTime: isSameTime,
-                                onSelect: { viewModel.updateSegmentBoundary(at: currentIndex, newTime: $0, isStart: false) }
-                            )
-                            
-                            Divider()
-                            
-                            EditColumnView(
                                 title: "Edit START boundary",
                                 icon: "arrow.right.to.line",
                                 color: .blue,
@@ -148,8 +196,26 @@ struct TranscriptionView: View {
                                 blocks: getBlocksInRange(start: min(previousSegment?.endTime ?? segment.startTime, segment.startTime - 600) - 60, end: segment.startTime + 120),
                                 selectedTime: segment.startTime,
                                 searchText: searchText,
+                                timeOffset: viewModel.config.timeOffset,
                                 isSameTime: isSameTime,
-                                onSelect: { viewModel.updateSegmentBoundary(at: currentIndex, newTime: $0, isStart: true) }
+                                onSelect: { viewModel.updateSegmentBoundary(at: currentIndex, newTime: $0, isStart: true) },
+                                onManualUpdate: { viewModel.updateSegmentBoundary(at: currentIndex, newTime: $0, isStart: true) }
+                            )
+
+                            Divider()
+
+                            EditColumnView(
+                                title: "Edit END boundary",
+                                icon: "arrow.left.to.line",
+                                color: .orange,
+                                prefix: "end",
+                                blocks: getBlocksInRange(start: segment.endTime - 120, end: max(nextSegment?.startTime ?? segment.endTime, segment.endTime + 600) + 60),
+                                selectedTime: segment.endTime,
+                                searchText: searchText,
+                                timeOffset: viewModel.config.timeOffset,
+                                isSameTime: isSameTime,
+                                onSelect: { viewModel.updateSegmentBoundary(at: currentIndex, newTime: $0, isStart: false) },
+                                onManualUpdate: { viewModel.updateSegmentBoundary(at: currentIndex, newTime: $0, isStart: false) }
                             )
                         }
                         .frame(maxHeight: .infinity)

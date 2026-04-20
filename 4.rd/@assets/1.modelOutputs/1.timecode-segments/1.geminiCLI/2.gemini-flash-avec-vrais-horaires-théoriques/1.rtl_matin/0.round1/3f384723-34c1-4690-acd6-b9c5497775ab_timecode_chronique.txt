@@ -1,0 +1,32 @@
+[00:00:00.000] - [00:00:22.660] Annonces et publicités
+[00:00:30.000] - [00:11:50.539] Le journal RTL - Olivier Boy
+[00:11:50.539] - [00:15:10.799] RTL Événement - Valentin Boisset
+[00:15:14.279] - [00:16:10.480] Annonce
+[00:16:13.519] - [00:19:14.559] L'édito d'Etienne Gernelle - Etienne Gernelle
+[00:19:15.200] - [00:22:48.259] Le visage du jour - Agnès Bonfillon
+[00:22:48.259] - [00:23:57.599] Annonces et publicités
+[00:24:00.960] - [00:25:19.519] La météo - Loui
+[00:25:21.779] - [00:30:50.119] Le journal RTL - Albane Leprince
+[00:30:52.618] - [00:31:35.380] Annonce
+[00:31:37.839] - [00:34:45.019] L'angle éco de François Lenglet - François Lenglet
+[00:34:47.059] - [00:50:41.559] L'invité RTL de 7h40 - Thomas Sotto
+[00:50:41.559] - [01:01:23.679] Le journal RTL - Céline Landreau
+[01:01:23.679] - [01:02:28.420] La météo - Louis Bodin
+[01:02:28.420] - [01:04:47.460] La question internationale - Bénédicte Tassart
+[01:04:49.518] - [01:05:32.340] Annonc
+[01:05:35.679] - [01:16:05.939] Face à Fogiel - Marc-Olivier Fogiel
+[01:16:05.939] - [01:16:23.439] Annonce
+[01:16:25.720] - [01:19:43.640] Le journal RTL - Albane Leprince
+[01:19:43.640] - [01:21:11.760] La météo à 7 jours - Louis Bodin
+[01:21:13.680] - [01:24:48.380] Le monde en marche - William Galibert
+[01:24:50.340] - [01:25:33.260] Annonce
+[01:25:37.979] - [01:32:30.460] Olivier Dauvers : les secrets de la conso + Ça va beaucoup mieux avec Jimmy Mohamed - Jimmy Mohamed - Olivier Dauvers
+[01:32:30.460] - [01:38:13.460] Laurent Gerra - Laurent Gerra
+[01:38:20.658] - [01:38:54.520] Annonce
+[01:38:54.520] - [01:44:01.680] Le journal RTL - Olivier Boy
+[01:44:01.680] - [01:46:13.020] Le vrai du faux - Florian Gazan
+[01:46:15.260] - [01:47:08.939] Météo - Loui Bodin
+[01:47:18.579] - [01:47:08.939] Annonce
+[01:47:21.538] - [02:00:12.420] C'est notre époque - Alain Duhamel
+[02:00:12.420] - [02:05:00.640] La pépite - Anthony Martin
+[02:05:03.520] - [02:06:03.039] Un jour une vie - Fautine Bollard

@@ -284,6 +284,16 @@ class AppViewModel: ObservableObject {
         }
     }
 
+    func updateSegment(id: UUID, title: String, startTime: TimeInterval, endTime: TimeInterval) {
+        if let index = segments.firstIndex(where: { $0.id == id }) {
+            segments[index].title = title
+            segments[index].startTime = startTime
+            segments[index].endTime = endTime
+            segments[index].isModified = true
+            saveSegments()
+        }
+    }
+
     func addSegment(title: String, startTime: TimeInterval, endTime: TimeInterval) {
         let newSegment = Segment(startTime: startTime, endTime: endTime, title: title, isModified: true, isNew: false)
         segments.append(newSegment)

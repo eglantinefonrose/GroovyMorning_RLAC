@@ -1,0 +1,29 @@
+[00:00:00.000] - [00:01:46.740] Annonces et publicités
+[00:01:46.740] - [00:12:33.019] Le journal RTL - Gaël Jordana
+[00:12:33.019] - [00:16:03.779] RTL Événement - Hortense Crépin
+[00:16:07.879] - [00:19:39.220] Les secrets de l'actu internationale - Georges Malbrunot
+[00:19:40.779] - [00:23:31.700] Le visage du jour - Agnès Bonfillon
+[00:23:33.319] - [00:25:14.339] Annonces et publicités
+[00:25:17.740] - [00:26:24.539] Météo - Loui Bodin
+[00:23:33.318] - [00:32:44.980] Le journal RTL - Nathalie Michet
+[00:32:50.299] - [00:33:42.980] Nouvelle chronique
+[00:33:54.480] - [00:37:12.119] L'angle éco de François Lenglet - François Lenglet
+[00:33:54.480] - [00:46:27.639] L'invité RTL de 7h40 - Thomas Sotto
+[00:46:27.639] - [00:52:06.980] L'oeil d'Alex Vizorek - Alex Vizorek
+[00:52:06.980] - [01:06:07.860] Le journal RTL - Céline Landreau
+[01:06:07.860] - [01:07:05.619] La météo - Louis Bodin
+[01:07:06.460] - [01:07:37.079] Annonce
+[01:07:54.239] - [01:18:18.899] Face à Fogiel - Marc-Olivier Fogiel
+[01:18:18.899] - [01:21:55.500] Le journal RTL - Nathalie Michet
+[01:21:55.500] - [01:23:17.920] La météo à 7 jours - Louis Bodin
+[01:23:17.920] - [01:26:19.119] Le monde en marche - William Galibert
+[01:26:19.119] - [01:27:18.619] Annonce
+[01:27:18.618] - [01:30:10.000] Olivier Dauvers : les secrets de la conso - Olivier Dauvers
+[01:30:11.439] - [01:35:06.699] Ça va beaucoup mieux avec Jimmy Mohamed - Jimmy Mohamed
+[01:35:07.619] - [01:41:27.340] Laurent Gerra et Jade - Laurent Gerra et Jade
+[01:41:32.420] - [01:48:04.819] Le journal RTL - Gaëlle Jordana
+[01:48:05.939] - [01:50:05.279] Le vrai du faux - Florian Gazan
+[01:50:05.279] - [01:51:14.119] Météo - Loui
+[01:51:14.699] - [01:51:52.840] Annonce
+[01:51:53.340] - [02:03:25.880] C'est notre époque - Thomas Sotto
+[02:03:27.119] - [02:07:53.380] Le Trapenard du vendredi - Augustin Trapenard

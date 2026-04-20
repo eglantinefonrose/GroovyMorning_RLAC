@@ -42,10 +42,10 @@ struct SegmentListView: View {
                                         } else {
                                             Text(segment.title)
                                                 .font(.headline)
+                                            Text("\(formatTime(segment.startTime)) - \(formatTime(segment.endTime))")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
                                         }
-                                        Text("\(formatTime(segment.startTime)) - \(formatTime(segment.endTime))")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
                                     }
                                     Spacer()
                                     if segment.isModified {
