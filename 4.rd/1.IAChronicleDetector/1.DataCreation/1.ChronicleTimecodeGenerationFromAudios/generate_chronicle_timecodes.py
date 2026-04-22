@@ -103,7 +103,7 @@ def find_segment_range(main_segments, chronicle_segments):
 
 def main():
     input_dir = "1.modelOutputs/0.transcriptions/1.transcriptions_whisper_ggml-large-v3-turbo"
-    output_dir = "2.humanOutputs/1.timecode-segments/1.automatic-from-chronique-transcription"
+    output_dir = "../../../@assets/2.humanOutputs/1.timecode-segments/1.automatic-from-chronique-transcription"
     os.makedirs(output_dir, exist_ok=True)
 
     print("Démarrage de la recherche de timecodes...")

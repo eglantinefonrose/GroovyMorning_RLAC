@@ -6,7 +6,7 @@ import base64
 import json
 from datetime import datetime, timedelta
 
-def download_file(url, dest_path):
+def download_file(url, dest_path, headers=None):
     """Télécharge un fichier si il n'existe pas déjà."""
     if os.path.exists(dest_path):
         print(f"      ✅ Déjà présent : {os.path.basename(dest_path)}")
@@ -15,7 +15,7 @@ def download_file(url, dest_path):
     print(f"      📥 Téléchargement : {url}")
     try:
         if url.startswith('//'): url = 'https:' + url
-        response = requests.get(url, stream=True, timeout=30)
+        response = requests.get(url, stream=True, timeout=30, headers=headers)
         response.raise_for_status()
         with open(dest_path, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):
@@ -26,27 +26,24 @@ def download_file(url, dest_path):
         print(f"      ❌ Erreur : {e}")
         return False
 
-def get_audio_url_from_page(page_url):
+def get_audio_url_from_page(page_url, headers=None):
     """Récupère l'URL .mp3 sur la page individuelle."""
     try:
         if page_url.startswith('/'):
             page_url = f"https://www.radiofrance.fr{page_url}"
-        response = requests.get(page_url, timeout=10)
+        response = requests.get(page_url, timeout=10, headers=headers)
         if response.status_code != 200: return None
         match = re.search(r"https://media\.radiofrance-podcast\.net/[^\"]*\.mp3", response.text)
         return match.group(0) if match else None
     except:
         return None
 
-def find_audio_anywhere(id_or_uuid):
-    """
-    Cherche l'audio par tous les moyens possibles pour un identifiant donné.
-    """
-    # 1. Tentative via l'API manifestation directe (souvent utilisée pour le replay)
-    # On teste avec l'UUID
+def find_audio_anywhere(id_or_uuid, headers=None):
+    """Cherche l'audio par tous les moyens possibles pour un identifiant donné."""
+    # 1. Tentative via l'API manifestation directe
     try:
         api_url = f"https://www.radiofrance.fr/api/v1/manifestations/{id_or_uuid}"
-        resp = requests.get(api_url, timeout=5)
+        resp = requests.get(api_url, timeout=5, headers=headers)
         if resp.status_code == 200:
             data = resp.json()
             url = data.get("url")
@@ -56,7 +53,7 @@ def find_audio_anywhere(id_or_uuid):
     # 2. Tentative via l'API player (v1)
     try:
         api_url = f"https://www.radiofrance.fr/api/v1/player/manifestations/{id_or_uuid}"
-        resp = requests.get(api_url, timeout=5)
+        resp = requests.get(api_url, timeout=5, headers=headers)
         if resp.status_code == 200:
             data = resp.json()
             sources = data.get("sources", [])
@@ -70,65 +67,77 @@ def process_date(target_date):
     """Exécute la logique complète pour une date donnée."""
     print(f"\n[*] --- TRAITEMENT DU {target_date} ---")
     
+    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:130.0) Gecko/20100101 Firefox/130.0'}
+    
+    dest_dir = f"../../../../@assets/0.media/audio/2.franceinfo-matin/{target_date}"
+    chroniques_dir = os.path.join(dest_dir, "chroniques")
+    os.makedirs(chroniques_dir, exist_ok=True)
+
     grid_url = f"https://www.radiofrance.fr/franceinfo/grille-programmes?date={target_date}"
     try:
-        resp = requests.get(grid_url, timeout=10)
+        resp = requests.get(grid_url, timeout=10, headers=headers)
         if resp.status_code != 200: return
-        
-        # Identification du bloc 6/9
-        match = re.search(r"\{[^}]*label:\"06h00\"[^}]*\}", resp.text)
-        if not match: return
-        show_id = re.search(r"id:\"([a-f0-9-]{36})\"", match.group(0)).group(1)
-        
-        dest_dir = f"../../../@assets/0.media/audio/3.franceinfo-matin/{target_date}"
-        chroniques_dir = os.path.join(dest_dir, "chroniques")
-        os.makedirs(chroniques_dir, exist_ok=True)
+        content = resp.text
 
-        # Appel API Chroniques
-        build_hash = "1vzv7fl"
-        payload_raw = [{"brand": 1, "parentStep": 2}, "franceinfo", show_id]
-        payload_b64 = base64.b64encode(json.dumps(payload_raw, separators=(',', ':')).encode()).decode()
-        api_url = f"https://www.radiofrance.fr/_app/remote/{build_hash}/loadChroniclesGrid?payload={payload_b64}"
+        # Build hash
+        build_hash_match = re.search(r"\"buildId\":\"([^\"]+)\"", content)
+        build_hash = build_hash_match.group(1) if build_hash_match else "1vzv7fl"
 
-        api_resp = requests.get(api_url, timeout=10)
-        if api_resp.status_code == 200:
-            result_str = api_resp.json().get("result", "")
-            
-            # Extraction de TOUS les UUIDs et de TOUS les nombres longs (IDs ITEMA potentiels)
-            uuids = list(set(re.findall(r'[a-f0-9-]{36}', result_str)))
-            # Les liens de podcasts contiennent souvent l'ID numérique à la fin
-            podcast_links = list(set(re.findall(r'/franceinfo/podcasts/[^"\\]+', result_str)))
-            
-            # On extrait aussi les IDs numériques isolés (souvent des manifestationIds)
-            # On cherche des nombres de 7 ou 8 chiffres entourés de guillemets ou virgules
-            potential_ids = list(set(re.findall(r'[:",](\d{7,8})[:",]', result_str)))
-            
-            all_targets = uuids + potential_ids
-            print(f"   [*] {len(podcast_links)} podcasts et {len(all_targets)} IDs techniques identifiés.")
-            
-            processed_urls = set()
+        processed_shows = set()
 
-            # A. Podcasts d'abord
-            for link in sorted(podcast_links):
-                parts = link.split('/')
-                show_name = parts[3] if len(parts) > 3 else "chronique"
-                audio_url = get_audio_url_from_page(link)
-                if audio_url:
-                    dest_name = f"{target_date}.mp3" if show_name == "le-6-9" else f"{show_name}.mp3"
-                    dest_path = os.path.join(dest_dir if show_name == "le-6-9" else chroniques_dir, dest_name)
-                    if download_file(audio_url, dest_path):
-                        processed_urls.add(audio_url)
+        for label in ["06h00"]:
+            match = re.search(rf'label="{label}"[^>]*data-element-id="([a-f0-9-]{{36}})"', content)
+            if not match: continue
+            
+            show_id = match.group(1)
+            
+            if show_id in processed_shows: continue
+            processed_shows.add(show_id)
 
-            # B. Recherche exhaustive pour tout ce qui reste
-            print(f"   [*] Recherche approfondie pour les segments manquants...")
-            for target in sorted(all_targets):
-                audio_url, title = find_audio_anywhere(target)
-                if audio_url and audio_url not in processed_urls:
-                    clean_title = re.sub(r'[^a-z0-9-]', '', title.lower().replace(" ", "-"))[:50]
-                    dest_path = os.path.join(chroniques_dir, f"{clean_title}.mp3")
-                    print(f"      📍 Trouvé via ID {target} : {title}")
-                    if download_file(audio_url, dest_path):
-                        processed_urls.add(audio_url)
+            link_match = re.search(rf'label="{label}".*?<a href="([^"]+)"[^>]*data-testid="Link"[^>]*>(.*?)</a>', content, re.DOTALL)
+            if not link_match: continue
+            main_link, show_title = link_match.groups()
+            show_title = re.sub('<[^>]*>', '', show_title).strip()
+
+            print(f"   [*] Segment trouvé : {show_title} ({label})")
+
+            # 1. Téléchargement de l'intégrale à la RACINE
+            main_audio_url = get_audio_url_from_page(main_link, headers=headers)
+            if main_audio_url:
+                dest_name = f"{target_date}.mp3" if "06h00" in label else f"{re.sub(r'[^a-z0-9]', '-', show_title.lower())}.mp3"
+                download_file(main_audio_url, os.path.join(dest_dir, dest_name), headers=headers)
+
+            # 2. Appel API Chroniques
+            payload_raw = [{"brand": 1, "parentStep": 2}, "franceinfo", show_id]
+            payload_b64 = base64.b64encode(json.dumps(payload_raw, separators=(',', ':')).encode()).decode()
+            api_url = f"https://www.radiofrance.fr/_app/remote/{build_hash}/loadChroniclesGrid?payload={payload_b64}"
+
+            api_resp = requests.get(api_url, headers=headers, timeout=10)
+            if api_resp.status_code == 200:
+                result_str = api_resp.json().get("result", "")
+                
+                podcast_links = list(set(re.findall(r'/franceinfo/podcasts/[^"\\]+', result_str)))
+                potential_ids = list(set(re.findall(r'[:",](\d{7,8})[:",]', result_str)))
+                uuids = list(set(re.findall(r'[a-f0-9-]{36}', result_str)))
+                
+                processed_urls = {main_audio_url} if main_audio_url else set()
+
+                for link in sorted(podcast_links):
+                    if link == main_link: continue
+                    parts = link.split('/')
+                    show_name = parts[3] if len(parts) > 3 else "chronique"
+                    audio_url = get_audio_url_from_page(link, headers=headers)
+                    if audio_url and audio_url not in processed_urls:
+                        if download_file(audio_url, os.path.join(chroniques_dir, f"{show_name}.mp3"), headers=headers):
+                            processed_urls.add(audio_url)
+
+                for target in sorted(uuids + potential_ids):
+                    if target == show_id: continue
+                    audio_url, title = find_audio_anywhere(target, headers=headers)
+                    if audio_url and audio_url not in processed_urls:
+                        clean_title = re.sub(r'[^a-z0-9-]', '', title.lower().replace(" ", "-"))[:50]
+                        if download_file(audio_url, os.path.join(chroniques_dir, f"{clean_title}.mp3"), headers=headers):
+                            processed_urls.add(audio_url)
 
     except Exception as e:
         print(f"   ❌ Erreur : {e}")

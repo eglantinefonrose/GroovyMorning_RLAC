@@ -5,6 +5,7 @@ import librosa
 from scipy import signal
 import datetime
 
+
 def format_time(seconds):
     """Convertit des secondes en format HH:MM:SS.mmm"""
     td = datetime.timedelta(seconds=seconds)
@@ -14,6 +15,7 @@ def format_time(seconds):
     secs = total_seconds % 60
     return f"{hours:02d}:{minutes:02d}:{secs:06.3f}"
 
+
 def find_audio_match(y_needle, y_haystack_norm, sr):
     """
     Trouve la meilleure correspondance de y_needle dans y_haystack_norm.
@@ -22,49 +24,49 @@ def find_audio_match(y_needle, y_haystack_norm, sr):
     """
     # Normalisation du needle
     y_needle_norm = (y_needle - np.mean(y_needle)) / (np.std(y_needle) + 1e-9)
-    
+
     # 1. Alignement global via corrélation FFT
     correlation = signal.fftconvolve(y_haystack_norm, y_needle_norm[::-1], mode='full')
     peak_index = np.argmax(correlation)
-    
+
     # Offset : index dans le haystack où le début du needle est aligné
     offset = peak_index - len(y_needle_norm) + 1
-    
+
     # 2. Affinement des bornes (recherche de la portion réellement présente)
     # On découpe le needle en blocs pour vérifier la corrélation locale
     win_size = int(sr * 0.2)  # Fenêtres de 200ms
     if win_size == 0: win_size = 1
-    
+
     num_wins = len(y_needle) // win_size
     similarities = []
-    
+
     for i in range(num_wins):
         start_n = i * win_size
         end_n = start_n + win_size
-        
+
         start_h = offset + start_n
         end_h = start_h + win_size
-        
+
         # Si le bloc est hors des limites du haystack, similarity = 0
         if start_h < 0 or end_h > len(y_haystack_norm):
             similarities.append(0)
             continue
-            
+
         # Calcul de la corrélation locale sur ce bloc
         chunk_n = y_needle_norm[start_n:end_n]
         chunk_h = y_haystack_norm[start_h:end_h]
-        
+
         # Corrélation de Pearson simplifiée (les chunks sont déjà +/- centrés)
-        corr = np.sum(chunk_n * chunk_h) / (np.sqrt(np.sum(chunk_n**2) * np.sum(chunk_h**2)) + 1e-9)
+        corr = np.sum(chunk_n * chunk_h) / (np.sqrt(np.sum(chunk_n ** 2) * np.sum(chunk_h ** 2)) + 1e-9)
         similarities.append(corr)
-        
+
     similarities = np.array(similarities)
-    
+
     # On cherche le bloc contigu le plus large au-dessus d'un seuil
     # Seuil de corrélation locale (0.3 est assez bas mais robuste aux bruits/différences mineures)
     threshold = 0.25
     matches = similarities > threshold
-    
+
     if not np.any(matches):
         # Si aucun bloc ne dépasse le seuil, on renvoie le résultat de l'alignement global
         # mais recadré (comportement par défaut précédent)
@@ -75,17 +77,19 @@ def find_audio_match(y_needle, y_haystack_norm, sr):
     # Ici on prend simplement du premier au dernier pour couvrir la "portion"
     first_match_idx = np.where(matches)[0][0]
     last_match_idx = np.where(matches)[0][-1]
-    
+
     # Calcul des nouveaux timecodes
     start_time = (offset + first_match_idx * win_size) / sr
     end_time = (offset + (last_match_idx + 1) * win_size) / sr
-    
+
     return start_time, end_time
+
 
 def main():
     if len(sys.argv) < 3:
         print("\nUsage:")
-        print("python find_all_chroniques.py ../../../0.media/audio/2.rtl-matin/13-04-2026/chroniques ../../../0.media/audio/2.rtl-matin/13-04-2026/13-04-2026.mp3")
+        print(
+            "python find_all_chroniques.py ../../../0.media/audio/1.rtl-matin/06-04-2026/chroniques ../../../0.media/audio/1.rtl-matin/06-04-2026/06-04-2026.mp3")
         sys.exit(1)
 
     chroniques_dir = sys.argv[1]
@@ -98,9 +102,26 @@ def main():
         print(f"Erreur : '{haystack_path}' est introuvable.")
         sys.exit(1)
 
+    # Extraire le nom de la radio (deux niveaux au-dessus de chroniques_dir)
+    # Exemple: chroniques_dir = .../2.rtl-matin/13-04-2026/chroniques
+    # On remonte de deux niveaux: .../2.rtl-matin
+    parent_dir = os.path.dirname(chroniques_dir)  # .../13-04-2026
+    radio_dir = os.path.dirname(parent_dir)  # .../2.rtl-matin
+    radio_name = os.path.basename(radio_dir)  # "2.rtl-matin"
+
+    # Créer le dossier de sortie timecode_chroniques/{radio_name}
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    output_base_dir = os.path.join(script_dir, "timecode_chroniques")
+    output_radio_dir = os.path.join(output_base_dir, radio_name)
+
+    # Créer les dossiers si nécessaire
+    os.makedirs(output_radio_dir, exist_ok=True)
+
+    print(f"[*] Dossier de sortie : {output_radio_dir}")
+
     # Taux d'échantillonnage réduit pour accélérer le calcul (16kHz est suffisant pour des signatures audio)
-    sr = 16000 
-    
+    sr = 16000
+
     print(f"[*] Chargement de l'audio complet (haystack) : {os.path.basename(haystack_path)}")
     try:
         # On charge tout en mémoire pour éviter de relire le gros fichier pour chaque chronique
@@ -115,10 +136,10 @@ def main():
 
     results = []
     audio_extensions = ('.mp3', '.m4a', '.wav', '.flac', '.ogg')
-    
+
     # Liste et tri des fichiers dans le dossier des chroniques
     files_to_process = sorted([f for f in os.listdir(chroniques_dir) if f.lower().endswith(audio_extensions)])
-    
+
     if not files_to_process:
         print(f"Aucun fichier audio trouvé dans {chroniques_dir}")
         sys.exit(0)
@@ -128,25 +149,25 @@ def main():
     for filename in files_to_process:
         needle_path = os.path.join(chroniques_dir, filename)
         print(f"    - Analyse de : {filename}")
-        
+
         try:
             # Chargement de la chronique
             y_needle, _ = librosa.load(needle_path, sr=sr, mono=True)
-            
+
             # Recherche de la correspondance
             start, end = find_audio_match(y_needle, y_haystack_norm, sr)
-            
+
             # On recadre les timecodes s'ils sortent des limites du haystack (cas de portion partielle)
             actual_start = max(0, start)
             actual_end = min(haystack_duration, end)
-            
+
             results.append({
                 'start': actual_start,
                 'end': actual_end,
                 'name': filename
             })
             print(f"      => Trouvé : {format_time(actual_start)} - {format_time(actual_end)}")
-            
+
         except Exception as e:
             print(f"      [!] Erreur sur {filename} : {e}")
 
@@ -156,10 +177,10 @@ def main():
     # Préparation du fichier de sortie
     haystack_basename = os.path.splitext(os.path.basename(haystack_path))[0]
     output_filename = f"timecode_chroniques_{haystack_basename}.txt"
-    # On écrit le fichier dans le même dossier que le script
-    output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), output_filename)
+    # Écrire le fichier dans le dossier timecode_chroniques/{radio_name}
+    output_path = os.path.join(output_radio_dir, output_filename)
 
-    print(f"[*] Écriture des résultats dans {output_filename}...")
+    print(f"[*] Écriture des résultats dans {output_path}...")
     try:
         with open(output_path, 'w', encoding='utf-8') as f:
             for res in results:
@@ -169,6 +190,7 @@ def main():
         print(f"[*] Terminé avec succès. Fichier généré : {output_path}")
     except Exception as e:
         print(f"Erreur lors de l'écriture du fichier : {e}")
+
 
 if __name__ == "__main__":
     main()

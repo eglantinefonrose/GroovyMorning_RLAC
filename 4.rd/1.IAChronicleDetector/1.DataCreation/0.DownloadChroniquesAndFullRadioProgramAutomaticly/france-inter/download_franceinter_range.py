@@ -5,6 +5,9 @@ import requests
 from datetime import datetime, timedelta
 import xml.etree.ElementTree as ET
 
+# Dossier de destination mis à jour
+BASE_DIR = "../../../../@assets/0.media/audio/4.franceinter-matin"
+
 def get_rss_feed(concept_url):
     """Récupère l'URL du flux RSS depuis la page d'une émission."""
     try:
@@ -20,6 +23,9 @@ def download_audio(url, filename):
     if os.path.exists(filename):
         return
     
+    # Création automatique des dossiers parents si nécessaire
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    
     print(f"  -> Téléchargement : {os.path.basename(filename)}")
     try:
         response = requests.get(url, stream=True, timeout=30)
@@ -32,16 +38,21 @@ def download_audio(url, filename):
 
 def process_date(date_str):
     """Télécharge les chroniques pour une date donnée (format DD-MM-YYYY)."""
-    # Les deux flux principaux de la matinale (7/9 et Le Mag)
+    # Les flux de la matinale (Le 6/9, La grande matinale, Le Mag)
     concepts = [
         "https://www.radiofrance.fr/franceinter/podcasts/la-grande-matinale",
-        "https://www.radiofrance.fr/franceinter/podcasts/la-grande-matinale-le-mag"
+        "https://www.radiofrance.fr/franceinter/podcasts/la-grande-matinale-le-mag",
+        "https://www.radiofrance.fr/franceinter/podcasts/le-6-7"
     ]
 
-    os.makedirs(date_str, exist_ok=True)
+    # Dossier principal de la date
+    date_dir = os.path.join(BASE_DIR, date_str)
+    # Sous-dossier pour les chroniques
+    chroniques_dir = os.path.join(date_dir, "chroniques")
+    
     target_date = datetime.strptime(date_str, "%d-%m-%Y").date()
     
-    episodes_found = 0
+    files_found = 0
     for concept_url in concepts:
         rss_url = get_rss_feed(concept_url)
         if not rss_url: continue
@@ -56,6 +67,10 @@ def process_date(date_str):
                 pub_dt = datetime.strptime(pub_date_raw[:-6], "%a, %d %b %Y %H:%M:%S")
                 
                 if pub_dt.date() == target_date:
+                    # On ne garde que ce qui est diffusé entre 6h et 10h pour le "6/9"
+                    if not (6 <= pub_dt.hour < 10):
+                        continue
+
                     title = item.find('title').text.strip()
                     enclosure = item.find('enclosure')
                     
@@ -69,23 +84,27 @@ def process_date(date_str):
                                 duration = int(itunes_dur.text)
                             except: pass
                         
-                        # Si durée absente du XML, on se base sur la taille du fichier (estimée)
-                        # ou on télécharge quand même si le titre ne contient pas "Le 7/9" ou "Le Mag"
-                        is_full_show = "Le 7/9" in title or "Le Mag" in title or duration > 1800
+                        # Identification de l'émission complète
+                        is_full_show = any(x in title for x in ["Le 7/9", "Le 6/9", "Le Mag", "Le 6/7"]) or duration > 1800
                         
-                        if not is_full_show:
-                            audio_url = enclosure.get('url')
-                            time_str = pub_dt.strftime("%Hh%M")
-                            safe_title = re.sub(r'[^\w\s-]', '', title).strip().replace(' ', '_')
-                            ext = "m4a" if ".m4a" in audio_url.lower() else "mp3"
-                            
-                            filename = os.path.join(date_str, f"[{time_str}] {safe_title}.{ext}")
-                            download_audio(audio_url, filename)
-                            episodes_found += 1
+                        audio_url = enclosure.get('url')
+                        time_str = pub_dt.strftime("%Hh%M")
+                        safe_title = re.sub(r'[^\w\s-]', '', title).strip().replace(' ', '_')
+                        ext = "m4a" if ".m4a" in audio_url.lower() else "mp3"
+                        
+                        if is_full_show:
+                            # À la racine du dossier de la date
+                            filename = os.path.join(date_dir, f"[{time_str}] {safe_title}.{ext}")
+                        else:
+                            # Dans le sous-dossier chroniques
+                            filename = os.path.join(chroniques_dir, f"[{time_str}] {safe_title}.{ext}")
+                        
+                        download_audio(audio_url, filename)
+                        files_found += 1
         except Exception as e:
             print(f"  ! Erreur flux RSS {concept_url}: {e}")
             
-    print(f"--- Terminé pour le {date_str} : {episodes_found} chroniques récupérées ---")
+    print(f"--- Terminé pour le {date_str} : {files_found} fichiers récupérés ---")
 
 def main():
     if len(sys.argv) < 2:
@@ -98,9 +117,13 @@ def main():
     
     curr = start_date
     while curr <= end_date:
-        ds = curr.strftime("%d-%m-%Y")
-        print(f"\nTraitement du {ds}...")
-        process_date(ds)
+        # Lundi=0, Mardi=1, Mercredi=2, Jeudi=3. On ignore Vendredi(4), Samedi(5), Dimanche(6).
+        if curr.weekday() <= 3:
+            ds = curr.strftime("%d-%m-%Y")
+            print(f"\nTraitement du {ds}...")
+            process_date(ds)
+        else:
+            print(f"\nSaut du {curr.strftime('%d-%m-%Y')} (Vendredi-Dimanche non demandés)")
         curr += timedelta(days=1)
 
 if __name__ == "__main__":
