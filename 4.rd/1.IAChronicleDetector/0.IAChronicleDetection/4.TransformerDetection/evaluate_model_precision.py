@@ -2,9 +2,45 @@ import os
 import argparse
 import pandas as pd
 import numpy as np
+from datetime import datetime
 from src.utils import load_transcription, load_timecodes, format_timecode
 from src.evaluation import evaluate_chronicles
 from predict import predict
+
+def log_to_models_readme(metrics, srt_path, readme_path="models/README.md"):
+    """Met à jour le score de performance dans le README du dossier models."""
+    if not os.path.exists(readme_path):
+        return
+        
+    date_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    filename = os.path.basename(srt_path)
+    
+    log_line = (
+        f"| {date_str} | {filename} | **{round(metrics['score_global']*100, 1)}%** | "
+        f"{round(metrics['cardinality_score']*100, 1)}% | {round(metrics['alignment_score']*100, 1)}% | "
+        f"{metrics['n_pred']}/{metrics['n_gt']} |\n"
+    )
+    
+    with open(readme_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    
+    # On définit la section de score
+    section_header = "## Score de Performance (Dernière Évaluation)"
+    
+    # Si la section existe déjà, on coupe tout ce qui suit pour la remplacer
+    if section_header in content:
+        base_content = content.split(section_header)[0].rstrip()
+    else:
+        base_content = content.rstrip()
+
+    new_content = base_content + "\n\n" + section_header + "\n\n"
+    new_content += "| Date | Fichier | Score Global | Cardinalité | Alignement | Détail (Pred/GT) |\n"
+    new_content += "| :--- | :--- | :--- | :--- | :--- | :--- |\n"
+    new_content += log_line
+    
+    with open(readme_path, "w", encoding="utf-8") as f:
+        f.write(new_content)
+    print(f"Score de performance mis à jour dans {readme_path}")
 
 def evaluate_model_precision(srt_path, tc_path, output_csv="results/evaluation_results.csv"):
     """
@@ -82,6 +118,9 @@ def evaluate_model_precision(srt_path, tc_path, output_csv="results/evaluation_r
     print(f"SCORE GLOBAL : {metrics['score_global']*100}%")
     print(f"  - Cardinalité (40%) : {metrics['cardinality_score']*100}%")
     print(f"  - Alignement (60%)  : {metrics['alignment_score']*100}%")
+    
+    # Consigner dans l'historique des modèles
+    log_to_models_readme(metrics, srt_path)
     
     return metrics
 
