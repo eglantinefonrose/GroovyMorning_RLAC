@@ -35,9 +35,28 @@ Pour chaque chronique réelle $C_{gt}$ :
 ### Résilience
 Si le modèle manque une chronique au milieu de l'émission, l'algorithme "saute" la chronique manquante (note 0) et continue l'évaluation sur la suivante pour vérifier si le modèle "retombe sur ses pattes" plus loin.
 
+## 3. Score Individuel par Chronique (Détail)
+
+Au-delà du score global, chaque chronique réelle ($C_{gt}$) se voit attribuer une note de précision propre, comprise entre 0 et 100%. Cette note permet d'identifier précisément quelles parties de l'émission sont les plus difficiles à détecter pour le modèle.
+
+### Calcul de la note par segment
+La note d'une chronique est calculée selon la formule de pénalité temporelle :
+
+$$Score_{chronique} = \max\left(0, 1 - \frac{\text{Décalage Moyen}}{\text{Tolérance Max}}\right)$$
+
+*   **Décalage Moyen** : Moyenne de l'erreur sur le début et l'erreur sur la fin $|start_{diff}| + |end_{diff}| / 2$.
+*   **Tolérance Max** : Seuil au-delà duquel la détection est jugée inutile (par défaut 60 secondes).
+
+### Statuts de détection
+Chaque chronique est ensuite classée selon son score :
+- **Parfaite** : Score > 95% (Décalage < 3s).
+- **Acceptable** : Score entre 70% et 95% (Décalage < 18s).
+- **Imprécise** : Score entre 1% et 70% (Décalage < 60s).
+- **Manquante (Miss)** : Score = 0% (Aucun segment trouvé ou décalage > 60s).
+
 ---
 
-## 3. Export des résultats
+## 4. Export des résultats
 
 Les résultats sont exportés dans `results/evaluation_results.csv` avec :
 - Le détail par chronique (Décalage, IoU, Statut).

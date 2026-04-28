@@ -35,14 +35,25 @@ def evaluate_model_precision(srt_path, tc_path, output_csv="results/evaluation_r
         if detail["pred_idx"] is not None:
             p = predicted_chronicles[detail["pred_idx"]]
         
+        # Détermination du statut selon les seuils du README
+        score = detail["score"]
+        if score > 0.95:
+            statut = "PARFAITE"
+        elif score >= 0.70:
+            statut = "ACCEPTABLE"
+        elif score > 0:
+            statut = "IMPRÉCISE"
+        else:
+            statut = "MISS"
+
         detailed_results.append({
             "chronicle_index": gt_idx + 1,
             "gt_start": format_timecode(gt_start),
             "gt_end": format_timecode(gt_end),
-            "detected": "YES" if detail["score"] > 0 else "NO",
-            "score_chronique": round(detail["score"], 3),
-            "iou": round(detail["iou"], 3),
+            "statut": statut,
+            "score_chronique": round(score * 100, 1),  # Affichage en %
             "offset_avg_sec": round(detail["offset"], 2) if detail["offset"] is not None else "-",
+            "iou": round(detail["iou"], 3),
             "pred_start": format_timecode(p['start']) if p else "-",
             "pred_end": format_timecode(p['end']) if p else "-"
         })
@@ -53,12 +64,12 @@ def evaluate_model_precision(srt_path, tc_path, output_csv="results/evaluation_r
     # Ligne de résumé
     summary_row = {
         "chronicle_index": "SUMMARY",
-        "gt_start": f"Score Global: {metrics['score_global']}",
-        "gt_end": f"Card: {metrics['cardinality_score']}",
-        "detected": f"Align: {metrics['alignment_score']}",
+        "gt_start": f"Score Global: {round(metrics['score_global']*100, 1)}%",
+        "gt_end": f"Card: {round(metrics['cardinality_score']*100, 1)}%",
+        "statut": f"Align: {round(metrics['alignment_score']*100, 1)}%",
         "score_chronique": "",
-        "iou": f"GT: {metrics['n_gt']}",
-        "offset_avg_sec": f"Pred: {metrics['n_pred']}",
+        "offset_avg_sec": f"Pred/GT: {metrics['n_pred']}/{metrics['n_gt']}",
+        "iou": "",
         "pred_start": "",
         "pred_end": ""
     }
