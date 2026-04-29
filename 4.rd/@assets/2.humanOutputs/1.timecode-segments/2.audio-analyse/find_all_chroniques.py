@@ -89,7 +89,7 @@ def main():
     if len(sys.argv) < 3:
         print("\nUsage:")
         print(
-            "python find_all_chroniques.py ../../../0.media/audio/5.rtl-matin/21-04-2026/chroniques ../../../0.media/audio/5.rtl-matin/21-04-2026/21-04-2026.mp3")
+            "python find_all_chroniques.py ../../../0.media/audio/1.rtl-matin/16-04-2026/chroniques ../../../0.media/audio-done/1.rtl-matin/16-04-2026/16-04-2026.mp3")
         sys.exit(1)
 
     chroniques_dir = sys.argv[1]
