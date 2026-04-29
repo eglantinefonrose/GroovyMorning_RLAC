@@ -19,11 +19,10 @@ DEFAULT_MODEL_PATH = "/Applications/DevTools/AI/whisper.cpp/models/ggml-large-v3
 
 # Répertoires audio à traiter
 AUDIO_DIRS = [
-    "0.france-inter-grande-matinale",
-    "1.misc",
-    "2.rtl-matin",
-    "3.franceinfo-matin",
-    "4.franceculture-matin"
+    "1.rtl-matin",
+    "2.franceinfo-matin",
+    "3.franceculture-matin",
+    "4.franceinter-matin"
 ]
 
 def parse_arguments():
@@ -139,12 +138,12 @@ def transcribe_audio(file_path, output_path, whisper_cli_path, model_path):
             os.remove(output_path)
         return False
 
-def move_to_done(file_path, media_base_dir, audio_dir):
+def move_to_done(file_path, media_base_dir, audio_dir, rel_sub_dir):
     """
-    Déplace un fichier audio vers audio-done
+    Déplace un fichier audio vers audio-done en préservant la structure des sous-dossiers
     Retourne True si succès, False sinon
     """
-    audio_done_dir = Path(media_base_dir) / "audio-done" / audio_dir
+    audio_done_dir = Path(media_base_dir) / "audio-done" / audio_dir / rel_sub_dir
     audio_done_dir.mkdir(parents=True, exist_ok=True)
     
     destination = audio_done_dir / Path(file_path).name
@@ -158,7 +157,7 @@ def move_to_done(file_path, media_base_dir, audio_dir):
         return False
 
 def process_audio_files(args):
-    """Parcourt les répertoires et traite les fichiers audio"""
+    """Parcourt les répertoires récursivement et traite les fichiers audio"""
     
     stats = {
         "total_files": 0,
@@ -168,31 +167,41 @@ def process_audio_files(args):
         "moved_failed": 0
     }
     
+    # Extensions audio supportées
+    AUDIO_EXTENSIONS = {".wav", ".mp3", ".m4a", ".aac", ".flac", ".ogg", ".opus", ".m4b"}
+    
     for audio_dir in AUDIO_DIRS:
-        print(f"\n📂 Traitement du dossier: {audio_dir}")
+        print(f"\n📂 Traitement (récursif) du dossier: {audio_dir}")
         
         audio_path = Path(args.media_base_dir) / "audio" / audio_dir
-        output_dir = Path(args.transcription_output_dir) / audio_dir
         
         # Vérifier si le répertoire source existe
         if not audio_path.exists():
             print(f"   ⚠️  Répertoire source inexistant: {audio_path}")
             continue
         
-        # Créer le répertoire de sortie
-        output_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Lister les fichiers audio (tous les fichiers, pas de sous-répertoires)
-        files = [f for f in audio_path.iterdir() if f.is_file()]
+        # Lister les fichiers audio récursivement
+        files = [
+            f for f in audio_path.rglob("*") 
+            if f.is_file() and not f.name.startswith('.') and f.suffix.lower() in AUDIO_EXTENSIONS
+        ]
         
         if not files:
-            print(f"   ℹ️  Aucun fichier trouvé dans {audio_dir}")
+            print(f"   ℹ️  Aucun fichier trouvé dans {audio_dir} (ou ses sous-dossiers)")
             continue
         
         stats["total_files"] += len(files)
         
         for file_path in files:
-            print(f"\n   🎵 Fichier: {file_path.name}")
+            # Calculer le chemin relatif par rapport au dossier parent pour préserver la structure
+            rel_sub_dir = file_path.relative_to(audio_path).parent
+            display_name = file_path.relative_to(audio_path)
+            
+            print(f"\n   🎵 Fichier: {display_name}")
+            
+            # Répertoire de sortie (préserve la structure des sous-dossiers)
+            output_dir = Path(args.transcription_output_dir) / audio_dir / rel_sub_dir
+            output_dir.mkdir(parents=True, exist_ok=True)
             
             # Préparer le nom du fichier de sortie
             base_name = file_path.stem  # sans extension
@@ -213,7 +222,7 @@ def process_audio_files(args):
                 
                 # Déplacement vers audio-done (sauf si désactivé)
                 if not args.no_move_to_done_when_processed:
-                    if move_to_done(file_path, args.media_base_dir, audio_dir):
+                    if move_to_done(file_path, args.media_base_dir, audio_dir, rel_sub_dir):
                         stats["moved_success"] += 1
                     else:
                         stats["moved_failed"] += 1
