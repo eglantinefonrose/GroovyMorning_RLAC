@@ -18,7 +18,7 @@ def format_time(seconds: float) -> str:
     ms = int((seconds - int(seconds)) * 1000)
     return f"{h:02d}:{m:02d}:{s:02d}.{ms:03d}"
 
-def predict(audio_path: str, window_size: float = 10.0, overlap: float = 5.0):
+def predict(audio_path: str, window_size: float = 10.0, overlap: float = 5.0, threshold: float = 0.1):
     # Load model and feature extractor
     print(f"Loading model from {MODEL_DIR}...")
     model = Wav2Vec2ForSequenceClassification.from_pretrained(MODEL_DIR)
@@ -40,7 +40,7 @@ def predict(audio_path: str, window_size: float = 10.0, overlap: float = 5.0):
     print("Running sliding window inference...")
     for start in np.arange(0, duration, step):
         end = min(start + window_size, duration)
-        if end - start < 1.0: # Skip very short segments at the end
+        if end - start < 2.0: # Skip very short segments at the end
             continue
             
         segment = audio[int(start * SAMPLING_RATE):int(end * SAMPLING_RATE)]
@@ -50,31 +50,46 @@ def predict(audio_path: str, window_size: float = 10.0, overlap: float = 5.0):
         
         with torch.no_grad():
             logits = model(**inputs).logits
+            probs = torch.softmax(logits, dim=-1)
             
-        pred_id = torch.argmax(logits, dim=-1).item()
+        confidence, pred_id = torch.max(probs, dim=-1)
+        confidence = confidence.item()
+        pred_id = pred_id.item()
         label = model.config.id2label[pred_id]
+        
+        # Skip background or low confidence
+        if label == "background" or confidence < threshold:
+            continue
         
         predictions.append({
             "label": label,
             "start": start,
-            "end": end
+            "end": end,
+            "confidence": confidence
         })
 
-    # Merge consecutive segments
+    # Merge consecutive segments with same label
     if not predictions:
         return []
 
     merged = []
-    current = predictions[0].copy()
+    if predictions:
+        current = predictions[0].copy()
+        
+        for i in range(1, len(predictions)):
+            next_seg = predictions[i]
+            # Merge if same label AND they are close enough in time
+            if next_seg["label"] == current["label"] and next_seg["start"] <= current["end"] + step:
+                current["end"] = next_seg["end"]
+                # Keep max confidence or average? Let's keep max for now
+                current["confidence"] = max(current["confidence"], next_seg["confidence"])
+            else:
+                merged.append(current)
+                current = next_seg.copy()
+        merged.append(current)
     
-    for i in range(1, len(predictions)):
-        next_seg = predictions[i]
-        if next_seg["label"] == current["label"]:
-            current["end"] = next_seg["end"]
-        else:
-            merged.append(current)
-            current = next_seg.copy()
-    merged.append(current)
+    # Filter out very short chronicles (e.g. < 15s) that might be false positives
+    merged = [m for m in merged if (m["end"] - m["start"]) >= 5.0]
     
     # Format output
     result = []
@@ -82,7 +97,8 @@ def predict(audio_path: str, window_size: float = 10.0, overlap: float = 5.0):
         result.append({
             "chronique": m["label"],
             "start": format_time(m["start"]),
-            "end": format_time(m["end"])
+            "end": format_time(m["end"]),
+            "confidence": round(m["confidence"], 3)
         })
         
     return result
@@ -92,11 +108,12 @@ if __name__ == "__main__":
     parser.add_argument("audio", type=str, help="Path to audio file (mp3 or m4a)")
     parser.add_argument("--window", type=float, default=10.0, help="Window size in seconds")
     parser.add_argument("--overlap", type=float, default=5.0, help="Overlap in seconds")
+    parser.add_argument("--threshold", type=float, default=0.4, help="Confidence threshold (0-1)")
     parser.add_argument("--output", type=str, help="Path to save JSON output")
     
     args = parser.parse_args()
     
-    results = predict(args.audio, args.window, args.overlap)
+    results = predict(args.audio, args.window, args.overlap, args.threshold)
     
     print("\nDetected Chronicles:")
     print(json.dumps(results, indent=4, ensure_ascii=False))

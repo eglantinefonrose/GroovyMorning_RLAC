@@ -1,0 +1,53 @@
+Found 33 audio/timecode pairs.
+Number of unique labels: 100
+Generating train split: 0 examples [00:10, ? examples/s]
+Processing ../../../@assets/0.media/audio/3.franceculture-matin/01-04-2026/01-04-2026_trimmed.mp3...
+Traceback (most recent call last):
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/features/audio.py", line 108, in encode_example
+    from torchcodec.encoders import AudioEncoder  # needed to write audio files
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'torchcodec'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/builder.py", line 1500, in _prepare_split_single
+    example = self.info.features.encode_example(record) if self.info.features is not None else record
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/features/features.py", line 2152, in encode_example
+    return encode_nested_example(self, example)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/features/features.py", line 1437, in encode_nested_example
+    {k: encode_nested_example(schema[k], obj.get(k), level=level + 1) for k in schema}
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/features/features.py", line 1460, in encode_nested_example
+    return schema.encode_example(obj) if obj is not None else None
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/features/audio.py", line 110, in encode_example
+    raise ImportError("To support encoding audio data, please install 'torchcodec'.") from err
+ImportError: To support encoding audio data, please install 'torchcodec'.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/train.py", line 220, in <module>
+    train()
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/train.py", line 159, in train
+    dataset = Dataset.from_generator(
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/arrow_dataset.py", line 1428, in from_generator
+    ).read()
+      ^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/io/generator.py", line 52, in read
+    self.builder.download_and_prepare(
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/builder.py", line 882, in download_and_prepare
+    self._download_and_prepare(
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/builder.py", line 1540, in _download_and_prepare
+    super()._download_and_prepare(
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/builder.py", line 943, in _download_and_prepare
+    self._prepare_split(split_generator, **prepare_split_kwargs)
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/builder.py", line 1345, in _prepare_split
+    for job_id, done, content in self._prepare_split_single(
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/builder.py", line 1523, in _prepare_split_single
+    raise DatasetGenerationError("An error occurred while generating the dataset") from e
+datasets.exceptions.DatasetGenerationError: An error occurred while generating the dataset

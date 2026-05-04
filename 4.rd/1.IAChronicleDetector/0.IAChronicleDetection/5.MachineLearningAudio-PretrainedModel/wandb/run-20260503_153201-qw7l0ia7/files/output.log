@@ -1,0 +1,25 @@
+Found 33 audio/timecode pairs.
+Number of unique labels: 100
+Map: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 345/345 [00:50<00:00,  6.78 examples/s]
+Map: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 87/87 [00:10<00:00,  8.16 examples/s]
+Loading weights: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 422/422 [00:00<00:00, 38148.12it/s]
+[transformers] [1mWav2Vec2ForSequenceClassification LOAD REPORT[0m from: facebook/wav2vec2-large-xlsr-53-french
+Key               | Status     | Details
+------------------+------------+--------
+lm_head.bias      | [38;5;208mUNEXPECTED[0m |
+lm_head.weight    | [38;5;208mUNEXPECTED[0m |
+projector.weight  | [31mMISSING[0m    |
+classifier.bias   | [31mMISSING[0m    |
+projector.bias    | [31mMISSING[0m    |
+classifier.weight | [31mMISSING[0m    |
+
+Notes:
+- [38;5;208mUNEXPECTED:[0m	[3mcan be ignored when loading from different task/architecture; not ok if you expect identical arch.[0m
+- [31mMISSING:[0m	[3mthose params were newly initialized because missing from the checkpoint. Consider training on your downstream task.[0m
+Traceback (most recent call last):
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/train.py", line 217, in <module>
+    train()
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/train.py", line 186, in train
+    training_args = TrainingArguments(
+                    ^^^^^^^^^^^^^^^^^^
+TypeError: TrainingArguments.__init__() got an unexpected keyword argument 'evaluation_strategy'

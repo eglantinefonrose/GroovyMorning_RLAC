@@ -1,0 +1,91 @@
+Found 33 audio/timecode pairs.
+Number of unique labels: 100
+Map: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 345/345 [00:51<00:00,  6.75 examples/s]
+Map: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 87/87 [00:11<00:00,  7.45 examples/s]
+Loading weights: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 422/422 [00:00<00:00, 36114.27it/s]
+[transformers] [1mWav2Vec2ForSequenceClassification LOAD REPORT[0m from: facebook/wav2vec2-large-xlsr-53-french
+Key               | Status     | Details
+------------------+------------+--------
+lm_head.bias      | [38;5;208mUNEXPECTED[0m |
+lm_head.weight    | [38;5;208mUNEXPECTED[0m |
+projector.weight  | [31mMISSING[0m    |
+classifier.weight | [31mMISSING[0m    |
+classifier.bias   | [31mMISSING[0m    |
+projector.bias    | [31mMISSING[0m    |
+
+Notes:
+- [38;5;208mUNEXPECTED:[0m	[3mcan be ignored when loading from different task/architecture; not ok if you expect identical arch.[0m
+- [31mMISSING:[0m	[3mthose params were newly initialized because missing from the checkpoint. Consider training on your downstream task.[0m
+  0%|                                                                                                                                                                                             | 0/435 [00:00<?, ?it/s]/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/torch/utils/data/dataloader.py:775: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, device pinned memory won't be used.
+  super().__init__(loader)
+Traceback (most recent call last):
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/train.py", line 216, in <module>
+    train()
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/train.py", line 211, in train
+    trainer.train()
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/transformers/trainer.py", line 1427, in train
+    return inner_training_loop(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/transformers/trainer.py", line 1509, in _inner_training_loop
+    self._run_epoch(
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/transformers/trainer.py", line 1737, in _run_epoch
+    tr_loss_step = self.training_step(model, inputs, num_items_in_batch)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/transformers/trainer.py", line 1909, in training_step
+    loss = self.compute_loss(model, inputs, num_items_in_batch=num_items_in_batch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/transformers/trainer.py", line 1981, in compute_loss
+    outputs = model(**inputs)
+              ^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/transformers/models/wav2vec2/modeling_wav2vec2.py", line 1812, in forward
+    outputs = self.wav2vec2(
+              ^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/transformers/models/wav2vec2/modeling_wav2vec2.py", line 1361, in forward
+    encoder_outputs = self.encoder(
+                      ^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/transformers/models/wav2vec2/modeling_wav2vec2.py", line 780, in forward
+    layer_outputs = layer(
+                    ^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/transformers/modeling_layers.py", line 93, in __call__
+    return super().__call__(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/transformers/models/wav2vec2/modeling_wav2vec2.py", line 639, in forward
+    hidden_states, attn_weights, _ = self.attention(
+                                     ^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/transformers/models/wav2vec2/modeling_wav2vec2.py", line 533, in forward
+    attn_output, attn_weights = attention_interface(
+                                ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py", line 92, in sdpa_attention_forward
+    attn_output = torch.nn.functional.scaled_dot_product_attention(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: MPS backend out of memory (MPS allocated: 17.46 GiB, other allocations: 678.78 MiB, max allowed: 18.13 GiB). Tried to allocate 23.42 MiB on private pool. Use PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.0 to disable upper limit for memory allocations (may cause system failure).
