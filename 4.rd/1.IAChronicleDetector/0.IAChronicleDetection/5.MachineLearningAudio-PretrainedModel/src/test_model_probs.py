@@ -3,7 +3,7 @@ from transformers import Wav2Vec2ForSequenceClassification, Wav2Vec2FeatureExtra
 import librosa
 import numpy as np
 
-MODEL_DIR = "./model_output"
+MODEL_DIR = "../model_output"
 SAMPLING_RATE = 16000
 
 def test_model(audio_path):

@@ -1,0 +1,68 @@
+Generating train split: 28474 examples [10:31, 45.09 examples/s] 
+Traceback (most recent call last):
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/builder.py", line 1483, in _prepare_split_single
+    for key, record in generator:
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/packaged_modules/generator/generator.py", line 37, in _generate_examples
+    for sample_idx, sample in enumerate(self.config.generator(**shard_gen_kwargs)):
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/src/train_without_names.py", line 115, in segment_generator
+    samples /= np.max(np.abs(samples)) if np.max(np.abs(samples)) > 0 else 1
+                                          ^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/builder.py", line 850, in incomplete_dir
+    yield tmp_dir
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/builder.py", line 882, in download_and_prepare
+    self._download_and_prepare(
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/builder.py", line 1540, in _download_and_prepare
+    super()._download_and_prepare(
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/builder.py", line 943, in _download_and_prepare
+    self._prepare_split(split_generator, **prepare_split_kwargs)
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/builder.py", line 1345, in _prepare_split
+    for job_id, done, content in self._prepare_split_single(
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/builder.py", line 1514, in _prepare_split_single
+    num_examples, num_bytes = writer.finalize()
+                              ^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/arrow_writer.py", line 783, in finalize
+    self.write_examples_on_file()
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/arrow_writer.py", line 655, in write_examples_on_file
+    self._write_batch(batch_examples=batch_examples)
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/arrow_writer.py", line 752, in _write_batch
+    arrays.append(pa.array(typed_sequence))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pyarrow/array.pxi", line 281, in pyarrow.lib.array
+  File "pyarrow/array.pxi", line 118, in pyarrow.lib._handle_arrow_array_protocol
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/arrow_writer.py", line 291, in __arrow_array__
+    out = self._arrow_array(type=type)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/arrow_writer.py", line 340, in _arrow_array
+    out = pa.array(cast_to_python_objects(examples, only_1d_for_numpy=True))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/src/train_without_names.py", line 274, in <module>
+    train(epochs=args.epochs, tags=[t.strip() for t in args.tags.split(",") if t.strip()])
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/src/train_without_names.py", line 207, in train
+    dataset = Dataset.from_generator(
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/arrow_dataset.py", line 1428, in from_generator
+    ).read()
+      ^^^^^^
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/io/generator.py", line 52, in read
+    self.builder.download_and_prepare(
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/builder.py", line 873, in download_and_prepare
+    with incomplete_dir(self._output_dir) as tmp_output_dir:
+  File "/opt/miniconda3/lib/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/lib/python3.12/site-packages/datasets/builder.py", line 857, in incomplete_dir
+    shutil.rmtree(tmp_dir)
+  File "/opt/miniconda3/lib/python3.12/shutil.py", line 785, in rmtree
+    _rmtree_safe_fd(fd, path, onexc)
+  File "/opt/miniconda3/lib/python3.12/shutil.py", line 715, in _rmtree_safe_fd
+    os.unlink(entry.name, dir_fd=topfd)
+KeyboardInterrupt

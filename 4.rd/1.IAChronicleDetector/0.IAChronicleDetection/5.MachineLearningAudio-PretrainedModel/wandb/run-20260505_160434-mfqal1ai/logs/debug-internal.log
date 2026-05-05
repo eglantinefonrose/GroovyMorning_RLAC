@@ -1,0 +1,127 @@
+{"time":"2026-05-05T16:04:34.422272+02:00","level":"INFO","msg":"wandb-core"}
+{"time":"2026-05-05T16:04:34.424582+02:00","level":"INFO","msg":"stream: starting","core version":"0.26.1"}
+{"time":"2026-05-05T16:04:34.71095+02:00","level":"INFO","msg":"stream: created new stream","id":"mfqal1ai"}
+{"time":"2026-05-05T16:04:34.711006+02:00","level":"INFO","msg":"handler: started"}
+{"time":"2026-05-05T16:04:34.711184+02:00","level":"INFO","msg":"stream: started"}
+{"time":"2026-05-05T16:04:34.711193+02:00","level":"INFO","msg":"writer: started","stream_id":"mfqal1ai"}
+{"time":"2026-05-05T16:04:34.711546+02:00","level":"INFO","msg":"sender: started"}
+{"time":"2026-05-05T16:04:35.605201+02:00","level":"INFO","msg":"filestream: sending request","total_files":1,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:04:35.874623+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:04:50.606117+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":0,"events_lines":2,"console_offset":0,"console_lines":1,"uploaded_len":2}
+{"time":"2026-05-05T16:04:50.929369+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:05:05.606376+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":2,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:05:05.864505+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:05:20.605703+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":4,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:05:20.854352+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:05:35.606458+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":6,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:05:35.836359+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:05:50.60675+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":8,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:05:50.822948+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:06:05.606852+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":10,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:06:05.854976+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:06:20.607896+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":12,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:06:20.996481+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:06:35.606986+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":14,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:06:35.825965+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:06:50.607085+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":16,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:06:50.867968+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:07:05.607522+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":18,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:07:05.813789+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:07:20.606888+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":20,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:07:20.87968+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:07:35.607425+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":22,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:07:35.841672+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:07:50.607544+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":24,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:07:50.902232+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:08:05.607543+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":26,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:08:23.903313+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": read tcp 10.4.10.8:55704->34.8.250.101:443: read: can't assign requested address"}
+{"time":"2026-05-05T16:08:26.408384+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:08:31.29592+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:08:39.415602+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:08:56.107716+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:09:34.279345+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:10:41.987133+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:10:42.000708+02:00","level":"INFO","msg":"filestream: sending request","total_files":0}
+{"time":"2026-05-05T16:10:42.264496+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:10:42.272886+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":28,"events_lines":20,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:10:42.687462+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:10:44.597401+02:00","level":"INFO","msg":"filestream: sending request","total_files":1,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:10:44.82076+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:10:59.599606+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":48,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:10:59.941716+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:11:14.598884+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":50,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:11:14.905201+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:11:29.59876+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":52,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:11:29.83802+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:11:44.599876+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":54,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:11:44.891583+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:11:59.598459+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":56,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:11:59.888753+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:12:14.599231+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":58,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:12:14.87362+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:12:29.598181+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":60,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:12:29.839742+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:12:44.599173+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":62,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:12:44.880825+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:12:59.599403+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":64,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:12:59.902624+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:13:14.599988+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":66,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:13:14.889969+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:13:29.599485+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":68,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:13:29.840677+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:13:44.599693+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":70,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:13:55.439147+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:13:59.59986+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":72,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:14:35.287348+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": read tcp 10.4.10.8:55845->34.8.250.101:443: read: can't assign requested address"}
+{"time":"2026-05-05T16:14:37.710384+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:14:41.77903+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:14:51.354452+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:15:09.161089+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:15:44.310021+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:16:44.969253+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:16:44.969523+02:00","level":"INFO","msg":"filestream: sending request","total_files":0}
+{"time":"2026-05-05T16:16:45.267023+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:16:45.267268+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":74,"events_lines":22,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:16:45.608316+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:16:45.608432+02:00","level":"INFO","msg":"filestream: sending request","total_files":1,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:16:45.849809+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:17:00.48638+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":96,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:17:03.744213+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:17:15.485546+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":98,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:17:15.971175+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:17:30.488519+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":100,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:17:30.919097+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:17:45.48621+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":102,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:17:45.852754+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:18:00.486543+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":104,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:18:12.884039+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:18:15.486116+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":106,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:18:15.951614+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:18:30.486148+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":108,"events_lines":2,"console_offset":0,"console_lines":1}
+{"time":"2026-05-05T16:19:28.079965+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/graphql\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:19:30.433177+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/graphql\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:19:34.735994+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/graphql\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:19:43.288088+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/graphql\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:20:01.019257+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/graphql\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:20:23.627216+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": read tcp 10.4.10.8:55979->34.8.250.101:443: read: can't assign requested address"}
+{"time":"2026-05-05T16:20:26.111888+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:20:30.853928+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:20:34.515964+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/graphql\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:20:39.897841+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:20:57.673373+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:21:31.847131+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/eglantine-fonrose-rlac/RLAC-Audio/mfqal1ai/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:21:34.521617+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/graphql\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2026-05-05T16:23:13.193789+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:23:13.194752+02:00","level":"INFO","msg":"filestream: sending request","total_files":0}
+{"time":"2026-05-05T16:23:13.434514+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:23:13.466819+02:00","level":"INFO","msg":"filestream: sending request","total_files":3,"events_offset":110,"events_lines":8,"console_offset":0,"console_lines":63}
+{"time":"2026-05-05T16:23:13.903932+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:23:15.236073+02:00","level":"INFO","msg":"filestream: sending request","total_files":0,"uploaded_len":1}
+{"time":"2026-05-05T16:23:15.249451+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2026-05-05T16:23:15.506603+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:23:15.51654+02:00","level":"INFO","msg":"filestream: sending request","total_files":0,"uploaded_len":2,"complete":true,"exit_code":1}
+{"time":"2026-05-05T16:23:15.807411+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-05T16:23:15.808058+02:00","level":"INFO","msg":"stream: finishing up"}
+{"time":"2026-05-05T16:23:15.808126+02:00","level":"INFO","msg":"handler: closed"}
+{"time":"2026-05-05T16:23:15.8102+02:00","level":"INFO","msg":"sender: closed"}
+{"time":"2026-05-05T16:23:15.810246+02:00","level":"INFO","msg":"stream: all finished"}

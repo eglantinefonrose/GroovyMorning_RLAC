@@ -88,7 +88,7 @@ def process_date(target_date):
         href_match = re.search(r"href:\"([^\"]+)\"", block_data)
         main_link = href_match.group(1) if href_match else None
         
-        dest_dir = f"../../../@assets/0.media/audio/4.franceculture-matin/{target_date}"
+        dest_dir = f"../../../../@assets/0.media/audio/4.franceculture-matin/{target_date}"
         chroniques_dir = os.path.join(dest_dir, "chroniques")
         os.makedirs(chroniques_dir, exist_ok=True)
 
