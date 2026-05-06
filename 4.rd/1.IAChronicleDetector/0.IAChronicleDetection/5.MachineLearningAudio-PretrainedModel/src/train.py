@@ -6,6 +6,8 @@ import librosa
 import numpy as np
 import socket
 import argparse
+import shutil
+from pathlib import Path
 from datetime import datetime
 from pydub import AudioSegment
 import evaluate
@@ -30,6 +32,17 @@ MODEL_NAME = "facebook/wav2vec2-large-xlsr-53-french"
 OUTPUT_DIR = "../model_output"
 SAMPLING_RATE = 16000
 MAX_DURATION = 10.0
+
+def cleanup_cache():
+    """Cleans up the Hugging Face generator cache to free disk space."""
+    cache_path = Path.home() / ".cache" / "huggingface" / "datasets" / "generator"
+    if cache_path.exists():
+        print(f"Cleaning up cache at {cache_path}...")
+        try:
+            shutil.rmtree(cache_path)
+            print("Cache cleaned.")
+        except Exception as e:
+            print(f"Warning: Could not clean cache: {e}")
 
 def parse_timecode(tc_str: str) -> float:
     """Converts [HH:MM:SS:mmm] to seconds."""
@@ -199,7 +212,10 @@ class UnfreezeCallback(TrainerCallback):
                 for param in model.wav2vec2.feature_extractor.parameters():
                     param.requires_grad = True
 
-def train(epochs=10, tags=None, chronicle_step=5.0, background_step=20.0, background_percent=None):
+def train(epochs=10, tags=None, chronicle_step=5.0, background_step=20.0, background_percent=None, cleanup=False):
+    if cleanup:
+        cleanup_cache()
+        
     # Détection automatique du matériel
     hardware_info = "CPU"
     if torch.cuda.is_available():
@@ -370,6 +386,7 @@ if __name__ == "__main__":
     parser.add_argument("--chronicle_step", type=float, default=5.0, help="Pas d'échantillonnage pour les chroniques (en s)")
     parser.add_argument("--background_step", type=float, default=20.0, help="Pas d'échantillonnage pour le background (en s)")
     parser.add_argument("--background_percent", type=float, default=None, help="Pourcentage de background dans le dataset final")
+    parser.add_argument("--cleanup_cache", action="store_true", help="Vider le cache Hugging Face avant de commencer")
     
     args = parser.parse_args()
     
@@ -381,7 +398,6 @@ if __name__ == "__main__":
         tags=tags_list, 
         chronicle_step=args.chronicle_step, 
         background_step=args.background_step,
-        background_percent=args.background_percent
+        background_percent=args.background_percent,
+        cleanup=args.cleanup_cache
     )
-
-

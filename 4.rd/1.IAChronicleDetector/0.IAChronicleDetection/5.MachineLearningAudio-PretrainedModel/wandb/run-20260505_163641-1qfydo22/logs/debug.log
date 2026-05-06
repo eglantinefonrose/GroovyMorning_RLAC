@@ -17,3 +17,5 @@ config: {'model_architecture': 'Wav2Vec2', 'model_variant': 'facebook/wav2vec2-l
 2026-05-05 16:36:44,376 INFO    MainThread:59324 [wandb_run.py:_redirect():2472] Wrapping output streams.
 2026-05-05 16:36:44,376 INFO    MainThread:59324 [wandb_run.py:_redirect():2495] Redirects installed.
 2026-05-05 16:36:44,378 INFO    MainThread:59324 [wandb_init.py:init():1094] run started, returning control to user process
+2026-05-05 16:48:54,476 INFO    wandb-AsyncioManager-main:59324 [service_client.py:_forward_responses():134] Reached EOF.
+2026-05-05 16:48:54,499 INFO    wandb-AsyncioManager-main:59324 [mailbox.py:close():155] Closing mailbox, abandoning 1 handles.

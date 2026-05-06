@@ -1,0 +1,95 @@
+_wandb:
+    value:
+        cli_version: 0.26.1
+        e:
+            4gsc16vs0w93kz7dai78enxalyzejffn:
+                apple:
+                    ecpuCores: 2
+                    gpuCores: 14
+                    macModel: MacBookPro18,3
+                    memoryGb: 16
+                    name: Apple M1 Pro
+                    pcpuCores: 6
+                    ramTotalBytes: "17179869184"
+                    swapTotalBytes: "3221225472"
+                args:
+                    - --background_percent
+                    - "50"
+                codePath: 4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/src/train_without_names.py
+                codePathLocal: src/train_without_names.py
+                cpu_count: 8
+                cpu_count_logical: 8
+                disk:
+                    /:
+                        total: "494384795648"
+                        used: "476862386176"
+                email: eglantine.fonrose@uphf.fr
+                executable: /Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/.venv/bin/python
+                git:
+                    commit: e26712b4ef863186a4c29ff154558f70b55a51f2
+                    remote: https://github.com/eglantinefonrose/GroovyMorning_RLAC.git
+                host: MacBook-Pro-6.local
+                memory:
+                    total: "17179869184"
+                os: macOS-15.3.1-arm64-arm-64bit
+                program: /Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/src/train_without_names.py
+                python: CPython 3.12.2
+                root: /Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel
+                startedAt: "2026-05-05T14:36:41.785121Z"
+                writerId: 4gsc16vs0w93kz7dai78enxalyzejffn
+        m: []
+        python_version: 3.12.2
+        t:
+            "1":
+                - 1
+                - 5
+                - 11
+                - 49
+                - 51
+                - 53
+                - 71
+                - 100
+            "2":
+                - 1
+                - 5
+                - 11
+                - 49
+                - 51
+                - 53
+                - 71
+                - 100
+            "3":
+                - 13
+                - 15
+                - 16
+            "4": 3.12.2
+            "5": 0.26.1
+            "6": 5.7.0
+            "12": 0.26.1
+            "13": darwin-arm64
+background_percent:
+    value: 50
+background_step:
+    value: 10
+chronicle_step:
+    value: 5
+epochs:
+    value: 10
+gradient_accumulation_steps:
+    value: 16
+hardware:
+    value: Mac Apple Silicon (MPS)
+learning_rate:
+    value: 5e-05
+machine:
+    value: MacBook-Pro-6.local
+max_duration:
+    value: 10
+model_architecture:
+    value: Wav2Vec2
+model_variant:
+    value: facebook/wav2vec2-large-xlsr-53-french
+per_device_train_batch_size:
+    value: 1
+sampling_rate:
+    value: 16000

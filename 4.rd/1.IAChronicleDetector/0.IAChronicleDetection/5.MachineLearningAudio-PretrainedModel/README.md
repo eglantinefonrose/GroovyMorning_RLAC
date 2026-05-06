@@ -29,8 +29,20 @@ Le script `train.py` effectue les étapes suivantes :
 
 ### Lancement de l'entraînement
 ```bash
-python train.py
+python train.py --epochs 10
 ```
+
+**Arguments optionnels :**
+- `--epochs` : Nombre d'époques d'entraînement (défaut: 10).
+- `--cleanup_cache` : Vide le cache Hugging Face avant de commencer. Utile en cas d'erreur de disque ou de données corrompues, mais ralentit le démarrage (re-génération des segments).
+- `--background_percent` : Pourcentage cible de segments "background" dans le dataset (ex: 70).
+
+### Lancement en mode offline
+HF_DATASETS_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python train.py
+
+### Astuces pour la vitesse
+- **Multiprocessing** : Vous pouvez accélérer la génération du dataset en ajoutant `num_proc=4` (ou le nombre de cœurs de votre Mac) dans l'appel `dataset.map` à l'intérieur des scripts.
+- **Cache** : N'utilisez `--cleanup_cache` que si vous changez radicalement de données ou si vous avez des erreurs de lecture.
 
 ## Prédiction (`predict.py`)
 
