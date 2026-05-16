@@ -21,3 +21,7 @@
 4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/wandb
 *.safetensors
 *.pt
+4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/model_output
+4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/model_output_ast
+4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/model_output_binary
+4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/wandb
