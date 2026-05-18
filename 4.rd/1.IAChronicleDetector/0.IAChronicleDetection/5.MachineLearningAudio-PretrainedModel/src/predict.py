@@ -115,37 +115,42 @@ def predict(audio_path: str, model_type: str, model_dir: str = None, is_binary: 
             logits = model(**inputs).logits
             probs = torch.softmax(logits, dim=-1)
             
-        confidence, pred_id = torch.max(probs, dim=-1)
-        confidence = confidence.item()
-        pred_id = pred_id.item()
+        # We store the probability of 'chronique' (label 1)
+        chronique_prob = probs[0][1].item()
         
-        # Handle string keys in id2label (common in HuggingFace config)
-        label = model.config.id2label.get(str(pred_id), model.config.id2label.get(pred_id))
+        # Determine pred_id for internal reference
+        pred_id = torch.argmax(probs, dim=-1).item()
         
-        if debug:
-            print(f"Time: {format_time(start)}-{format_time(end)} | Label: {label:10} | Conf: {confidence:.3f}")
-
-        if label == "background" or confidence < threshold:
-            continue
-
         predictions.append({
-            "label": label,
             "start": start,
             "end": end,
-            "confidence": confidence
+            "prob": chronique_prob,
+            "pred_id": pred_id
         })
 
     if not predictions:
         return []
 
+    for i, p in enumerate(predictions):
+        # Re-evaluate label based on raw prob and threshold
+        label = "chronique" if p["prob"] >= threshold else "background"
+        p["label"] = label
+        p["confidence"] = p["prob"]
+
+    # Filter out background segments for merging
+    active_segments = [p for p in predictions if p["label"] == "chronique"]
+    
+    if not active_segments:
+        return []
+
     # Merge consecutive segments with same label
     merged = []
-    current = predictions[0].copy()
+    current = active_segments[0].copy()
     
-    for i in range(1, len(predictions)):
-        next_seg = predictions[i]
-        # Merge if same label AND they are close enough in time (Gap Filling)
-        if next_seg["label"] == current["label"] and next_seg["start"] <= current["end"] + gap_filling:
+    for i in range(1, len(active_segments)):
+        next_seg = active_segments[i]
+        # Merge if they are close enough in time (Gap Filling)
+        if next_seg["start"] <= current["end"] + gap_filling + 0.1: # 0.1 for float safety
             current["end"] = next_seg["end"]
             current["confidence"] = max(current["confidence"], next_seg["confidence"])
         else:
