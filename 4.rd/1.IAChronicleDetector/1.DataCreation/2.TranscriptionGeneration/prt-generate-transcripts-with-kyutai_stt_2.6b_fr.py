@@ -19,16 +19,8 @@ from datetime import timedelta
 
 # Configuration par défaut
 DEFAULT_MEDIA_BASE_DIR = "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/@assets/0.media"
-DEFAULT_TRANSCRIPTION_OUTPUT_DIR = "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/@assets/1.modelOutputs/0.transcriptions/2.transcriptions_kyutai_stt-1b-en_fr"
-DEFAULT_MODEL_ID = "kyutai/stt-1b-en_fr"
-
-# Répertoires audio à traiter
-AUDIO_DIRS = [
-    "1.rtl-matin",
-    "2.franceinfo-matin",
-    "3.franceculture-matin",
-    "4.franceinter-matin"
-]
+DEFAULT_TRANSCRIPTION_OUTPUT_DIR = "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/@assets/1.modelOutputs/0.transcriptions/2.transcriptions_kyutai_stt_2.6b_fr"
+DEFAULT_MODEL_ID = "kyutai/stt-1b-en_fr-trfs"
 
 def parse_arguments():
     """Parse les arguments de ligne de commande"""
@@ -79,7 +71,7 @@ Exemples:
     
     return parser.parse_args()
 
-def display_configuration(args):
+def display_configuration(args, audio_dirs):
     """Affiche la configuration utilisée"""
     print("")
     print(" Paramètres utilisés de prt-generate-transcripts-with-kyutai")
@@ -90,7 +82,7 @@ def display_configuration(args):
     print(f"  Model ID:                 [{args.model_id}]")
     print(f"  Device:                   [{args.device or 'auto'}]")
     print(f"  Move to audio-done:       [{'Non' if args.no_move_to_done_when_processed else 'Oui'}]")
-    print(f"  Dossiers à traiter:       [{', '.join(AUDIO_DIRS)}]")
+    print(f"  Dossiers détectés:        [{len(audio_dirs)} dossiers dans audio/]")
     print("-" * 65)
     print("")
     print("💡 Utilisez --help pour voir tous les paramètres disponibles\n")
@@ -115,8 +107,6 @@ def generate_srt(transcription_with_timestamps):
     Convertit la sortie brute du modèle avec tags <|timestamp|> en format SRT
     """
     # Pattern pour extraire les timestamps et le texte
-    # Le modèle peut renvoyer des trucs comme <|0.00|> Bonjour <|1.20|> comment <|2.00|> allez-vous ? <|3.00|>
-    # On va découper par timestamps
     tokens = re.split(r"(<\|\d+\.\d+\|>)", transcription_with_timestamps)
     
     srt_entries = []
@@ -131,7 +121,6 @@ def generate_srt(transcription_with_timestamps):
         if ts_match:
             ts = ts_match.group(1)
             if current_start is not None:
-                # On a un début et une fin
                 if current_text.strip():
                     srt_entries.append((current_start, ts, current_text.strip()))
                 current_text = ""
@@ -156,23 +145,15 @@ def transcribe_audio(file_path, output_path, model, processor, device):
     import librosa
     
     try:
-        # Charger l'audio (Kyutai nécessite 24kHz)
         audio, _ = librosa.load(file_path, sr=24000)
-        
-        # Préparer les inputs
         inputs = processor(audio, sampling_rate=24000, return_tensors="pt").to(device)
         
-        # Générer avec timestamps
         with torch.no_grad():
             output_tokens = model.generate(**inputs, return_timestamps=True)
         
-        # Décoder
         prediction = processor.batch_decode(output_tokens, skip_special_tokens=False)[0]
-        
-        # Convertir en SRT
         srt_content = generate_srt(prediction)
         
-        # Si le SRT est vide (pas de timestamps trouvés), on met au moins le texte brut
         if not srt_content:
             text = processor.batch_decode(output_tokens, skip_special_tokens=True)[0]
             srt_content = f"1\n00:00:00,000 --> 00:00:10,000\n{text}\n"
@@ -205,45 +186,66 @@ def move_to_done(file_path, media_base_dir, audio_dir, rel_sub_dir):
         print(f"   ❌ Erreur lors du déplacement: {e}")
         return False
 
-def process_audio_files(args, model, processor, device):
+def process_audio_files(args, model, processor, device, audio_dirs):
     """Parcourt les répertoires récursivement et traite les fichiers audio"""
+    from tqdm import tqdm
+    import time
+    
+    # Extensions audio supportées
+    AUDIO_EXTENSIONS = {".wav", ".mp3", ".m4a", ".aac", ".flac", ".ogg", ".opus", ".m4b"}
+    
+    # Phase 1: Scan de tous les fichiers à traiter
+    print("🔍 Scan des fichiers en cours...")
+    all_files_to_process = []
+    total_size_bytes = 0
+    
+    for audio_dir in audio_dirs:
+        audio_path = Path(args.media_base_dir) / "audio" / audio_dir
+        if not audio_path.exists():
+            continue
+            
+        files = [
+            f for f in audio_path.rglob("*") 
+            if f.is_file() and not f.name.startswith('.') and f.suffix.lower() in AUDIO_EXTENSIONS
+        ]
+        
+        for f in files:
+            file_size = f.stat().st_size
+            all_files_to_process.append((f, audio_dir, file_size))
+            total_size_bytes += file_size
+            
+    total_files = len(all_files_to_process)
+    if total_files == 0:
+        print("ℹ️ Aucun fichier trouvé à traiter.")
+        return {
+            "total_files": 0,
+            "transcribed_success": 0,
+            "transcribed_failed": 0,
+            "moved_success": 0,
+            "moved_failed": 0
+        }
+        
+    print(f"📊 {total_files} fichiers trouvés ({total_size_bytes / (1024*1024):.1f} Mo)")
+    print("🚀 Démarrage du traitement...")
     
     stats = {
-        "total_files": 0,
+        "total_files": total_files,
         "transcribed_success": 0,
         "transcribed_failed": 0,
         "moved_success": 0,
         "moved_failed": 0
     }
     
-    # Extensions audio supportées
-    AUDIO_EXTENSIONS = {".wav", ".mp3", ".m4a", ".aac", ".flac", ".ogg", ".opus", ".m4b"}
-    
-    for audio_dir in AUDIO_DIRS:
-        print(f"\n📂 Traitement (récursif) du dossier: {audio_dir}")
-        
-        audio_path = Path(args.media_base_dir) / "audio" / audio_dir
-        
-        if not audio_path.exists():
-            print(f"   ⚠️  Répertoire source inexistant: {audio_path}")
-            continue
-        
-        files = [
-            f for f in audio_path.rglob("*") 
-            if f.is_file() and not f.name.startswith('.') and f.suffix.lower() in AUDIO_EXTENSIONS
-        ]
-        
-        if not files:
-            print(f"   ℹ️  Aucun fichier trouvé dans {audio_dir}")
-            continue
-        
-        stats["total_files"] += len(files)
-        
-        for file_path in files:
+    # Phase 2: Traitement avec barre de progression
+    # On utilise tqdm avec l'unité 'file'
+    with tqdm(total=total_files, unit="file", desc="Progression globale") as pbar:
+        for file_path, audio_dir, _ in all_files_to_process:
+            audio_path = Path(args.media_base_dir) / "audio" / audio_dir
             rel_sub_dir = file_path.relative_to(audio_path).parent
             display_name = file_path.relative_to(audio_path)
             
-            print(f"\n   🎵 Fichier: {display_name}")
+            # Mise à jour de la description pour voir le fichier actuel sans polluer la sortie
+            pbar.set_postfix_str(f"Dernier: {file_path.name[:20]}...")
             
             output_dir = Path(args.transcription_output_dir) / audio_dir / rel_sub_dir
             output_dir.mkdir(parents=True, exist_ok=True)
@@ -251,7 +253,6 @@ def process_audio_files(args, model, processor, device):
             base_name = file_path.stem
             output_file = output_dir / f"{base_name}_transcription.srt"
             
-            print(f"   🔄 Transcription en cours (Kyutai STT)...")
             success = transcribe_audio(
                 str(file_path),
                 str(output_file),
@@ -262,20 +263,28 @@ def process_audio_files(args, model, processor, device):
             
             if success:
                 stats["transcribed_success"] += 1
-                print(f"   ✅ Transcription sauvegardée: {output_file}")
                 
                 if not args.no_move_to_done_when_processed:
                     if move_to_done(file_path, args.media_base_dir, audio_dir, rel_sub_dir):
                         stats["moved_success"] += 1
                     else:
                         stats["moved_failed"] += 1
-                else:
-                    print(f"   ⏸️  Déplacement désactivé")
             else:
                 stats["transcribed_failed"] += 1
-                print(f"   ❌ Échec de la transcription pour {file_path.name}")
+                # En cas d'échec, on l'affiche explicitement au dessus de la barre
+                tqdm.write(f"❌ Échec de la transcription pour {file_path.name}")
+            
+            pbar.update(1)
     
     return stats
+
+def get_audio_subdirs(media_base_dir):
+    """Récupère la liste des dossiers dans le répertoire audio/"""
+    audio_path = Path(media_base_dir) / "audio"
+    if not audio_path.exists():
+        return []
+    # Liste uniquement les dossiers directs dans audio/
+    return sorted([d.name for d in audio_path.iterdir() if d.is_dir() and not d.name.startswith('.')])
 
 def display_stats(stats, args):
     """Affiche les statistiques finales"""
@@ -294,9 +303,16 @@ def main():
     """Fonction principale"""
     args = parse_arguments()
     
-    display_configuration(args)
+    # Détection dynamique des dossiers à traiter
+    audio_dirs = get_audio_subdirs(args.media_base_dir)
     
-    # Importations lourdes ici
+    display_configuration(args, audio_dirs)
+    
+    if not audio_dirs:
+        print("❌ Aucun dossier trouvé dans le répertoire audio. Fin du script.")
+        sys.exit(0)
+    
+    # Importations lourdes
     print("📦 Chargement des bibliothèques AI (torch, transformers)...")
     import torch
     from transformers import KyutaiSpeechToTextProcessor, KyutaiSpeechToTextForConditionalGeneration
@@ -328,7 +344,7 @@ def main():
     
     print("🚀 Démarrage du traitement des transcriptions...\n")
     
-    stats = process_audio_files(args, model, processor, device)
+    stats = process_audio_files(args, model, processor, device, audio_dirs)
     
     display_stats(stats, args)
     
