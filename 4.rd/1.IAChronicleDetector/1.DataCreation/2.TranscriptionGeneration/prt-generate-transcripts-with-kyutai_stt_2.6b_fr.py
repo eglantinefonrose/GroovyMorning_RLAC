@@ -37,6 +37,18 @@ def parse_arguments():
     )
     
     parser.add_argument(
+        "-i", "--input",
+        type=str,
+        help="Chemin vers un fichier audio unique à traiter"
+    )
+    
+    parser.add_argument(
+        "--stdout",
+        action="store_true",
+        help="Afficher la transcription sur stdout au lieu de l'écrire dans un fichier"
+    )
+    
+    parser.add_argument(
         "--no-move-to-done-when-processed",
         action="store_true",
         help="Ne pas déplacer les fichiers vers audio-done après transcription réussie"
@@ -82,14 +94,16 @@ def format_timestamp(seconds):
     millis = int(td.microseconds / 1000)
     return f"{hours:02d}:{minutes:02d}:{secs:02d},{millis:03d}"
 
-def transcribe_audio_mlx(file_path, output_path, model, audio_tokenizer, text_tokenizer, lm_config, stt_config):
+def transcribe_audio_mlx(file_path, model, audio_tokenizer, text_tokenizer, lm_config, stt_config):
     """
     Transcrit un fichier audio en utilisant MLX et rustymimi
+    Retourne le contenu SRT sous forme de chaîne de caractères
     """
     import mlx.core as mx
     import numpy as np
     import librosa
     from moshi_mlx import utils
+    from tqdm import tqdm
     
     try:
         # Charger l'audio et rééchantillonner à 24kHz
@@ -119,17 +133,14 @@ def transcribe_audio_mlx(file_path, output_path, model, audio_tokenizer, text_to
         other_codebooks = lm_config.other_codebooks
         
         # Traitement par steps de 80ms (1920 échantillons)
-        from tqdm import tqdm
         file_name = os.path.basename(file_path)
-        for idx in tqdm(range(steps), desc=f"   └─ {file_name[:30]}", unit="step", leave=False):
+        for idx in tqdm(range(steps), desc=f"   └─ {file_name[:30]}", unit="step", leave=False, file=sys.stderr):
             pcm_chunk = audio[idx * 1920:(idx + 1) * 1920]
             # rustymimi attend (batch, channels, samples) -> (1, 1, 1920)
             pcm_input = pcm_chunk[None, None, :]
             
             # Encodage Mimi
             other_audio_tokens = audio_tokenizer.encode_step(pcm_input)
-            # other_audio_tokens shape via rustymimi is (batch, samples, codebooks)
-            # Moshi LmGen attend (codebooks, steps)
             other_audio_tokens_mx = mx.array(other_audio_tokens).transpose(0, 2, 1)[:, :, :other_codebooks]
             
             # Step du modèle
@@ -137,7 +148,6 @@ def transcribe_audio_mlx(file_path, output_path, model, audio_tokenizer, text_to
             text_token_id = text_token[0].item()
             
             # On stocke le token avec son timestamp (ajusté du délai audio)
-            # Le délai audio_delay_seconds est souvent de 0.5s
             delay = stt_config.get("audio_delay_seconds", 0.0) if stt_config else 0.0
             timestamp = (idx * 0.08) - delay
             if timestamp < 0: timestamp = 0
@@ -150,20 +160,18 @@ def transcribe_audio_mlx(file_path, output_path, model, audio_tokenizer, text_to
         start_time = None
         
         for timestamp, token_id in all_tokens:
-            # 0 et 3 sont souvent des tokens de padding/silence
             if token_id in (0, 3):
                 continue
                 
             char = text_tokenizer.id_to_piece(token_id)
-            char = char.replace(" ", " ") # Sentencepiece space
-            char = char.replace("▁", "")
+            char = char.replace(" ", " ") # Caractère spécial SentencePiece
+            char = char.replace("▁", " ") # Caractère spécial Kyutai
             
             if char.strip():
                 if start_time is None:
                     start_time = timestamp
                 current_text.append(char)
                 
-                # Découpage arbitraire pour SRT (tous les 10 tokens ou sur ponctuation)
                 if len(current_text) > 12 or any(p in char for p in ".!?"):
                     end_time = timestamp + 0.08
                     text_content = "".join(current_text).strip()
@@ -176,20 +184,20 @@ def transcribe_audio_mlx(file_path, output_path, model, audio_tokenizer, text_to
         if current_text and start_time is not None:
             srt_entries.append((start_time, all_tokens[-1][0] + 0.08, "".join(current_text).strip()))
 
-        # Ecriture SRT
-        with open(output_path, 'w', encoding='utf-8') as f:
-            for i, (start, end, text) in enumerate(srt_entries):
-                f.write(f"{i+1}\n")
-                f.write(f"{format_timestamp(start)} --> {format_timestamp(end)}\n")
-                f.write(f"{text}\n\n")
+        # Génération du contenu SRT
+        srt_content = ""
+        for i, (start, end, text) in enumerate(srt_entries):
+            srt_content += f"{i+1}\n"
+            srt_content += f"{format_timestamp(start)} --> {format_timestamp(end)}\n"
+            srt_content += f"{text}\n\n"
         
-        return True
+        return srt_content
             
     except Exception as e:
-        print(f"Exception lors de la transcription MLX: {e}")
+        print(f"Exception lors de la transcription MLX: {e}", file=sys.stderr)
         import traceback
-        traceback.print_exc()
-        return False
+        traceback.print_exc(file=sys.stderr)
+        return None
 
 def move_to_done(file_path, media_base_dir, audio_dir, rel_sub_dir):
     """
@@ -217,16 +225,42 @@ def main():
     from huggingface_hub import hf_hub_download
     from moshi_mlx import models
     
-    # Récupération des dossiers audio
-    audio_base = Path(args.media_base_dir) / "audio"
-    if not audio_base.exists():
-        print(f"❌ Dossier source introuvable: {audio_base}")
-        return
+    # Récupération des dossiers audio si pas de mode single file
+    all_files = []
+    if args.input:
+        input_path = Path(args.input)
+        if not input_path.exists():
+            print(f"❌ Fichier d'entrée introuvable : {args.input}", file=sys.stderr)
+            return
+        all_files.append((input_path, None))
+    else:
+        audio_base = Path(args.media_base_dir) / "audio"
+        if not audio_base.exists():
+            print(f"❌ Dossier source introuvable: {audio_base}", file=sys.stderr)
+            return
+            
+        audio_dirs = sorted([d.name for d in audio_base.iterdir() if d.is_dir() and not d.name.startswith('.')])
         
-    audio_dirs = sorted([d.name for d in audio_base.iterdir() if d.is_dir() and not d.name.startswith('.')])
-    
-    print(f"🖥️  MLX Device: GPU (Metal)")
-    print(f"📥 Chargement du modèle depuis {args.hf_repo}...")
+        # Scan des fichiers
+        AUDIO_EXTENSIONS = {".wav", ".mp3", ".m4a", ".aac", ".flac", ".ogg", ".opus", ".m4b"}
+        for adir in audio_dirs:
+            path = audio_base / adir
+            files = [f for f in path.rglob("*") if f.is_file() and f.suffix.lower() in AUDIO_EXTENSIONS]
+            for f in files:
+                all_files.append((f, adir))
+                
+    if not all_files:
+        print("ℹ️ Aucun fichier à traiter.", file=sys.stderr)
+        return
+
+    # Limite si spécifiée
+    if args.max_files_to_process and not args.input:
+        all_files = all_files[:args.max_files_to_process]
+        print(f"⚠️ Limité à {args.max_files_to_process} fichiers par l'option --max-files-to-process", file=sys.stderr)
+
+    if not args.stdout:
+        print(f"🖥️  MLX Device: GPU (Metal)", file=sys.stderr)
+        print(f"📥 Chargement du modèle depuis {args.hf_repo}...", file=sys.stderr)
     
     try:
         config_path = hf_hub_download(args.hf_repo, "config.json")
@@ -238,9 +272,7 @@ def main():
         model = models.Lm(lm_config)
         model.set_dtype(mx.bfloat16)
         
-        # Chargement des poids
         weights_path = hf_hub_download(args.hf_repo, config_dict.get("moshi_name", "model.safetensors"))
-        # Gestion de la quantification si nécessaire (ici on assume bf16 par défaut pour stt-1b)
         if weights_path.endswith(".q4.safetensors"):
             nn.quantize(model, bits=4, group_size=32)
         elif weights_path.endswith(".q8.safetensors"):
@@ -248,7 +280,6 @@ def main():
             
         model.load_weights(weights_path)
         
-        # Tokenizers
         tokenizer_path = hf_hub_download(args.hf_repo, config_dict["tokenizer_name"])
         text_tokenizer = sentencepiece.SentencePieceProcessor(tokenizer_path)
         
@@ -258,45 +289,21 @@ def main():
         model.warmup()
         
     except Exception as e:
-        print(f"❌ Erreur lors de l'initialisation: {e}")
+        print(f"❌ Erreur lors de l'initialisation: {e}", file=sys.stderr)
         import traceback
-        traceback.print_exc()
+        traceback.print_exc(file=sys.stderr)
         return
 
-    # Scan des fichiers
-    all_files = []
-    AUDIO_EXTENSIONS = {".wav", ".mp3", ".m4a", ".aac", ".flac", ".ogg", ".opus", ".m4b"}
+    if not args.stdout:
+        print(f"🚀 Traitement de {len(all_files)} fichiers...", file=sys.stderr)
     
-    for adir in audio_dirs:
-        path = audio_base / adir
-        files = [f for f in path.rglob("*") if f.is_file() and f.suffix.lower() in AUDIO_EXTENSIONS]
-        for f in files:
-            all_files.append((f, adir))
-            
-    if not all_files:
-        print("ℹ️ Aucun fichier à traiter.")
-        return
-
-    # Limite si spécifiée
-    if args.max_files_to_process:
-        all_files = all_files[:args.max_files_to_process]
-        print(f"⚠️ Limité à {args.max_files_to_process} fichiers par l'option --max-files-to-process")
-
-    print(f"🚀 Traitement de {len(all_files)} fichiers...")
+    # On désactive la barre de progression globale si on a un seul fichier ou si on est en mode stdout
+    disable_pbar = args.stdout or len(all_files) == 1
     
-    with tqdm(total=len(all_files), unit="file", desc="Transcription MLX") as pbar:
+    with tqdm(total=len(all_files), unit="file", desc="Transcription MLX", disable=disable_pbar, file=sys.stderr) as pbar:
         for file_path, adir in all_files:
-            audio_path = audio_base / adir
-            rel_path = file_path.relative_to(audio_path).parent
-            output_dir = Path(args.transcription_output_dir) / adir / rel_path
-            output_dir.mkdir(parents=True, exist_ok=True)
-            
-            output_file = output_dir / f"{file_path.stem}_transcription.srt"
-            pbar.set_postfix_str(f"Fichier: {file_path.name[:20]}")
-            
-            success = transcribe_audio_mlx(
+            srt_content = transcribe_audio_mlx(
                 file_path, 
-                output_file, 
                 model, 
                 audio_tokenizer, 
                 text_tokenizer, 
@@ -304,13 +311,33 @@ def main():
                 stt_config
             )
             
-            if success:
-                if not args.no_move_to_done_when_processed:
-                    move_to_done(file_path, args.media_base_dir, adir, rel_path)
+            if srt_content:
+                if args.stdout:
+                    print(srt_content)
+                else:
+                    # Déterminer le chemin de sortie
+                    if adir:
+                        audio_path = Path(args.media_base_dir) / "audio" / adir
+                        rel_path = file_path.relative_to(audio_path).parent
+                        output_dir = Path(args.transcription_output_dir) / adir / rel_path
+                    else:
+                        output_dir = Path(args.transcription_output_dir)
+                    
+                    output_dir.mkdir(parents=True, exist_ok=True)
+                    output_file = output_dir / f"{file_path.stem}_transcription.srt"
+                    
+                    with open(output_file, 'w', encoding='utf-8') as f:
+                        f.write(srt_content)
+                    
+                    if not args.no_move_to_done_when_processed and adir:
+                        move_to_done(file_path, args.media_base_dir, adir, rel_path)
             else:
-                tqdm.write(f"❌ Échec pour {file_path.name}")
+                if not args.stdout:
+                    tqdm.write(f"❌ Échec pour {file_path.name}", file=sys.stderr)
             
-            pbar.update(1)
+            if not disable_pbar:
+                pbar.set_postfix_str(f"Fichier: {file_path.name[:20]}")
+                pbar.update(1)
 
 if __name__ == "__main__":
     main()

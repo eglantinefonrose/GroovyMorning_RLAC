@@ -162,3 +162,53 @@ Ca plante encore
 
 Cette fois, lance le truc et teste avant de me dire que tout va bien ;-)
 PS : Rajoute une option `--max-files-to-process <N>` comme ça tu peux lancer le truc en traitant juste N=1 fichier pour voir si ça marche sans y passer 15 ans
+
+---
+
+Ok nickel, ça fonctionne. Mais il y a un truc bizarre dans le texte généré. Il n'y a aucun espaces entre les mots !
+Tu penses que c'est un problème du modèle où un truc bizarre dans le code
+
+```
+uv run ./prt-generate-transcripts-with-kyutai_stt_2.6b_fr.py -i /Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/@assets/0.media/audio/1.rtl-matin/06-04-2026/chroniques/angle-eco.mp3  --stdout
+1                                                                                                                                                                                                                                                             
+00:00:01,660 --> 00:00:02,060
+RTLmatin.
+
+2
+00:00:02,780 --> 00:00:04,460
+Ilest7h39,l'Anglico,
+
+3
+00:00:04,460 --> 00:00:06,060
+FrançoisLanglais,alorsquelesvacancesscolairesont
+
+4
+00:00:06,380 --> 00:00:07,900
+débuté,vousnousemmenezprendrel'avionce
+
+[...]
+
+107
+00:03:18,060 --> 00:03:20,060
+Bon,mercibeaucoupàvousFrançoisLanglère
+
+108
+00:03:20,060 --> 00:03:21,100
+,onvousretrouveraévidemmentdemainmatin.
+
+109
+00:03:21,180 --> 00:03:21,340
+R.
+
+110
+00:03:21,340 --> 00:03:21,500
+T.
+
+111
+00:03:21,500 --> 00:03:21,660
+L.
+
+112
+00:03:21,660 --> 00:03:22,460
+ilest7h43.
+```
