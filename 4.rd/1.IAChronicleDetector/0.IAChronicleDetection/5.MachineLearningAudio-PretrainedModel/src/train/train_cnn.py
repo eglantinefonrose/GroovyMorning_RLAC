@@ -8,8 +8,13 @@ import socket
 import argparse
 import shutil
 import random
+import sys
 from pathlib import Path
 from datetime import datetime
+
+# Add the parent directory (src) to sys.path to allow importing modules from it
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 from pydub import AudioSegment
 import evaluate
 from sklearn.metrics import f1_score
