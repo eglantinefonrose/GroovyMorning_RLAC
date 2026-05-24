@@ -119,7 +119,9 @@ def transcribe_audio_mlx(file_path, output_path, model, audio_tokenizer, text_to
         other_codebooks = lm_config.other_codebooks
         
         # Traitement par steps de 80ms (1920 échantillons)
-        for idx in range(steps):
+        from tqdm import tqdm
+        file_name = os.path.basename(file_path)
+        for idx in tqdm(range(steps), desc=f"   └─ {file_name[:30]}", unit="step", leave=False):
             pcm_chunk = audio[idx * 1920:(idx + 1) * 1920]
             # rustymimi attend (batch, channels, samples) -> (1, 1, 1920)
             pcm_input = pcm_chunk[None, None, :]
