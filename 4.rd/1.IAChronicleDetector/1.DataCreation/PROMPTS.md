@@ -102,3 +102,63 @@ Quand je traite une grosse hiérarchie de fichiers, le traitement peut être lon
 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
 ❌ Erreur lors du chargement du modèle: Can't load feature extractor for 'kyutai/stt-1b-en_fr'. If you were trying to load it from 'https://huggingface.co/models', make sure you don't have a local directory with the same name. Otherwise, make sure 'kyutai/stt-1b-en_fr' is the correct path to a directory containing a preprocessor_config.json file
 ```
+
+---
+
+Tu penses que ça tournerait plus vite en version MLX sur mon Mac M1 Pro ?
+
+   -> RESULTAT 
+
+        ✦ Absolument. Sur un Mac M1 Pro, MLX sera entre 3 et 4 fois plus rapide que la version transformers (PyTorch) que nous utilisons actuellement.
+
+        Pourquoi MLX ?
+        - Mémoire Unifiée : MLX accède directement à la mémoire partagée du M1 sans copier de données entre le CPU et le GPU.
+        - Optimisation Native : Contrairement à PyTorch qui est généraliste, MLX est écrit spécifiquement pour les puces Apple Silicon.
+        - Moins d'overhead : La version transformers-trfs est un "wrapper" moins efficace que la version native de Kyutai.
+
+        Comment passer à MLX ?
+        Le script actuel devrait être réécrit pour utiliser moshi-mlx au lieu de transformers. C'est un peu plus complexe car moshi-mlx est optimisé pour le streaming (traitement par petits morceaux audio de 80ms) plutôt que pour le traitement de fichiers
+        complets d'un coup.
+
+        Est-ce que vous voulez que je tente une version MLX du script ? 
+        Cela nécessiterait :
+        1. D'installer moshi-mlx (uv add moshi-mlx).
+        2. De réécrire la logique de transcription pour gérer le streaming de Kyutai et reconstruire les timestamps à la volée.
+
+        Si vous avez beaucoup de fichiers, le gain de temps sera massif. Si vous n'en avez que quelques-uns, la version actuelle reste plus simple à maintenir. Qu'en pensez-vous ?
+
+--- 
+
+Ok. Porte le script en version MLX
+
+---
+
+Ça plante
+```
+(base) eglantine@macbook-pro-6 2.TranscriptionGeneration % uv sync                                                     
+Resolved 52 packages in 6ms
+Audited 46 packages in 1ms
+(base) eglantine@macbook-pro-6 2.TranscriptionGeneration % 
+(base) eglantine@macbook-pro-6 2.TranscriptionGeneration % 
+(base) eglantine@macbook-pro-6 2.TranscriptionGeneration % uv run ./prt-generate-transcripts-with-kyutai_stt_2.6b_fr.py
+Traceback (most recent call last):
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/1.DataCreation/2.TranscriptionGeneration/./prt-generate-transcripts-with-kyutai_stt_2.6b_fr.py", line 243, in <module>
+    main()
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/1.DataCreation/2.TranscriptionGeneration/./prt-generate-transcripts-with-kyutai_stt_2.6b_fr.py", line 190, in main
+    from moshi_mlx.models import loaders
+ImportError: cannot import name 'loaders' from 'moshi_mlx.models' (/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/1.DataCreation/2.TranscriptionGeneration/.venv/lib/python3.12/site-packages/moshi_mlx/models/__init__.py)
+(base) eglantine@macbook-pro-6 2.TranscriptionGeneration % 
+```
+
+---
+
+Ca plante encore
+```
+% uv run ./prt-generate-transcripts-with-kyutai_stt_2.6b_fr.py
+🖥️  MLX Device: GPU (Metal)
+📥 Chargement du modèle MLX depuis kyutai/stt-1b-en_fr-mlx...
+❌ Erreur chargement modèle: module 'moshi_mlx.utils.loaders' has no attribute 'CheckpointInfo'
+```
+
+Cette fois, lance le truc et teste avant de me dire que tout va bien ;-)
+PS : Rajoute une option `--max-files-to-process <N>` comme ça tu peux lancer le truc en traitant juste N=1 fichier pour voir si ça marche sans y passer 15 ans
