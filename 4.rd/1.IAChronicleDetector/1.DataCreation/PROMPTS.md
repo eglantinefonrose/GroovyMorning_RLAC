@@ -216,3 +216,47 @@ ilest7h43.
 ---
 
 Rajoute une option `--no-srt` pour que le script ne génère pas un SRT mais juste un fichier texte (sans aucun marqueur temporel) 
+
+---
+
+Est-ce que le modèle permet de faire mieux que "juste du texte". J'ai peur que mes demandes t'aies forcée à perdre une partie de l'info que le modèle est capable de générer (c'est le fait de voir `SentencePiece` dans tes logs qui ne fait penser ça)
+
+   -> RESULTAT 
+
+        ✦ C'est une excellente intuition. En utilisant SentencePiece pour décoder simplement les jetons en texte, on passe effectivement à côté de la "richesse" intrinsèque de l'architecture de Kyutai (Moshi).
+
+        Ce modèle n'est pas un simple moteur de transcription comme Whisper ; c'est un modèle temporel à flux retardés (Delayed Streams). Voici ce qu'il est capable de produire et que nous pourrions exploiter :
+
+        1. Précision temporelle absolue (Frame-level)
+        Contrairement à Whisper qui segmente par blocs de 30s, Kyutai produit un jeton (ou un silence) exactement toutes les 80ms. 
+        * Actuellement : Je regroupe ces jetons de manière un peu arbitraire pour faire des phrases SRT.
+        * Info perdue : On pourrait avoir le timestamp exact de chaque syllabe ou morceau de mot.
+
+        2. Le "Inner Monologue" (VAD Sémantique)
+        Le modèle possède une forme de "VAD sémantique". Il ne se base pas juste sur le volume sonore, mais sur la probabilité que ce qui est entendu soit du langage.
+        * Info perdue : On pourrait extraire les moments de pause, de respiration, ou de bruits non-verbaux que le modèle "filtre" lors du décodage texte mais qu'il identifie en interne.
+
+        3. Confiance et Logits
+        Comme c'est un transformer, chaque jeton a un score de probabilité.
+        * Actuellement : Je prends le jeton le plus probable (argmax).
+        * Info perdue : On pourrait extraire un indice de confiance pour chaque mot, permettant de surligner les passages où le modèle hésite.
+
+        4. Détection de langue dynamique
+        Le modèle est bilingue EN/FR de naissance.
+        * Info perdue : Dans un fichier audio mixant les deux langues, il sait exactement quand il passe de l'un à l'autre.
+
+        Ce qu'on pourrait faire pour "mieux faire" :
+        Si vous voulez vraiment exploiter la puissance du modèle, je pourrais ajouter une option --json qui exporterait une structure riche :
+
+        1 {
+        2   "tokens": [
+        3     {"text": "Bonjour", "start": 1.20, "end": 1.45, "confidence": 0.98},
+        4     {"text": "à", "start": 1.45, "end": 1.53, "confidence": 0.99},
+        5     {"text": "tous", "start": 1.53, "end": 1.80, "confidence": 0.95}
+        6   ],
+        7   "language_events": [...]
+        8 }
+
+        Est-ce que l'un de ces aspects (précision mot-à-mot, indices de confiance, ou format JSON riche) vous intéresserait pour vos traitements ?
+
+
