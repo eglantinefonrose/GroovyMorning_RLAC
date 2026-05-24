@@ -49,6 +49,12 @@ def parse_arguments():
     )
     
     parser.add_argument(
+        "--no-srt",
+        action="store_true",
+        help="Générer uniquement du texte brut sans formatage SRT ni marqueurs temporels"
+    )
+    
+    parser.add_argument(
         "--no-move-to-done-when-processed",
         action="store_true",
         help="Ne pas déplacer les fichiers vers audio-done après transcription réussie"
@@ -94,10 +100,10 @@ def format_timestamp(seconds):
     millis = int(td.microseconds / 1000)
     return f"{hours:02d}:{minutes:02d}:{secs:02d},{millis:03d}"
 
-def transcribe_audio_mlx(file_path, model, audio_tokenizer, text_tokenizer, lm_config, stt_config):
+def transcribe_audio_mlx(file_path, model, audio_tokenizer, text_tokenizer, lm_config, stt_config, no_srt=False):
     """
     Transcrit un fichier audio en utilisant MLX et rustymimi
-    Retourne le contenu SRT sous forme de chaîne de caractères
+    Retourne le contenu (SRT ou texte brut) sous forme de chaîne de caractères
     """
     import mlx.core as mx
     import numpy as np
@@ -184,14 +190,23 @@ def transcribe_audio_mlx(file_path, model, audio_tokenizer, text_tokenizer, lm_c
         if current_text and start_time is not None:
             srt_entries.append((start_time, all_tokens[-1][0] + 0.08, "".join(current_text).strip()))
 
-        # Génération du contenu SRT
-        srt_content = ""
-        for i, (start, end, text) in enumerate(srt_entries):
-            srt_content += f"{i+1}\n"
-            srt_content += f"{format_timestamp(start)} --> {format_timestamp(end)}\n"
-            srt_content += f"{text}\n\n"
-        
-        return srt_content
+        # Génération du contenu de sortie
+        if no_srt:
+            all_chars = []
+            for _, token_id in all_tokens:
+                if token_id in (0, 3): continue
+                char = text_tokenizer.id_to_piece(token_id)
+                char = char.replace(" ", " ")
+                char = char.replace("▁", " ")
+                all_chars.append(char)
+            return "".join(all_chars).strip()
+        else:
+            srt_content = ""
+            for i, (start, end, text) in enumerate(srt_entries):
+                srt_content += f"{i+1}\n"
+                srt_content += f"{format_timestamp(start)} --> {format_timestamp(end)}\n"
+                srt_content += f"{text}\n\n"
+            return srt_content
             
     except Exception as e:
         print(f"Exception lors de la transcription MLX: {e}", file=sys.stderr)
@@ -308,7 +323,8 @@ def main():
                 audio_tokenizer, 
                 text_tokenizer, 
                 lm_config, 
-                stt_config
+                stt_config,
+                no_srt=args.no_srt
             )
             
             if srt_content:
@@ -324,7 +340,8 @@ def main():
                         output_dir = Path(args.transcription_output_dir)
                     
                     output_dir.mkdir(parents=True, exist_ok=True)
-                    output_file = output_dir / f"{file_path.stem}_transcription.srt"
+                    ext = ".txt" if args.no_srt else ".srt"
+                    output_file = output_dir / f"{file_path.stem}_transcription{ext}"
                     
                     with open(output_file, 'w', encoding='utf-8') as f:
                         f.write(srt_content)

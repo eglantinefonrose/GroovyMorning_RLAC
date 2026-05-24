@@ -212,3 +212,7 @@ L.
 00:03:21,660 --> 00:03:22,460
 ilest7h43.
 ```
+
+---
+
+Rajoute une option `--no-srt` pour que le script ne génère pas un SRT mais juste un fichier texte (sans aucun marqueur temporel) 
