@@ -7,7 +7,7 @@ from transformers import ASTForAudioClassification, ASTFeatureExtractor
 
 SAMPLING_RATE = 16000
 AUDIO_PATH = "10075-07.04.2026-ITEMA_24467552-2026C6608S0097-NET_MFC_BE8424AB-0782-4064-B140-DD0480F89F2A-21-0097c3eba2e7ff163fc0dd719431af92.mp3"
-MODEL_DIR = "./model_output_ast"
+MODEL_DIR = "./model_output_beats"
 CACHE_FILE = "raw_preds_cache.json"
 
 TARGET_TIMECODES = [

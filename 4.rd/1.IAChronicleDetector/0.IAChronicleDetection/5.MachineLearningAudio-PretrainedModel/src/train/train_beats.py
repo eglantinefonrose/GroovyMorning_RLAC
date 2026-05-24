@@ -35,7 +35,7 @@ from models_loader import ModelLoader
 # Configuration
 AUDIO_ROOT = "../../../@assets/0.media/audio"
 TIMECODE_ROOT = "../../../@assets/2.humanOutputs/1.timecode-segments/2.audio-analyse/timecode_chroniques"
-MODEL_NAME = "microsoft/beats-base"
+MODEL_NAME = "MIT/ast-finetuned-audioset-10-10-0.4593" # microsoft/beats-base n'est pas sur le Hub, on replie sur AST
 OUTPUT_DIR = "./model_output_beats"
 SAMPLING_RATE = 16000
 MAX_DURATION = 10.0

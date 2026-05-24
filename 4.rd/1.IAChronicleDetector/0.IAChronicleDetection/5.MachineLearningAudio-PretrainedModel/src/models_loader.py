@@ -12,8 +12,8 @@ from transformers import (
 
 BASE_MODELS = {
     "ast": "MIT/ast-finetuned-audioset-10-10-0.4593",
-    "beats": "microsoft/beats-base",
-    "cnn": "MIT/efficientnet-b0-audioset",
+    "beats": "MIT/ast-finetuned-audioset-10-10-0.4593", # BEATs n'est pas sur le Hub Transformers, on utilise AST par défaut ou un chemin local
+    "cnn": "EarthSpeciesProject/esp-aves2-effnetb0-audioset",
     "wavlm": "microsoft/wavlm-base-plus-sv",
     "wav2vec2": "facebook/wav2vec2-base-960h"
 }
