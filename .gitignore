@@ -15,3 +15,9 @@
 !4.rd/1.IAChronicleDetector/3.MachineLearningTranscription-Hybrid/models/**/*.md
 4.rd/1.IAChronicleDetector/4.TransformerDetection/wandb
 4.rd/1.IAChronicleDetector/4.TransformerDetection/tea_debug.log
+4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/model_output
+4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/model_output_ast
+4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/model_output_binary
+4.rd/1.IAChronicleDetector/0.IAChronicleDetection/5.MachineLearningAudio-PretrainedModel/wandb
+*.safetensors
+*.pt
