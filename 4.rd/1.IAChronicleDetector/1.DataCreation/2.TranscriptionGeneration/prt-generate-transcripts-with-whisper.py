@@ -181,9 +181,10 @@ def process_audio_files(args):
             continue
         
         # Lister les fichiers audio récursivement
+        # On ne prend que les fichiers dans un sous-répertoire 'chroniques'
         files = [
             f for f in audio_path.rglob("*") 
-            if f.is_file() and not f.name.startswith('.') and f.suffix.lower() in AUDIO_EXTENSIONS
+            if f.is_file() and not f.name.startswith('.') and f.suffix.lower() in AUDIO_EXTENSIONS and "chroniques" in f.parts
         ]
         
         if not files:
