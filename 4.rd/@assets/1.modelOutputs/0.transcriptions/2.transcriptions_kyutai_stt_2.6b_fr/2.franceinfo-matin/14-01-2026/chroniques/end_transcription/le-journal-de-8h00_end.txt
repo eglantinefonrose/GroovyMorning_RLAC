@@ -1,0 +1,4 @@
+enregistre16degrés en journée.
+Localement, c'est quasiment30degrés quand même de diff
+érence en unesemaine.
+Ça fait un peu beaucoup.

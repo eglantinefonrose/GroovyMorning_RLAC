@@ -1,0 +1,4 @@
+Les lunettes peuvent aussi prendre une photo et la retravailler
+avec du texte, par exemple, tout cela sans que l'utilisateur
+n'aitjamaisbesoin desortir le téléphone de sa poche.
+Merci Loïc Pialat.
