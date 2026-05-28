@@ -304,8 +304,42 @@ def main():
     disable_pbar = args.stdout or len(all_files) == 1
     
     with tqdm(total=len(all_files), unit="file", desc="Transcription", disable=disable_pbar, file=sys.stderr) as pbar:
+        processed_count = 0
         for file_path, adir in all_files:
+            # Re-initialisation périodique pour éviter l'accumulation d'erreurs d'indexation (Metal/MLX)
+            if processed_count > 0 and processed_count % 10 == 0:
+                try:
+                    import gc
+                    audio_tokenizer = rustymimi.Tokenizer(mimi_path, num_codebooks=lm_config.audio_codebooks)
+                    mx.metal.clear_cache()
+                    gc.collect()
+                except Exception as e:
+                    print(f"⚠️ Erreur lors de la re-initialisation périodique: {e}", file=sys.stderr)
+
             try:
+                # Vérifier si les fichiers de sortie existent déjà pour passer
+                if not args.stdout:
+                    if adir:
+                        audio_path = Path(args.media_base_dir) / "audio" / adir
+                        rel_path = file_path.relative_to(audio_path).parent
+                        base_output_dir = Path(args.transcription_output_dir) / adir / rel_path
+                    else:
+                        base_output_dir = Path(args.transcription_output_dir)
+                        rel_path = None
+                    
+                    ext = ".txt" if args.no_srt else ".srt"
+                    start_file = base_output_dir / "start_transcription" / f"{file_path.stem}_start{ext}"
+                    end_file = base_output_dir / "end_transcription" / f"{file_path.stem}_end{ext}"
+                    
+                    if start_file.exists() and end_file.exists():
+                        if not args.no_move_to_done_when_processed and adir:
+                            move_to_done(file_path, args.media_base_dir, adir, rel_path)
+                        
+                        if not disable_pbar:
+                            pbar.update(1)
+                        processed_count += 1
+                        continue
+
                 total_duration = librosa.get_duration(path=file_path)
             except Exception as e:
                 print(f"❌ Impossible de lire la durée de {file_path}: {e}", file=sys.stderr)
@@ -365,6 +399,8 @@ def main():
             if not disable_pbar:
                 pbar.set_postfix_str(f"Fichier: {file_path.name[:20]}")
                 pbar.update(1)
+            
+            processed_count += 1
 
 if __name__ == "__main__":
     main()
