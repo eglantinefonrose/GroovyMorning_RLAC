@@ -72,6 +72,32 @@ Pour lancer la détection sur une nouvelle transcription au format `.srt` :
 python predict.py <chemin_vers_fichier.srt>
 ```
 
+## Fonctionnement de l'approche
+
+La détection de chroniques repose sur une architecture de type **Transformer** (CamemBERT) spécialisée dans la classification de séquences. L'approche se décompose en trois étapes majeures :
+
+### 1. Augmentation Sémantique (Contexte)
+Un segment de transcription isolé (souvent très court, ex: 2-3 secondes) contient rarement assez d'information pour être classé avec certitude. 
+- Le système utilise une **fenêtre glissante** (par défaut 5 segments : le segment cible + 2 avant + 2 après).
+- Ces segments sont concaténés avec le jeton spécial `[SEP]`.
+- Cela permet au modèle de capter la structure de l'émission (ex: détecter une transition, un jingle ou une annonce de sommaire).
+
+### 2. Classification Sémantique
+Le texte contextualisé est passé dans un modèle **CamemBERT** (ou DistilCamemBERT) fine-tuné.
+- **Entrée** : Les tokens des 5 segments fusionnés.
+- **Sortie** : Une probabilité (0 à 1) que le segment central appartienne à une chronique.
+- Le modèle apprend à reconnaître non seulement le vocabulaire thématique, mais aussi les formules de politesse et les structures de discours typiques des lancements de chroniques.
+
+### 3. Post-traitement & Lissage
+Les prédictions brutes peuvent être discontinues (ex: un segment de silence au milieu d'une chronique). Le script `predict.py` applique des filtres de cohérence :
+- **Lissage (Smoothing)** : Les "trous" d'un seul segment au sein d'un bloc de détection sont automatiquement comblés.
+- **Filtre de durée** : Seuls les blocs continus de plus de **30 secondes** sont conservés, éliminant ainsi les faux positifs sur des interventions brèves ou des titres.
+
+### 4. Évaluation sur-mesure
+Pour mesurer la performance réelle, nous utilisons un score hybride (détaillé dans [README-Training-method.md](README-Training-method.md)) :
+- **40% Cardinalité** : Capacité à identifier le bon nombre de chroniques.
+- **60% Alignement** : Précision du calage temporel (début/fin) par rapport à la vérité terrain.
+
 ## Structure du projet
 
 - `train.py` : Script d'entraînement.
