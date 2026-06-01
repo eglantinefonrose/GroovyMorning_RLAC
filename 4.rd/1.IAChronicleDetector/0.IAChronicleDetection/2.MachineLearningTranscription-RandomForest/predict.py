@@ -101,7 +101,7 @@ def predict_chroniques(model_path: str, srt_file: str,
 if __name__ == "__main__":
     # Configuration
     model_path = "models/radio_chronique_rf.pkl"
-    srt_file = "../../@assets/1.modelOutputs/0.transcriptions/1.transcriptions_whisper_ggml-large-v3-turbo/26811-06.04.2026-ITEMA_24466243-2026F10761S0096-NET_MFI_8F75AA4E-79C7-4CF3-A0B7-2D7EBC1FB5B5-22-534f5f6ae83fc95044c42304b90ca1f7_transcription.srt"
+    srt_file = "../../../@assets/1.modelOutputs/0.transcriptions/1.transcriptions_whisper_ggml-large-v3-turbo/1.rtl-matin/06-04-2026/06-04-2026_transcription.srt"
     gt_file = "../../@assets/1.modelOutputs/1.timecode-segments/1.geminiCLI/2.gemini-flash-avec-vrais-horaires-théoriques/26811-06.04.2026-ITEMA_24466243-2026F10761S0096-NET_MFI_8F75AA4E-79C7-4CF3-A0B7-2D7EBC1FB5B5-22-534f5f6ae83fc95044c42304b90ca1f7_timecode_chronique.txt"
 
     if not os.path.exists(model_path):

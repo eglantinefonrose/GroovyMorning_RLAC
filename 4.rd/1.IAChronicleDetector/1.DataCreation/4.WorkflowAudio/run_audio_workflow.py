@@ -65,17 +65,13 @@ def extract_date_from_string(s):
     match = re.search(r'(\d{2}-\d{2}-\d{4})', s)
     if match:
         try:
-            return datetime.strptime(match.group(1), '%d-%m-%y') # wait, 4 digits is %Y
-        except ValueError:
-            pass
-        try:
             return datetime.strptime(match.group(1), '%d-%m-%Y')
         except ValueError:
             pass
             
     return None
 
-def process_trimming(audio_file, timecode_file, radio_dir):
+def process_trimming(audio_file, timecode_file, radio_dir, output_name_prefix=None):
     """Logique de trimming (reprise de 3.AudioMediaTrimming)."""
     print(f"  Traitement de : {audio_file.name}")
     
@@ -138,7 +134,11 @@ def process_trimming(audio_file, timecode_file, radio_dir):
 
     news_dir = radio_dir / "news"
     news_dir.mkdir(exist_ok=True)
-    output_tc_path = news_dir / f"{audio_file.stem}_new_from_audio.txt"
+    
+    # Utilisation du préfixe s'il est fourni (ex: la date), sinon le nom du fichier audio
+    output_prefix = output_name_prefix if output_name_prefix else audio_file.stem
+    output_tc_path = news_dir / f"{output_prefix}_new_from_audio.txt"
+    
     try:
         with open(output_tc_path, 'w', encoding='utf-8') as f:
             for ns, ne, name in new_segments_tc:
@@ -153,15 +153,24 @@ def process_trimming(audio_file, timecode_file, radio_dir):
 
 def main():
     parser = argparse.ArgumentParser(description="Workflow Audio Automatique avec filtrage par date et détection de doublons.")
+    parser.add_argument("--date", help="Date spécifique (YYYY-MM-DD)", type=str)
     parser.add_argument("--start", help="Date de début (YYYY-MM-DD)", type=str)
     parser.add_argument("--end", help="Date de fin (YYYY-MM-DD)", type=str)
+    parser.add_argument("--radio", help="Limiter à une radio spécifique (ex: rtl, france-inter)", type=str)
     parser.add_argument("--force", help="Forcer le re-traitement même si le fichier _trimmed existe", action="store_true")
     parser.add_argument("--dry-run", help="Afficher ce qui serait fait sans exécuter", action="store_true")
     
     args = parser.parse_args()
 
-    start_date = datetime.strptime(args.start, '%Y-%m-%d') if args.start else None
-    end_date = datetime.strptime(args.end, '%Y-%m-%d') if args.end else None
+    if args.date:
+        start_date = datetime.strptime(args.date, '%Y-%m-%d')
+        end_date = start_date
+    else:
+        start_date = datetime.strptime(args.start, '%Y-%m-%d') if args.start else None
+        end_date = datetime.strptime(args.end, '%Y-%m-%d') if args.end else None
+    
+    # Nettoyage du filtre radio pour plus de souplesse (ex: france-inter -> franceinter)
+    radio_filter = args.radio.lower().replace("-", "").replace(" ", "") if args.radio else None
 
     # Recherche de @assets
     current_dir = Path.cwd().absolute()
@@ -189,6 +198,7 @@ def main():
     print(f"Assets : {assets_root}")
     if start_date: print(f"Début  : {start_date.date()}")
     if end_date:   print(f"Fin    : {end_date.date()}")
+    if radio_filter: print(f"Radio  : {radio_filter}")
     if args.force: print("Mode   : FORCE (écrase les fichiers existants)")
     if args.dry_run: print("Mode   : DRY-RUN (aucune modification)")
     print("-" * 20)
@@ -198,6 +208,7 @@ def main():
     processed_count = 0
     skipped_count = 0
     date_filtered_count = 0
+    radio_filtered_count = 0
 
     for tc_file in timecode_files:
         if 'news' in tc_file.parts:
@@ -210,6 +221,13 @@ def main():
         nom_dossier = match.group(1)
         file_date = extract_date_from_string(nom_dossier)
         
+        # Liste des formats possibles pour le nom du dossier média
+        possibilites_nom = [nom_dossier]
+        if file_date:
+            possibilites_nom.append(file_date.strftime("%Y-%m-%d"))
+            possibilites_nom.append(file_date.strftime("%d-%m-%Y"))
+            possibilites_nom.append(file_date.strftime("%d-%m-%y"))
+
         # Filtrage par date
         if file_date:
             if start_date and file_date < start_date:
@@ -229,15 +247,34 @@ def main():
             radio_dir = tc_file.parent
 
         nom_radio = radio_dir.name
+
+        # Filtrage par radio
+        if radio_filter:
+            clean_radio_name = nom_radio.lower().replace("-", "").replace(" ", "")
+            if radio_filter not in clean_radio_name:
+                radio_filtered_count += 1
+                continue
         
         # Recherche media
         target_media_dir = None
-        for p in media_root.rglob(nom_dossier):
-            if p.is_dir() and nom_radio.lower() in str(p).lower():
-                target_media_dir = p
+        # On scanne TOUT media_root pour trouver un dossier qui contient la date ET la radio
+        for root, dirs, files in os.walk(media_root):
+            for d in dirs:
+                # Si le nom du dossier est une de nos dates cibles
+                if d in possibilites_nom:
+                    full_path = Path(root) / d
+                    path_str = full_path.as_posix().lower().replace("-", "").replace(" ", "")
+                    radio_clean = nom_radio.lower().replace("-", "").replace(" ", "")
+                    
+                    # On vérifie si la radio est mentionnée dans le chemin (ex: franceinter)
+                    if radio_clean in path_str or radio_filter in path_str:
+                        target_media_dir = full_path
+                        break
+            if target_media_dir:
                 break
         
         if target_media_dir:
+            print(f"    🔍 Dossier media trouvé : {target_media_dir}")
             audio_file = find_audio_file(target_media_dir)
             if audio_file:
                 already_done = check_if_already_trimmed(audio_file)
@@ -249,12 +286,12 @@ def main():
                 
                 print(f"🎬 Traitement : {nom_dossier} ({nom_radio})")
                 if not args.dry_run:
-                    if process_trimming(audio_file, tc_file, radio_dir):
+                    if process_trimming(audio_file, tc_file, radio_dir, output_name_prefix=nom_dossier):
                         processed_count += 1
                 else:
                     processed_count += 1
             else:
-                print(f"❓ Audio non trouvé pour {nom_dossier} dans {target_media_dir}")
+                print(f"    ❓ Audio non trouvé dans : {target_media_dir}")
         else:
             # print(f"❓ Dossier media non trouvé pour {nom_dossier}")
             pass
@@ -262,6 +299,7 @@ def main():
     print(f"\n--- BILAN ---")
     print(f"Total fichiers trouvés : {len(timecode_files)}")
     print(f"Filtre date (exclus)   : {date_filtered_count}")
+    print(f"Filtre radio (exclus)  : {radio_filtered_count}")
     print(f"Déjà traités (sautés)  : {skipped_count}")
     print(f"Traités avec succès    : {processed_count}")
     print("Terminé.")

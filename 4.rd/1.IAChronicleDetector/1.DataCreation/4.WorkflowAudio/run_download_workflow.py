@@ -30,6 +30,7 @@ def main():
     parser = argparse.ArgumentParser(description="Automatisation du téléchargement pour toutes les radios.")
     parser.add_argument("start", help="Date de début (DD-MM-YYYY)", type=str)
     parser.add_argument("end", help="Date de fin (DD-MM-YYYY)", nargs="?", type=str)
+    parser.add_argument("--radio", help="Limiter à une radio spécifique (ex: rtl, france-inter, france-info, france-culture)", type=str)
     
     args = parser.parse_args()
     
@@ -48,19 +49,30 @@ def main():
     root_dir = Path(__file__).parent.parent
     download_root = root_dir / "0.DownloadChroniquesAndFullRadioProgramAutomaticly"
     
-    scripts = [
-        download_root / "france-inter" / "download_franceinter_range.py",
-        download_root / "france-info" / "download_franceinfo_range.py",
-        download_root / "france-culture" / "download_franceculture_range.py",
-        download_root / "rtl" / "download_rtl_range.py",
-    ]
+    all_scripts = {
+        "france-inter": download_root / "france-inter" / "download_franceinter_range.py",
+        "france-info": download_root / "france-info" / "download_franceinfo_range.py",
+        "france-culture": download_root / "france-culture" / "download_franceculture_range.py",
+        "rtl": download_root / "rtl" / "download_rtl_range.py",
+    }
+    
+    scripts_to_run = []
+    if args.radio:
+        radio_key = args.radio.lower().replace(" ", "-")
+        if radio_key in all_scripts:
+            scripts_to_run.append(all_scripts[radio_key])
+        else:
+            print(f"❌ Radio inconnue : {args.radio}. Options valides : {', '.join(all_scripts.keys())}")
+            sys.exit(1)
+    else:
+        scripts_to_run = list(all_scripts.values())
     
     print(f"--- WORKFLOW TÉLÉCHARGEMENT GLOBAL ---")
     print(f"Plage : {start_date} au {end_date}")
-    print(f"Radios : France Inter, France Info, France Culture, RTL")
+    print(f"Radios : {args.radio if args.radio else 'Toutes'}")
     print("-" * 40)
 
-    for script in scripts:
+    for script in scripts_to_run:
         if script.exists():
             run_script(script, start_date, end_date)
         else:

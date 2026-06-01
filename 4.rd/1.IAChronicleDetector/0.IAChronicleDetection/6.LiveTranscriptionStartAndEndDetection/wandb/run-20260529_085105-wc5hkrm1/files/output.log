@@ -1,0 +1,127 @@
+Entrainement sur : mps
+[transformers] `logging_dir` is deprecated and will be removed in v5.2. Please set `TENSORBOARD_LOGGING_DIR` instead.
+Début de l'entrainement...
+  0%|                                                                                                                                                                                             | 0/738 [00:00<?, ?it/s]/opt/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:684: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, then device pinned memory won't be used.
+  warnings.warn(warn_msg)
+Writing model shards: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:01<00:00,  1.42s/it]
+{'loss': '0.6993', 'grad_norm': '0.7652', 'learning_rate': '4.5e-06', 'epoch': '0.04065'}
+{'loss': '0.6874', 'grad_norm': '0.7507', 'learning_rate': '9.5e-06', 'epoch': '0.0813'}
+{'loss': '0.6808', 'grad_norm': '0.8208', 'learning_rate': '1.45e-05', 'epoch': '0.122'}
+{'loss': '0.6685', 'grad_norm': '0.8656', 'learning_rate': '1.95e-05', 'epoch': '0.1626'}
+{'loss': '0.599', 'grad_norm': '1.391', 'learning_rate': '2.45e-05', 'epoch': '0.2033'}
+{'loss': '0.4727', 'grad_norm': '1.757', 'learning_rate': '2.95e-05', 'epoch': '0.2439'}
+{'loss': '0.3438', 'grad_norm': '1.257', 'learning_rate': '3.45e-05', 'epoch': '0.2846'}
+{'loss': '0.2978', 'grad_norm': '3.908', 'learning_rate': '3.95e-05', 'epoch': '0.3252'}
+{'loss': '0.1506', 'grad_norm': '0.8893', 'learning_rate': '4.45e-05', 'epoch': '0.3659'}
+{'loss': '0.3133', 'grad_norm': '2.206', 'learning_rate': '4.95e-05', 'epoch': '0.4065'}
+{'loss': '0.1449', 'grad_norm': '2.139', 'learning_rate': '4.929e-05', 'epoch': '0.4472'}
+{'loss': '0.1071', 'grad_norm': '29.52', 'learning_rate': '4.851e-05', 'epoch': '0.4878'}
+{'loss': '0.1559', 'grad_norm': '0.5544', 'learning_rate': '4.773e-05', 'epoch': '0.5285'}
+{'loss': '0.1674', 'grad_norm': '1.859', 'learning_rate': '4.694e-05', 'epoch': '0.5691'}
+{'loss': '0.2014', 'grad_norm': '71.43', 'learning_rate': '4.616e-05', 'epoch': '0.6098'}
+{'loss': '0.2006', 'grad_norm': '7.272', 'learning_rate': '4.538e-05', 'epoch': '0.6504'}
+{'loss': '0.1022', 'grad_norm': '0.2389', 'learning_rate': '4.459e-05', 'epoch': '0.6911'}
+{'loss': '0.1979', 'grad_norm': '5.517', 'learning_rate': '4.381e-05', 'epoch': '0.7317'}
+{'loss': '0.1109', 'grad_norm': '0.2602', 'learning_rate': '4.303e-05', 'epoch': '0.7724'}
+{'loss': '0.09171', 'grad_norm': '4.625', 'learning_rate': '4.224e-05', 'epoch': '0.813'}
+{'loss': '0.1537', 'grad_norm': '0.6472', 'learning_rate': '4.146e-05', 'epoch': '0.8537'}
+{'loss': '0.3334', 'grad_norm': '2.97', 'learning_rate': '4.067e-05', 'epoch': '0.8943'}
+{'loss': '0.09372', 'grad_norm': '0.1677', 'learning_rate': '3.989e-05', 'epoch': '0.935'}
+{'loss': '0.1754', 'grad_norm': '0.2002', 'learning_rate': '3.911e-05', 'epoch': '0.9756'}
+/opt/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:684: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, then device pinned memory won't be used.00:00,  1.42s/it]
+{'eval_loss': '0.1382', 'eval_accuracy': '0.9644', 'eval_f1': '0.9647', 'eval_precision': '0.9657', 'eval_recall': '0.9637', 'eval_runtime': '4.842', 'eval_samples_per_second': '203.2', 'eval_steps_per_second': '12.8', 'epoch': '1'}
+  warnings.warn(warn_msg)
+Writing model shards: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  1.18it/s]
+{'loss': '0.1134', 'grad_norm': '0.7281', 'learning_rate': '3.832e-05', 'epoch': '1.016'}
+{'loss': '0.05299', 'grad_norm': '24.2', 'learning_rate': '3.754e-05', 'epoch': '1.057'}
+{'loss': '0.07225', 'grad_norm': '0.2259', 'learning_rate': '3.676e-05', 'epoch': '1.098'}
+{'loss': '0.03673', 'grad_norm': '0.1144', 'learning_rate': '3.597e-05', 'epoch': '1.138'}
+{'loss': '0.04754', 'grad_norm': '0.1603', 'learning_rate': '3.519e-05', 'epoch': '1.179'}
+{'loss': '0.04175', 'grad_norm': '0.1021', 'learning_rate': '3.44e-05', 'epoch': '1.22'}
+{'loss': '0.1323', 'grad_norm': '0.07802', 'learning_rate': '3.362e-05', 'epoch': '1.26'}
+{'loss': '0.1124', 'grad_norm': '14.25', 'learning_rate': '3.284e-05', 'epoch': '1.301'}
+{'loss': '0.1884', 'grad_norm': '0.1222', 'learning_rate': '3.205e-05', 'epoch': '1.341'}
+{'loss': '0.03906', 'grad_norm': '0.6524', 'learning_rate': '3.127e-05', 'epoch': '1.382'}
+{'loss': '0.04809', 'grad_norm': '0.1015', 'learning_rate': '3.049e-05', 'epoch': '1.423'}
+{'loss': '0.01261', 'grad_norm': '0.0716', 'learning_rate': '2.97e-05', 'epoch': '1.463'}
+{'loss': '0.04283', 'grad_norm': '0.06523', 'learning_rate': '2.892e-05', 'epoch': '1.504'}
+{'loss': '0.1572', 'grad_norm': '13.54', 'learning_rate': '2.813e-05', 'epoch': '1.545'}
+{'loss': '0.09873', 'grad_norm': '1.23', 'learning_rate': '2.735e-05', 'epoch': '1.585'}
+{'loss': '0.1403', 'grad_norm': '0.1668', 'learning_rate': '2.657e-05', 'epoch': '1.626'}
+{'loss': '0.01304', 'grad_norm': '0.199', 'learning_rate': '2.578e-05', 'epoch': '1.667'}
+{'loss': '0.07077', 'grad_norm': '0.1718', 'learning_rate': '2.5e-05', 'epoch': '1.707'}
+{'loss': '0.04055', 'grad_norm': '0.1692', 'learning_rate': '2.422e-05', 'epoch': '1.748'}
+{'loss': '0.05879', 'grad_norm': '26.15', 'learning_rate': '2.343e-05', 'epoch': '1.789'}
+{'loss': '0.1222', 'grad_norm': '0.1036', 'learning_rate': '2.265e-05', 'epoch': '1.829'}
+{'loss': '0.08876', 'grad_norm': '0.7814', 'learning_rate': '2.187e-05', 'epoch': '1.87'}
+{'loss': '0.06908', 'grad_norm': '0.07759', 'learning_rate': '2.108e-05', 'epoch': '1.911'}
+{'loss': '0.05984', 'grad_norm': '0.0753', 'learning_rate': '2.03e-05', 'epoch': '1.951'}
+{'loss': '0.07111', 'grad_norm': '0.751', 'learning_rate': '1.951e-05', 'epoch': '1.992'}
+/opt/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:684: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, then device pinned memory won't be used.00:00,  1.18it/s]
+{'eval_loss': '0.1244', 'eval_accuracy': '0.9736', 'eval_f1': '0.9734', 'eval_precision': '0.9876', 'eval_recall': '0.9597', 'eval_runtime': '4.597', 'eval_samples_per_second': '214.1', 'eval_steps_per_second': '13.49', 'epoch': '2'}
+  warnings.warn(warn_msg)
+Writing model shards: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:01<00:00,  1.69s/it]
+{'loss': '0.03616', 'grad_norm': '0.06884', 'learning_rate': '1.873e-05', 'epoch': '2.033'}
+{'loss': '0.09529', 'grad_norm': '0.07586', 'learning_rate': '1.795e-05', 'epoch': '2.073'}
+{'loss': '0.1078', 'grad_norm': '0.3762', 'learning_rate': '1.716e-05', 'epoch': '2.114'}
+{'loss': '0.1136', 'grad_norm': '0.07558', 'learning_rate': '1.638e-05', 'epoch': '2.154'}
+{'loss': '0.01106', 'grad_norm': '0.5901', 'learning_rate': '1.56e-05', 'epoch': '2.195'}
+{'loss': '0.01217', 'grad_norm': '0.07367', 'learning_rate': '1.481e-05', 'epoch': '2.236'}
+{'loss': '0.007578', 'grad_norm': '0.1584', 'learning_rate': '1.403e-05', 'epoch': '2.276'}
+{'loss': '0.07366', 'grad_norm': '0.05838', 'learning_rate': '1.324e-05', 'epoch': '2.317'}
+{'loss': '0.01013', 'grad_norm': '0.05892', 'learning_rate': '1.246e-05', 'epoch': '2.358'}
+{'loss': '0.03834', 'grad_norm': '0.06437', 'learning_rate': '1.168e-05', 'epoch': '2.398'}
+{'loss': '0.08579', 'grad_norm': '0.8232', 'learning_rate': '1.089e-05', 'epoch': '2.439'}
+{'loss': '0.03408', 'grad_norm': '0.1166', 'learning_rate': '1.011e-05', 'epoch': '2.48'}
+{'loss': '0.005816', 'grad_norm': '0.05882', 'learning_rate': '9.326e-06', 'epoch': '2.52'}
+{'loss': '0.006801', 'grad_norm': '0.06139', 'learning_rate': '8.542e-06', 'epoch': '2.561'}
+{'loss': '0.06689', 'grad_norm': '20.35', 'learning_rate': '7.759e-06', 'epoch': '2.602'}
+{'loss': '0.005711', 'grad_norm': '0.05119', 'learning_rate': '6.975e-06', 'epoch': '2.642'}
+{'loss': '0.00529', 'grad_norm': '0.08403', 'learning_rate': '6.191e-06', 'epoch': '2.683'}
+{'loss': '0.04513', 'grad_norm': '0.06571', 'learning_rate': '5.408e-06', 'epoch': '2.724'}
+{'loss': '0.09379', 'grad_norm': '0.06108', 'learning_rate': '4.624e-06', 'epoch': '2.764'}
+{'loss': '0.004957', 'grad_norm': '0.04813', 'learning_rate': '3.84e-06', 'epoch': '2.805'}
+{'loss': '0.08227', 'grad_norm': '0.06244', 'learning_rate': '3.056e-06', 'epoch': '2.846'}
+{'loss': '0.01816', 'grad_norm': '26.87', 'learning_rate': '2.273e-06', 'epoch': '2.886'}
+{'loss': '0.004952', 'grad_norm': '0.05874', 'learning_rate': '1.489e-06', 'epoch': '2.927'}
+{'loss': '0.06802', 'grad_norm': '0.05596', 'learning_rate': '7.053e-07', 'epoch': '2.967'}
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 738/738 [04:34<00:00,  2.69it/s]
+{'eval_loss': '0.147', 'eval_accuracy': '0.9705', 'eval_f1': '0.9706', 'eval_precision': '0.9775', 'eval_recall': '0.9637', 'eval_runtime': '4.725', 'eval_samples_per_second': '208.3', 'eval_steps_per_second': '13.12', 'epoch': '3'}
+{'train_runtime': '272.5', 'train_samples_per_second': '43.34', 'train_steps_per_second': '2.709', 'train_loss': '0.1375', 'epoch': '3'}
+Traceback (most recent call last):
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/6.LiveTranscriptionStartAndEndDetection/train_camembert.py", line 231, in <module>
+    try:
+  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/0.IAChronicleDetection/6.LiveTranscriptionStartAndEndDetection/train_camembert.py", line 184, in train
+    trainer.train()
+  File "/opt/miniconda3/lib/python3.12/site-packages/transformers/trainer.py", line 1427, in train
+    return inner_training_loop(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.12/site-packages/transformers/trainer.py", line 1525, in _inner_training_loop
+    return self._finalize_training(trial, num_train_samples, start_time)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.12/site-packages/transformers/trainer.py", line 1860, in _finalize_training
+    self._finish_current_push()
+  File "/opt/miniconda3/lib/python3.12/site-packages/transformers/trainer.py", line 4158, in _finish_current_push
+    self.push_in_progress.wait_until_done()
+  File "/opt/miniconda3/lib/python3.12/site-packages/transformers/utils/hub.py", line 941, in wait_until_done
+    futures.wait(self.jobs)
+  File "/opt/miniconda3/lib/python3.12/concurrent/futures/_base.py", line 305, in wait
+    waiter.event.wait(timeout)
+  File "/opt/miniconda3/lib/python3.12/threading.py", line 655, in wait
+    signaled = self._cond.wait(timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.12/threading.py", line 355, in wait
+    waiter.acquire()
+KeyboardInterrupt
+Exception ignored in: <module 'threading' from '/opt/miniconda3/lib/python3.12/threading.py'>
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.12/threading.py", line 1592, in _shutdown
+    atexit_call()
+  File "/opt/miniconda3/lib/python3.12/concurrent/futures/thread.py", line 31, in _python_exit
+    t.join()
+  File "/opt/miniconda3/lib/python3.12/threading.py", line 1147, in join
+    self._wait_for_tstate_lock()
+  File "/opt/miniconda3/lib/python3.12/threading.py", line 1167, in _wait_for_tstate_lock
+    if lock.acquire(block, timeout):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt:

@@ -1,0 +1,90 @@
+Entrainement sur : mps
+[transformers] `logging_dir` is deprecated and will be removed in v5.2. Please set `TENSORBOARD_LOGGING_DIR` instead.
+Début de l'entrainement...
+  0%|                                                                                       | 0/738 [00:00<?, ?it/s]/opt/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:684: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, then device pinned memory won't be used.
+  warnings.warn(warn_msg)
+Writing model shards: 100%|███████████████████████████████████████████████████████████| 1/1 [00:01<00:00,  1.12s/it]
+{'loss': '0.6907', 'grad_norm': '1.329', 'learning_rate': '4.5e-06', 'epoch': '0.04065'}
+{'loss': '0.6836', 'grad_norm': '0.8489', 'learning_rate': '9.5e-06', 'epoch': '0.0813'}
+{'loss': '0.6746', 'grad_norm': '1.037', 'learning_rate': '1.45e-05', 'epoch': '0.122'}
+{'loss': '0.6288', 'grad_norm': '0.949', 'learning_rate': '1.95e-05', 'epoch': '0.1626'}
+{'loss': '0.5436', 'grad_norm': '2.239', 'learning_rate': '2.45e-05', 'epoch': '0.2033'}
+{'loss': '0.4401', 'grad_norm': '2.709', 'learning_rate': '2.95e-05', 'epoch': '0.2439'}
+{'loss': '0.3506', 'grad_norm': '4.807', 'learning_rate': '3.45e-05', 'epoch': '0.2846'}
+{'loss': '0.3296', 'grad_norm': '7.685', 'learning_rate': '3.95e-05', 'epoch': '0.3252'}
+{'loss': '0.2156', 'grad_norm': '15.81', 'learning_rate': '4.45e-05', 'epoch': '0.3659'}
+{'loss': '0.2872', 'grad_norm': '1.719', 'learning_rate': '4.95e-05', 'epoch': '0.4065'}
+{'loss': '0.1448', 'grad_norm': '2.207', 'learning_rate': '4.929e-05', 'epoch': '0.4472'}
+{'loss': '0.1504', 'grad_norm': '10.18', 'learning_rate': '4.851e-05', 'epoch': '0.4878'}
+{'loss': '0.1101', 'grad_norm': '0.2268', 'learning_rate': '4.773e-05', 'epoch': '0.5285'}
+{'loss': '0.2252', 'grad_norm': '0.7136', 'learning_rate': '4.694e-05', 'epoch': '0.5691'}
+{'loss': '0.1999', 'grad_norm': '7.608', 'learning_rate': '4.616e-05', 'epoch': '0.6098'}
+{'loss': '0.2706', 'grad_norm': '25.13', 'learning_rate': '4.538e-05', 'epoch': '0.6504'}
+{'loss': '0.2653', 'grad_norm': '2.679', 'learning_rate': '4.459e-05', 'epoch': '0.6911'}
+{'loss': '0.1914', 'grad_norm': '13.44', 'learning_rate': '4.381e-05', 'epoch': '0.7317'}
+{'loss': '0.1151', 'grad_norm': '0.2593', 'learning_rate': '4.303e-05', 'epoch': '0.7724'}
+{'loss': '0.07861', 'grad_norm': '2.389', 'learning_rate': '4.224e-05', 'epoch': '0.813'}
+{'loss': '0.2025', 'grad_norm': '0.1718', 'learning_rate': '4.146e-05', 'epoch': '0.8537'}
+{'loss': '0.1406', 'grad_norm': '16.23', 'learning_rate': '4.067e-05', 'epoch': '0.8943'}
+{'loss': '0.1055', 'grad_norm': '0.2027', 'learning_rate': '3.989e-05', 'epoch': '0.935'}
+{'loss': '0.2151', 'grad_norm': '0.2483', 'learning_rate': '3.911e-05', 'epoch': '0.9756'}
+/opt/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:684: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, then device pinned memory won't be used.
+{'eval_loss': '0.1364', 'eval_accuracy': '0.9604', 'eval_f1': '0.9606', 'eval_precision': '0.9616', 'eval_recall': '0.9597', 'eval_runtime': '5.937', 'eval_samples_per_second': '165.7', 'eval_steps_per_second': '10.44', 'epoch': '1'}
+  warnings.warn(warn_msg)
+Writing model shards: 100%|███████████████████████████████████████████████████████████| 1/1 [00:01<00:00,  1.89s/it]
+{'loss': '0.1257', 'grad_norm': '13.18', 'learning_rate': '3.832e-05', 'epoch': '1.016'}
+{'loss': '0.07895', 'grad_norm': '32.9', 'learning_rate': '3.754e-05', 'epoch': '1.057'}
+{'loss': '0.1031', 'grad_norm': '0.5822', 'learning_rate': '3.676e-05', 'epoch': '1.098'}
+{'loss': '0.06258', 'grad_norm': '0.6583', 'learning_rate': '3.597e-05', 'epoch': '1.138'}
+{'loss': '0.09225', 'grad_norm': '0.1172', 'learning_rate': '3.519e-05', 'epoch': '1.179'}
+{'loss': '0.04064', 'grad_norm': '0.142', 'learning_rate': '3.44e-05', 'epoch': '1.22'}
+{'loss': '0.08924', 'grad_norm': '0.09589', 'learning_rate': '3.362e-05', 'epoch': '1.26'}
+{'loss': '0.08983', 'grad_norm': '12.18', 'learning_rate': '3.284e-05', 'epoch': '1.301'}
+{'loss': '0.1789', 'grad_norm': '0.2384', 'learning_rate': '3.205e-05', 'epoch': '1.341'}
+{'loss': '0.07803', 'grad_norm': '0.1325', 'learning_rate': '3.127e-05', 'epoch': '1.382'}
+{'loss': '0.05475', 'grad_norm': '0.3137', 'learning_rate': '3.049e-05', 'epoch': '1.423'}
+{'loss': '0.07904', 'grad_norm': '0.1032', 'learning_rate': '2.97e-05', 'epoch': '1.463'}
+{'loss': '0.03986', 'grad_norm': '0.1428', 'learning_rate': '2.892e-05', 'epoch': '1.504'}
+{'loss': '0.1367', 'grad_norm': '10.74', 'learning_rate': '2.813e-05', 'epoch': '1.545'}
+{'loss': '0.05307', 'grad_norm': '4.624', 'learning_rate': '2.735e-05', 'epoch': '1.585'}
+{'loss': '0.09691', 'grad_norm': '0.8409', 'learning_rate': '2.657e-05', 'epoch': '1.626'}
+{'loss': '0.01497', 'grad_norm': '0.08637', 'learning_rate': '2.578e-05', 'epoch': '1.667'}
+{'loss': '0.0669', 'grad_norm': '0.1019', 'learning_rate': '2.5e-05', 'epoch': '1.707'}
+{'loss': '0.06411', 'grad_norm': '0.117', 'learning_rate': '2.422e-05', 'epoch': '1.748'}
+{'loss': '0.1126', 'grad_norm': '14.28', 'learning_rate': '2.343e-05', 'epoch': '1.789'}
+{'loss': '0.1536', 'grad_norm': '0.1259', 'learning_rate': '2.265e-05', 'epoch': '1.829'}
+{'loss': '0.1218', 'grad_norm': '2.201', 'learning_rate': '2.187e-05', 'epoch': '1.87'}
+{'loss': '0.07011', 'grad_norm': '0.0926', 'learning_rate': '2.108e-05', 'epoch': '1.911'}
+{'loss': '0.08145', 'grad_norm': '0.08271', 'learning_rate': '2.03e-05', 'epoch': '1.951'}
+{'loss': '0.1093', 'grad_norm': '1.603', 'learning_rate': '1.951e-05', 'epoch': '1.992'}
+/opt/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:684: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, then device pinned memory won't be used.
+{'eval_loss': '0.1216', 'eval_accuracy': '0.9705', 'eval_f1': '0.9703', 'eval_precision': '0.9854', 'eval_recall': '0.9556', 'eval_runtime': '5.792', 'eval_samples_per_second': '169.9', 'eval_steps_per_second': '10.7', 'epoch': '2'}
+  warnings.warn(warn_msg)
+Writing model shards: 100%|███████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  1.22it/s]
+{'loss': '0.07296', 'grad_norm': '17.25', 'learning_rate': '1.873e-05', 'epoch': '2.033'}
+{'loss': '0.05377', 'grad_norm': '0.1032', 'learning_rate': '1.795e-05', 'epoch': '2.073'}
+{'loss': '0.0988', 'grad_norm': '0.118', 'learning_rate': '1.716e-05', 'epoch': '2.114'}
+{'loss': '0.0635', 'grad_norm': '0.148', 'learning_rate': '1.638e-05', 'epoch': '2.154'}
+{'loss': '0.01443', 'grad_norm': '0.1551', 'learning_rate': '1.56e-05', 'epoch': '2.195'}
+{'loss': '0.06262', 'grad_norm': '0.0921', 'learning_rate': '1.481e-05', 'epoch': '2.236'}
+{'loss': '0.0156', 'grad_norm': '0.982', 'learning_rate': '1.403e-05', 'epoch': '2.276'}
+{'loss': '0.07935', 'grad_norm': '0.07694', 'learning_rate': '1.324e-05', 'epoch': '2.317'}
+{'loss': '0.0163', 'grad_norm': '0.05958', 'learning_rate': '1.246e-05', 'epoch': '2.358'}
+{'loss': '0.006687', 'grad_norm': '0.06688', 'learning_rate': '1.168e-05', 'epoch': '2.398'}
+{'loss': '0.05294', 'grad_norm': '24.7', 'learning_rate': '1.089e-05', 'epoch': '2.439'}
+{'loss': '0.04208', 'grad_norm': '0.06627', 'learning_rate': '1.011e-05', 'epoch': '2.48'}
+{'loss': '0.005723', 'grad_norm': '0.04942', 'learning_rate': '9.326e-06', 'epoch': '2.52'}
+{'loss': '0.03675', 'grad_norm': '0.05039', 'learning_rate': '8.542e-06', 'epoch': '2.561'}
+{'loss': '0.04051', 'grad_norm': '0.05513', 'learning_rate': '7.759e-06', 'epoch': '2.602'}
+{'loss': '0.04479', 'grad_norm': '0.0633', 'learning_rate': '6.975e-06', 'epoch': '2.642'}
+{'loss': '0.01914', 'grad_norm': '0.05707', 'learning_rate': '6.191e-06', 'epoch': '2.683'}
+{'loss': '0.03919', 'grad_norm': '0.1241', 'learning_rate': '5.408e-06', 'epoch': '2.724'}
+{'loss': '0.1018', 'grad_norm': '0.05878', 'learning_rate': '4.624e-06', 'epoch': '2.764'}
+{'loss': '0.004975', 'grad_norm': '0.9864', 'learning_rate': '3.84e-06', 'epoch': '2.805'}
+{'loss': '0.04132', 'grad_norm': '0.07224', 'learning_rate': '3.056e-06', 'epoch': '2.846'}
+{'loss': '0.02325', 'grad_norm': '0.816', 'learning_rate': '2.273e-06', 'epoch': '2.886'}
+{'loss': '0.04927', 'grad_norm': '9.84', 'learning_rate': '1.489e-06', 'epoch': '2.927'}
+{'loss': '0.04982', 'grad_norm': '0.04924', 'learning_rate': '7.053e-07', 'epoch': '2.967'}
+100%|█████████████████████████████████████████████████████████████████████████████| 738/738 [04:49<00:00,  2.55it/s]
+{'eval_loss': '0.1393', 'eval_accuracy': '0.9695', 'eval_f1': '0.9696', 'eval_precision': '0.9736', 'eval_recall': '0.9657', 'eval_runtime': '5.183', 'eval_samples_per_second': '189.9', 'eval_steps_per_second': '11.96', 'epoch': '3'}
+{'train_runtime': '288.8', 'train_samples_per_second': '40.88', 'train_steps_per_second': '2.555', 'train_loss': '0.1424', 'epoch': '3'}
