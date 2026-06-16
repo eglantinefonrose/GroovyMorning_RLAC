@@ -35,6 +35,19 @@ pip install -r requirements.txt
 
 *Note : Contrairement à la méthode hybride, ce projet ne nécessite pas PyTorch ni de modèles de langage lourds.*
 
+## Évaluation de la Qualité
+
+Le script `evaluate_quality.py` permet de calculer une note de performance standardisée (40% Cardinalité, 60% Alignement), identique aux autres projets.
+
+```bash
+python evaluate_quality.py --srt <chemin_transcription_srt> --gt <chemin_timecodes_gt>
+```
+
+Exemple :
+```bash
+python evaluate_quality.py --srt transcription.srt --gt src/timecodes_files/timecodes_01-12-2025.txt
+```
+
 ## Utilisation
 
 ### Entraînement

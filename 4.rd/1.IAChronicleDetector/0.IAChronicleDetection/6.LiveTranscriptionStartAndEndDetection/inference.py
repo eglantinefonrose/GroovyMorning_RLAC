@@ -78,12 +78,27 @@ def get_chronicle_starts(text):
     results = detector.predict_starts(text)
     return [r["sentence"] for r in results]
 
+def clean_srt_content(content):
+    """Supprime les indices et les horodatages des fichiers SRT."""
+    lines = content.split('\n')
+    clean_lines = []
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        if line.isdigit():
+            continue
+        if '-->' in line:
+            continue
+        clean_lines.append(line)
+    return " ".join(clean_lines)
+
 if __name__ == "__main__":
     import argparse
     import os
 
     parser = argparse.ArgumentParser(description="Détecte les débuts de chroniques dans un fichier de transcription.")
-    parser.add_argument("file_path", help="Chemin vers le fichier texte (.txt) à analyser.")
+    parser.add_argument("file_path", help="Chemin vers le fichier texte (.txt ou .srt) à analyser.")
     parser.add_argument("--threshold", type=float, default=0.85, help="Seuil de confiance (0.0 à 1.0).")
     parser.add_argument("--model", default="./camembert_chronicle_start", help="Chemin vers le modèle.")
     
@@ -96,6 +111,10 @@ if __name__ == "__main__":
             with open(args.file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             
+            if args.file_path.lower().endswith(".srt"):
+                print("Fichier SRT détecté, nettoyage en cours...")
+                content = clean_srt_content(content)
+                
             detector = ChronicleDetector(model_path=args.model)
             results = detector.predict_starts(content, threshold=args.threshold)
             

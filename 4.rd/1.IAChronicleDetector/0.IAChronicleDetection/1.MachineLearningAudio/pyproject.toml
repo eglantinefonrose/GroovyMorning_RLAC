@@ -1,5 +1,5 @@
 [project]
-name = "4-machinelearning"
+name = "1-machinelearningaudio"
 version = "0.1.0"
 description = "Outil de détection de chroniques radio par Machine Learning"
 readme = "README.md"

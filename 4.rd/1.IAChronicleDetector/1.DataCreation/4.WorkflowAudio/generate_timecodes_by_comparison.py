@@ -75,12 +75,22 @@ def find_audio_match(y_needle, y_haystack_norm, sr):
 
 def main():
     parser = argparse.ArgumentParser(description="Génère un fichier de timecodes par corrélation audio (Méthode audio-analyse).")
-    parser.add_argument("--radio", required=True, help="Nom de la radio (ex: rtl, france-inter)")
-    parser.add_argument("--date", required=True, help="Date (YYYY-MM-DD)")
+    parser.add_argument("--radio", help="Nom de la radio (ex: rtl, france-inter)")
+    parser.add_argument("--date", help="Date (YYYY-MM-DD)")
+    parser.add_argument("--haystack", help="Chemin direct vers le fichier audio complet (meule de foin)")
+    parser.add_argument("--chroniques-dir", help="Chemin direct vers le dossier contenant les extraits (aiguilles)")
+    parser.add_argument("--output", help="Chemin direct pour le fichier de sortie .txt")
     args = parser.parse_args()
 
-    radio_filter = args.radio.lower().replace("-", "").replace(" ", "")
-    date_iso = args.date
+    # Vérification des arguments minimaux
+    if not ((args.radio and args.date) or (args.haystack and args.chroniques_dir)):
+        parser.error("Vous devez fournir soit (--radio ET --date) pour la découverte automatique, "
+                     "soit (--haystack ET --chroniques-dir) pour un usage manuel.")
+
+    # 1. Préparation des variables de base
+    radio_filter = args.radio.lower().replace("-", "").replace(" ", "") if args.radio else "manual"
+    date_iso = args.date if args.date else datetime.datetime.now().strftime('%Y-%m-%d')
+    
     try:
         dt = datetime.datetime.strptime(date_iso, '%Y-%m-%d')
         date_dmy = dt.strftime('%d-%m-%Y')
@@ -95,63 +105,73 @@ def main():
             assets_root = parent / "@assets"
             break
     
-    if not assets_root:
-        print("❌ Erreur : Impossible de trouver le dossier @assets")
-        sys.exit(1)
-
-    media_root = assets_root / "0.media" / "audio"
-    output_base = assets_root / "2.humanOutputs" / "1.timecode-segments" / "2.audio-analyse" / "timecode_chroniques"
-
-    # Recherche du dossier média
-    best_date_dir = None
-    date_formats = [
-        dt.strftime('%d-%m-%Y'),
-        dt.strftime('%Y-%m-%d'),
-        dt.strftime('%d-%m-%y')
-    ]
-
-    for radio_dir in media_root.iterdir():
-        if not radio_dir.is_dir(): continue
-        radio_clean = radio_dir.name.lower().replace("-", "").replace(" ", "")
-        if radio_filter in radio_clean:
-            for fmt in date_formats:
-                test_dir = radio_dir / fmt
-                if test_dir.exists():
-                    best_date_dir = test_dir
-                    break
-        if best_date_dir: break
-    
-    if not best_date_dir:
-        print(f"❌ Dossier média introuvable pour {args.radio} le {date_dmy}")
-        sys.exit(1)
-
-    print(f"🔍 Utilisation du dossier média : {best_date_dir.relative_to(assets_root)}")
-    
-    # Trouver le fichier haystack (le plus gros audio à la racine du dossier date)
-    audio_extensions = ('.mp3', '.m4a', '.wav', '.flac', '.ogg')
+    # 2. Localisation du haystack (audio principal) et des chroniques
     haystack_path = None
-    max_size = -1
-    for f in best_date_dir.glob("*"):
-        if f.suffix.lower() in audio_extensions:
-            if f.stat().st_size > max_size:
-                max_size = f.stat().st_size
-                haystack_path = f
+    chron_files = []
 
-    if not haystack_path:
+    if args.haystack and args.chroniques_dir:
+        # Mode Manuel
+        haystack_path = Path(args.haystack)
+        chron_dir = Path(args.chroniques_dir)
+        
+        if not haystack_path.exists():
+            print(f"❌ Fichier haystack introuvable : {haystack_path}")
+            sys.exit(1)
+        if not chron_dir.is_dir():
+            print(f"❌ Dossier des chroniques introuvable : {chron_dir}")
+            sys.exit(1)
+            
+        audio_extensions = ('.mp3', '.m4a', '.wav', '.flac', '.ogg')
+        chron_files = sorted([f for f in chron_dir.glob("*") if f.suffix.lower() in audio_extensions])
+    else:
+        # Mode Automatique (découverte via @assets)
+        if not assets_root:
+            print("❌ Erreur : Impossible de trouver le dossier @assets pour la découverte automatique.")
+            sys.exit(1)
+
+        media_root = assets_root / "0.media" / "audio"
+        best_date_dir = None
+        date_formats = [dt.strftime('%d-%m-%Y'), dt.strftime('%Y-%m-%d'), dt.strftime('%d-%m-%y')]
+
+        for radio_dir in media_root.iterdir():
+            if not radio_dir.is_dir(): continue
+            radio_clean = radio_dir.name.lower().replace("-", "").replace(" ", "")
+            if radio_filter in radio_clean:
+                for fmt in date_formats:
+                    test_dir = radio_dir / fmt
+                    if test_dir.exists():
+                        best_date_dir = test_dir
+                        break
+            if best_date_dir: break
+        
+        if not best_date_dir:
+            print(f"❌ Dossier média introuvable pour {args.radio} le {date_dmy}")
+            sys.exit(1)
+
+        print(f"🔍 Utilisation du dossier média : {best_date_dir.relative_to(assets_root)}")
+        
+        audio_extensions = ('.mp3', '.m4a', '.wav', '.flac', '.ogg')
+        max_size = -1
+        for f in best_date_dir.glob("*"):
+            if f.suffix.lower() in audio_extensions:
+                if f.stat().st_size > max_size:
+                    max_size = f.stat().st_size
+                    haystack_path = f
+
+        chron_dir = best_date_dir / "chroniques"
+        if chron_dir.exists():
+            chron_files = sorted([f for f in chron_dir.glob("*") if f.suffix.lower() in audio_extensions])
+
+    # 3. Validations finales avant analyse
+    if not haystack_path or not haystack_path.exists():
         print("❌ Fichier audio principal introuvable.")
         sys.exit(1)
 
-    chron_dir = best_date_dir / "chroniques"
-    if not chron_dir.exists():
-        print(f"⚠️ Aucun dossier 'chroniques' trouvé dans {best_date_dir}")
-        sys.exit(0)
-
-    chron_files = sorted([f for f in chron_dir.glob("*") if f.suffix.lower() in audio_extensions])
     if not chron_files:
-        print(f"⚠️ Aucun fichier audio trouvé dans {chron_dir}")
+        print(f"⚠️ Aucun fichier audio trouvé dans le dossier des chroniques.")
         sys.exit(0)
 
-    # Chargement et analyse
+    # 4. Chargement et analyse
     sr = 16000
     print(f"[*] Chargement de l'audio complet : {haystack_path.name}")
     try:
@@ -182,23 +202,30 @@ def main():
         print("ℹ️ Aucune chronique localisée.")
         sys.exit(0)
 
-    # Détermination du dossier de sortie
-    radio_out_dir = None
-    for d in output_base.iterdir():
-        if d.is_dir() and radio_filter in d.name.lower().replace("-", "").replace(" ", ""):
-            radio_out_dir = d
-            break
-    
-    if not radio_out_dir:
-        # Fallback sur le nom du dossier radio source
-        radio_out_dir = output_base / best_date_dir.parent.name
-        radio_out_dir.mkdir(parents=True, exist_ok=True)
+    # 5. Sortie des résultats
+    if args.output:
+        output_file = Path(args.output)
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+    elif assets_root:
+        output_base = assets_root / "2.humanOutputs" / "1.timecode-segments" / "2.audio-analyse" / "timecode_chroniques"
+        radio_out_dir = None
+        for d in output_base.iterdir():
+            if d.is_dir() and radio_filter in d.name.lower().replace("-", "").replace(" ", ""):
+                radio_out_dir = d
+                break
+        
+        if not radio_out_dir:
+            radio_out_dir = output_base / (args.radio if args.radio else "manual_uploads")
+            radio_out_dir.mkdir(parents=True, exist_ok=True)
 
-    output_file = radio_out_dir / f"timecode_chroniques_{date_dmy}.txt"
+        output_file = radio_out_dir / f"timecode_chroniques_{date_dmy}.txt"
+    else:
+        output_file = Path.cwd() / f"timecode_chroniques_{date_dmy}.txt"
+
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write("\n".join(results) + "\n")
     
-    print(f"\n✨ Timecodes générés : {output_file.relative_to(assets_root.parent)}")
+    print(f"\n✨ Timecodes générés : {output_file}")
 
 if __name__ == "__main__":
     main()

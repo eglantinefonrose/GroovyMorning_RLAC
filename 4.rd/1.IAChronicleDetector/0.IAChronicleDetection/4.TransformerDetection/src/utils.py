@@ -29,25 +29,43 @@ def load_timecodes(filepath: str) -> List[Tuple[float, float]]:
     return timecodes
 
 def load_transcription(filepath: str) -> List[Dict]:
-    """Charge le format [00:00:00.000 --> 00:00:01.000] Texte."""
+    """Charge le format [00:00:00.000 --> 00:00:01.000] Texte ou format SRT classique."""
     if not os.path.exists(filepath): return []
     with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
         content = f.read()
     
-    # Regex ultra-flexible pour capturer [TC --> TC] ou TC --> TC suivi du texte
-    pattern = re.compile(r'(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\s*-->\s*(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\]?\s*(.*?)(?=\[?\d{1,2}:\d{2}:\d{2}[.,]\d{3}\s*-->|$)', re.DOTALL)
+    # Regex pour capturer [TC --> TC] ou TC --> TC suivi du texte
+    # On s'arrête avant le prochain timecode ou la fin du fichier
+    pattern = re.compile(r'(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\s*-->\s*(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\]?\s*(.*?)(?=\n*\d+\n\d{1,2}:\d{2}:\d{2}[.,]\d{3}\s*-->|\[?\d{1,2}:\d{2}:\d{2}[.,]\d{3}\s*-->|$)', re.DOTALL)
     matches = pattern.finditer(content)
     
     result = []
     for m in matches:
         text = m.group(3).strip()
+        
+        # Nettoyage des index numériques qui pourraient traîner (SRT)
+        # On enlève les chiffres isolés en fin de bloc qui sont en fait l'index du bloc suivant
+        text = re.sub(r'\n+\d+$', '', text)
+        
         # Nettoyage des éventuels index numériques en début de ligne
-        text = re.sub(r'^\d+[\r\n]+', '', text).replace('\n', ' ').strip()
-        result.append({
-            'start': parse_timecode_to_seconds(m.group(1)),
-            'end': parse_timecode_to_seconds(m.group(2)),
-            'text': text
-        })
+        text = re.sub(r'^\d+[\r\n]+', '', text)
+        
+        # Remplacement de tous les types de sauts de ligne par des espaces
+        text = text.replace('\r\n', ' ').replace('\n', ' ').replace('\r', ' ')
+        
+        # Ajout d'espaces après la ponctuation si manquants (ex: "Bonjour.Comment" -> "Bonjour. Comment")
+        # On ne le fait que si ce n'est pas un chiffre après (pour éviter de casser les nombres 3.14)
+        text = re.sub(r'([.!?,:;])(?=[^\s\d])', r'\1 ', text)
+        
+        # Suppression des doubles espaces
+        text = re.sub(r'\s+', ' ', text).strip()
+        
+        if text:
+            result.append({
+                'start': parse_timecode_to_seconds(m.group(1)),
+                'end': parse_timecode_to_seconds(m.group(2)),
+                'text': text
+            })
     return result
 
 def label_segments(segments: List[Dict], tc_list: List[Tuple[float, float]]) -> List[int]:

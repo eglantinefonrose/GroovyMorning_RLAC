@@ -173,10 +173,12 @@ def transcribe_audio_mlx(file_path, model, audio_tokenizer, text_tokenizer, lm_c
             char = char.replace(" ", " ") # Caractère spécial SentencePiece
             char = char.replace("▁", " ") # Caractère spécial Kyutai
             
-            if char.strip():
-                if start_time is None:
+            if char:
+                if start_time is None and char.strip():
                     start_time = timestamp
-                current_text.append(char)
+                
+                if start_time is not None:
+                    current_text.append(char)
                 
                 if len(current_text) > 12 or any(p in char for p in ".!?"):
                     end_time = timestamp + 0.08

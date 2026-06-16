@@ -28,10 +28,36 @@ def calculate_iou(range1, range2):
     union = (end1 - start1) + (end2 - start2) - intersection
     return intersection / union if union > 0 else 0.0
 
+import re
+
 def parse_time(time_str):
-    h, m, s = time_str.split(':')
-    s, ms = s.split('.')
-    return int(h) * 3600 + int(m) * 60 + int(s) + int(ms) / 1000
+    if isinstance(time_str, (int, float)):
+        return float(time_str)
+
+    try:
+        time_str = time_str.strip("[] ")
+        if ':' not in time_str:
+            return float(time_str)
+
+        parts = time_str.split(':')
+        if len(parts) == 3: # HH:MM:SS[.mmm]
+            h, m, s = parts
+        elif len(parts) == 2: # MM:SS[.mmm]
+            h = 0
+            m, s = parts
+        else:
+            return 0.0
+
+        if '.' in s:
+            s, ms = s.split('.')
+            ms = float("0." + ms)
+        else:
+            ms = 0.0
+
+        return int(h) * 3600 + int(m) * 60 + int(s) + ms
+    except Exception as e:
+        print(f"Warning: Could not parse time '{time_str}': {e}")
+        return 0.0
 
 def evaluate_quality(model_dir, audio_path, tc_path, model_type="wav2vec2"):
     if not os.path.exists(model_dir):
@@ -42,16 +68,43 @@ def evaluate_quality(model_dir, audio_path, tc_path, model_type="wav2vec2"):
     tc_path = find_file_robustly(tc_path)
 
     print(f"--- Évaluation de Qualité (40/60) pour {model_dir} ---")
-    
+
     # 1. Prédire
     predictions = predict(audio_path, model_type=model_type, model_dir=model_dir)
     pred_intervals = [(parse_time(p['start']), parse_time(p['end'])) for p in predictions]
 
+    print("\n--- Chroniques Détectées ---")
+    if not predictions:
+        print("Aucune chronique détectée.")
+    for p in predictions:
+        print(f"[{p['start']} -> {p['end']}] {p['label']}")
+
     # 2. Charger la vérité terrain
+    gt_intervals = []
     with open(tc_path, 'r', encoding='utf-8') as f:
-        gt_data = [line.strip().split('|') for line in f if '|' in line]
-    gt_intervals = [(float(start), float(end)) for start, end in gt_data]
-    
+        for line in f:
+            line = line.strip()
+            if not line: continue
+
+            # Format 1: start|end
+            if '|' in line:
+                parts = line.split('|')
+                if len(parts) >= 2:
+                    gt_intervals.append((parse_time(parts[0]), parse_time(parts[1])))
+            # Format 2: [HH:MM:SS.mmm] - [HH:MM:SS.mmm]
+            else:
+                match = re.search(r'\[(.*?)\]\s*-\s*\[(.*?)\]', line)
+                if match:
+                    gt_intervals.append((parse_time(match.group(1)), parse_time(match.group(2))))
+                elif line[0].isdigit(): # Simple seconds or MM:SS
+                    parts = re.split(r'[\s\t,;]+', line)
+                    if len(parts) >= 2:
+                        gt_intervals.append((parse_time(parts[0]), parse_time(parts[1])))
+
+    if not gt_intervals:
+        print(f"Erreur : Aucun intervalle de vérité terrain trouvé dans {tc_path}")
+        return
+
     # 3. Calculer les métriques
     n_gt = len(gt_intervals)
     n_pred = len(pred_intervals)

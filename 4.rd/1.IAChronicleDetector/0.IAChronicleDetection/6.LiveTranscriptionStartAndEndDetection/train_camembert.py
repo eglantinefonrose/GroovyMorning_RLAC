@@ -19,6 +19,23 @@ WANDB_PROJECT = "IAChronicleDetection"
 HF_REPO_NAME = "eglantinefonrose/camembert-chronicle-start-detection"
 HF_COLLECTION_SLUG = "eglantinefonrose/rlac-radio-live-a-la-carte-69dbc4adbaf921268f565853"
 
+def clean_srt_content(content):
+    """Supprime les indices et les horodatages des fichiers SRT."""
+    lines = content.split('\n')
+    clean_lines = []
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        # Si c'est un index numérique
+        if line.isdigit():
+            continue
+        # Si c'est un horodatage (ex: 00:00:04,460 --> 00:00:09,420)
+        if '-->' in line:
+            continue
+        clean_lines.append(line)
+    return " ".join(clean_lines)
+
 def extract_first_sentence(text):
     """Extrait la première phrase jusqu'au premier point."""
     if not text:
@@ -41,10 +58,14 @@ def load_data():
     print(f"Dossiers de début trouvés : {len(start_dirs)}")
     
     for d in start_dirs:
-        for f in glob.glob(os.path.join(d, "*.txt")):
+        # On cherche à la fois .txt et .srt
+        files = glob.glob(os.path.join(d, "*.txt")) + glob.glob(os.path.join(d, "*.srt"))
+        for f in files:
             try:
                 with open(f, 'r', encoding='utf-8') as file:
                     content = file.read()
+                    if f.endswith(".srt"):
+                        content = clean_srt_content(content)
                     sentence = extract_first_sentence(content)
                     if sentence:
                         data.append({"text": sentence, "label": 1})
@@ -57,10 +78,13 @@ def load_data():
     print(f"Dossiers de fin trouvés : {len(end_dirs)}")
     
     for d in end_dirs:
-        for f in glob.glob(os.path.join(d, "*.txt")):
+        files = glob.glob(os.path.join(d, "*.txt")) + glob.glob(os.path.join(d, "*.srt"))
+        for f in files:
             try:
                 with open(f, 'r', encoding='utf-8') as file:
                     content = file.read()
+                    if f.endswith(".srt"):
+                        content = clean_srt_content(content)
                     sentence = extract_first_sentence(content)
                     if sentence:
                         data.append({"text": sentence, "label": 0})

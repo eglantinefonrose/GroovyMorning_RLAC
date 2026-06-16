@@ -37,6 +37,21 @@ Pour chaque segment de 3 secondes, le système extrait une signature acoustique 
 - `chroniques_extraites/` : Dossier de sortie pour les segments détectés et extraits.
 - `src/training_config.txt` : Fichier de configuration pour l'entraînement multi-fichiers.
 
+## Évaluation de la Qualité
+
+Le script `evaluate_quality.py` permet de calculer une note de performance pour un modèle donné en le comparant à une vérité terrain (ground truth). La note est calculée sur 100 points :
+- 40% sur la **Cardinalité** (nombre de chroniques détectées vs attendues).
+- 60% sur l'**Alignement Temporel** (précision des débuts et fins).
+
+```bash
+python evaluate_quality.py <chemin_modele_pkl> <chemin_audio> <chemin_timecodes_gt>
+```
+
+Exemple :
+```bash
+python evaluate_quality.py models/rlac-audio-segmenter-chroniques_model.pkl audio_test.mp3 src/timecodes_files/timecodes_01-12-2025.txt
+```
+
 ## Utilisation
 
 ### Installation

@@ -1,14 +1,12 @@
 import os
 import argparse
-import json
 import sys
 import numpy as np
 from pathlib import Path
 
-# Ajout du dossier courant au path pour les imports locaux
-sys.path.append(os.getcwd())
-from predict import predict_chroniques
-from utils import load_timecodes
+# Ajout du dossier src au path pour les imports
+sys.path.append(os.path.join(os.getcwd(), 'src'))
+from logic import ChronicleClassifier, TimecodeLoader
 
 def calculate_iou(range1, range2):
     start1, end1 = range1
@@ -17,35 +15,40 @@ def calculate_iou(range1, range2):
     union = (end1 - start1) + (end2 - start2) - intersection
     return intersection / union if union > 0 else 0.0
 
-def evaluate_quality(model_path, srt_path, tc_path):
+def evaluate_quality(model_path, audio_path, tc_path, threshold=0.89):
     if not os.path.exists(model_path):
         print(f"Erreur : Le modèle '{model_path}' n'existe pas.")
         return
-    if not os.path.exists(srt_path):
-        print(f"Erreur : La transcription '{srt_path}' n'existe pas.")
-        return
-    if not os.path.exists(tc_path):
-        print(f"Erreur : Les timecodes '{tc_path}' n'existent pas.")
+
+    if not os.path.exists(audio_path):
+        print(f"Erreur : Le fichier audio '{audio_path}' n'existe pas.")
         return
 
-    print(f"--- Évaluation de Qualité (40/60) pour Random Forest ---")
+    if not os.path.exists(tc_path):
+        print(f"Erreur : Le fichier de timecodes '{tc_path}' n'existe pas.")
+        return
+
+    print(f"--- Évaluation de Qualité (40/60) pour {model_path} ---")
     
     # 1. Prédire
-    print(f"Analyse de {srt_path}...")
-    # On utilise la fonction de prédiction existante du projet
-    final_chroniques, _ = predict_chroniques(model_path, srt_path, gt_file=None)
-    pred_intervals = final_chroniques
-
+    classifier = ChronicleClassifier()
+    classifier.load_model(model_path)
+    
+    print(f"Analyse de {audio_path}...")
+    segments = classifier.detect_chronicles_in_file(audio_path, threshold=threshold, extract_segments=False)
+    
     print(f"\n📺 Chroniques détectées par le modèle :")
     print("-" * 60)
-    print(f"{'Index':<5} | {'Début (s)':<10} | {'Fin (s)':<10}")
+    print(f"{'Index':<5} | {'Début (s)':<10} | {'Fin (s)':<10} | {'Confiance':<10}")
     print("-" * 60)
-    for i, (start, end) in enumerate(pred_intervals, 1):
-        print(f"{i:<5} | {start:<10.1f} | {end:<10.1f}")
+    pred_intervals = []
+    for i, s in enumerate(segments, 1):
+        print(f"{i:<5} | {s['start']:<10.1f} | {s['end']:<10.1f} | {s['conf']:<10.1%}")
+        pred_intervals.append((s['start'], s['end']))
     print("-" * 60)
 
     # 2. Charger la vérité terrain
-    gt_intervals = load_timecodes(tc_path)
+    gt_intervals = TimecodeLoader.load_timecodes(tc_path)
     print(f"\n✅ Vérité Terrain (Ground Truth) chargée : {len(gt_intervals)} chroniques attendues.")
     
     # 3. Calculer les métriques et afficher la comparaison
@@ -93,7 +96,7 @@ def evaluate_quality(model_path, srt_path, tc_path):
 
     print("-" * 80)
 
-    # Calcul des scores finaux (Standardisés)
+    # Calcul des scores finaux
     cardinality_score = max(0.0, 1.0 - abs(n_gt - n_pred) / n_gt) if n_gt > 0 else (1.0 if n_pred == 0 else 0.0)
     alignment_score = np.mean(chronicle_scores) if chronicle_scores else 0.0
     global_score = (cardinality_score * 0.4) + (alignment_score * 0.6)
@@ -108,10 +111,11 @@ def evaluate_quality(model_path, srt_path, tc_path):
     print("="*40)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Évalue la qualité de détection pour le modèle Random Forest.")
-    parser.add_argument("--model", default="models/radio_chronique_rf.pkl", help="Chemin vers le modèle (.pkl)")
-    parser.add_argument("--srt", required=True, help="Chemin vers la transcription SRT")
-    parser.add_argument("--gt", required=True, help="Chemin vers le ground truth (timecodes)")
+    parser = argparse.ArgumentParser(description="Évalue la qualité de détection des chroniques pour le ML Audio.")
+    parser.add_argument("model_path", help="Chemin vers le modèle .pkl")
+    parser.add_argument("audio_path", help="Chemin vers le fichier audio")
+    parser.add_argument("tc_path", help="Chemin vers le fichier de vérité terrain (timecodes)")
+    parser.add_argument("--threshold", type=float, default=0.89, help="Seuil de détection")
     
     args = parser.parse_args()
-    evaluate_quality(args.model, args.srt, args.gt)
+    evaluate_quality(args.model_path, args.audio_path, args.tc_path, args.threshold)

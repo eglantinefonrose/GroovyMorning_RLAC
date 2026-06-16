@@ -10,7 +10,8 @@ from transformers import (
     ASTForAudioClassification,
     ASTFeatureExtractor,
     Wav2Vec2ForSequenceClassification,
-    Wav2Vec2FeatureExtractor
+    Wav2Vec2FeatureExtractor,
+    WavLMForSequenceClassification
 )
 
 SAMPLING_RATE = 16000
@@ -25,6 +26,21 @@ MODEL_CONFIGS = {
         "dir": "./model_output",
         "model_class": Wav2Vec2ForSequenceClassification,
         "extractor_class": Wav2Vec2FeatureExtractor
+    },
+    "beats": {
+        "dir": "./model_output_beats",
+        "model_class": AutoModelForAudioClassification,
+        "extractor_class": AutoFeatureExtractor
+    },
+    "wavlm": {
+        "dir": "./model_output_wavlm",
+        "model_class": WavLMForSequenceClassification,
+        "extractor_class": Wav2Vec2FeatureExtractor
+    },
+    "cnn": {
+        "dir": "./model_output_cnn",
+        "model_class": AutoModelForAudioClassification,
+        "extractor_class": AutoFeatureExtractor
     }
 }
 

@@ -17,9 +17,27 @@ L'approche utilise une technique de **Few-Shot Prompting** (apprentissage par l'
 *   **Contexte massif** : L'approche "bourrage de prompt" consiste à donner un maximum de contexte au modèle. Bien que le résultat ne soit pas parfait (quelques erreurs sur les secondes de début/fin), la compréhension sémantique permet souvent de nommer correctement la chronique, là où les méthodes audio échouent.
 *   **Limites** : Cette méthode est dépendante de la qualité de la transcription initiale et consomme beaucoup de tokens de contexte (fenêtre de contexte large indispensable).
 
+## Évaluation de la Qualité
+
+Un script d'évaluation est disponible pour comparer les prédictions d'un modèle avec la vérité terrain (timecodes réels). Le calcul de la note est basé sur la cardinalité (nombre de chroniques) et l'alignement temporel, suivant la même méthodologie que dans le projet 5.
+
+```bash
+python evaluate_quality.py <nom_du_modele> <chemin_transcription> <chemin_timecodes_gt>
+```
+
+Exemple :
+```bash
+python evaluate_quality.py mistral ./prompt.txt ../1.MachineLearningAudio/src/timecodes_files/timecodes_01-12-2025.txt
+```
+
 ## Utilisation
 
 Le script utilise `ollama` pour l'inférence locale.
 ```bash
 python main.py
+```
+
+### Evaluate quality
+```bash
+python evaluate_quality.py mistral ./prompt.txt ../1.MachineLearningAudio/src/timecodes_files/timecodes_01-12-2025.txt
 ```

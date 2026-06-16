@@ -76,17 +76,25 @@ class TimecodeLoader:
                     line = line.strip()
                     if not line or line.startswith('#'):
                         continue
-                    if '-' in line:
-                        parts = line.split('-')
+                    
+                    # Nettoyage des crochets si présents: [00:22:23.000] -> 00:22:23.000
+                    clean_line = line.replace('[', '').replace(']', '')
+                    
+                    if '-' in clean_line:
+                        # On sépare au premier '-' pour isoler le début et la fin
+                        parts = clean_line.split('-', 1)
                         if len(parts) == 2:
                             start_str = parts[0].strip()
-                            end_str = parts[1].strip()
+                            # La fin est dans la deuxième partie, avant l'espace ou le nom du fichier
+                            end_part = parts[1].strip().split()
+                            end_str = end_part[0] if end_part else ""
+                            
                             start = TimecodeLoader._parse_time(start_str)
                             end = TimecodeLoader._parse_time(end_str)
                             if start is not None and end is not None:
                                 timecodes.append((start, end))
-                    elif ',' in line:
-                        parts = line.split(',')
+                    elif ',' in clean_line:
+                        parts = clean_line.split(',')
                         if len(parts) == 2:
                             try:
                                 start = float(parts[0].strip())
@@ -110,6 +118,8 @@ class TimecodeLoader:
     @staticmethod
     def _parse_time(time_str: str) -> Optional[float]:
         try:
+            # Nettoyage supplémentaire au cas où
+            time_str = time_str.strip().replace('[', '').replace(']', '')
             if ':' in time_str:
                 parts = time_str.split(':')
                 if len(parts) == 2:

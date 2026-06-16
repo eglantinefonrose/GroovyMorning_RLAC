@@ -130,6 +130,7 @@ def predict_robust(audio_path: str, model_type: str, model_dir: str = None,
                 
                 if (current_end - current_start) >= min_duration:
                     detected_segments.append({
+                        "label": "chronique",
                         "chronique": "chronique",
                         "start": format_time(current_start),
                         "end": format_time(current_end),

@@ -164,6 +164,7 @@ def predict(audio_path: str, model_type: str, model_dir: str = None, is_binary: 
     result = []
     for m in merged:
         result.append({
+            "label": m["label"],
             "chronique": m["label"],
             "start": format_time(m["start"]),
             "end": format_time(m["end"]),

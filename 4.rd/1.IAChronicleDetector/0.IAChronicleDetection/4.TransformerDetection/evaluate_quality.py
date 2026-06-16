@@ -42,12 +42,49 @@ def evaluate_quality(model_path, srt_path, tc_path):
 
     if predicted_chronicles is None: predicted_chronicles = []
 
+    print(f"\n📺 Chroniques détectées par le modèle :")
+    print("-" * 60)
+    print(f"{'Index':<5} | {'Début (s)':<10} | {'Fin (s)':<10}")
+    print("-" * 60)
+    for i, p in enumerate(predicted_chronicles, 1):
+        print(f"{i:<5} | {p['start']:<10.1f} | {p['end']:<10.1f}")
+    print("-" * 60)
+
     # 2. Charger la vérité terrain
     ground_truth = load_timecodes(tc_path)
+    print(f"\n✅ Vérité Terrain (Ground Truth) chargée : {len(ground_truth)} chroniques attendues.")
     
     # 3. Calculer les métriques
     metrics = evaluate_chronicles(predicted_chronicles, ground_truth)
     
+    print(f"\n🔍 Comparaison détaillée :")
+    print("-" * 80)
+    print(f"{'GT Index':<10} | {'GT Intervalle':<20} | {'Match Pred':<15} | {'IoU':<6} | {'Status'}")
+    print("-" * 80)
+
+    pred_used = set()
+    for detail in metrics['details']:
+        gt_idx = detail['gt_idx']
+        gt = ground_truth[gt_idx]
+        gt_str = f"{gt[0]:.1f}s - {gt[1]:.1f}s"
+        
+        if detail['pred_idx'] is not None:
+            p_idx = detail['pred_idx']
+            pred_used.add(p_idx)
+            p = predicted_chronicles[p_idx]
+            p_str = f"{p['start']:.1f}s - {p['end']:.1f}s"
+            print(f"{gt_idx+1:<10} | {gt_str:<20} | {p_str:<15} | {detail['iou']:<6.2f} | ✅ OK")
+        else:
+            print(f"{gt_idx+1:<10} | {gt_str:<20} | {'-'*15:<15} | {0.0:<6.2f} | ❌ MISS")
+
+    # Signaler les prédictions en trop (Faux Positifs)
+    for i, p in enumerate(predicted_chronicles):
+        if i not in pred_used:
+            p_str = f"{p['start']:.1f}s - {p['end']:.1f}s"
+            print(f"{'EXTRA':<10} | {'-'*20:<20} | {p_str:<15} | {'-':<6} | ⚠️ FP")
+    
+    print("-" * 80)
+
     card_score = metrics['cardinality_score'] * 100
     align_score = metrics['alignment_score'] * 100
     global_score = (card_score * 0.4) + (align_score * 0.6)

@@ -33,6 +33,19 @@ uv sync
 # Le projet utilise automatiquement le GPU (CUDA) ou l'accélération Apple Silicon (MPS) si disponibles.
 ```
 
+## Évaluation de la Qualité
+
+Le script `evaluate_quality.py` permet de calculer une note de performance standardisée (40% Cardinalité, 60% Alignement), identique aux autres projets.
+
+```bash
+python evaluate_quality.py <chemin_transcription_srt> <chemin_timecodes_gt>
+```
+
+Exemple :
+```bash
+python evaluate_quality.py transcription.srt src/timecodes_files/timecodes_01-12-2025.txt
+```
+
 ## Utilisation
 
 ### Entraînement

@@ -17,9 +17,12 @@ def calculate_iou(range1, range2):
     union = (end1 - start1) + (end2 - start2) - intersection
     return intersection / union if union > 0 else 0.0
 
-def evaluate_quality(model_path, srt_path, tc_path):
-    if not os.path.exists(model_path):
-        print(f"Erreur : Le modèle '{model_path}' n'existe pas.")
+def evaluate_quality(base_model_path, hybrid_model_path, srt_path, tc_path):
+    if not os.path.exists(base_model_path):
+        print(f"Erreur : Le modèle de base '{base_model_path}' n'existe pas.")
+        return
+    if not os.path.exists(hybrid_model_path):
+        print(f"Erreur : Le modèle hybride '{hybrid_model_path}' n'existe pas.")
         return
     if not os.path.exists(srt_path):
         print(f"Erreur : La transcription '{srt_path}' n'existe pas.")
@@ -28,12 +31,13 @@ def evaluate_quality(model_path, srt_path, tc_path):
         print(f"Erreur : Les timecodes '{tc_path}' n'existent pas.")
         return
 
-    print(f"--- Évaluation de Qualité (40/60) pour Random Forest ---")
+    print(f"--- Évaluation de Qualité (40/60) pour l'approche Hybride ---")
     
     # 1. Prédire
     print(f"Analyse de {srt_path}...")
     # On utilise la fonction de prédiction existante du projet
-    final_chroniques, _ = predict_chroniques(model_path, srt_path, gt_file=None)
+    # On met gt_file=None pour éviter d'utiliser leur calcul de score interne
+    final_chroniques, _ = predict_chroniques(base_model_path, hybrid_model_path, srt_path, gt_file=None)
     pred_intervals = final_chroniques
 
     print(f"\n📺 Chroniques détectées par le modèle :")
@@ -101,17 +105,18 @@ def evaluate_quality(model_path, srt_path, tc_path):
     print("\n" + "="*40)
     print(f"📊 NOTE DE QUALITÉ FINALE : {global_score*100:.1f}/100")
     print("="*40)
-    print(f"- Modèle : {model_path}")
+    print(f"- Modèle Hybride : {hybrid_model_path}")
     print(f"- Chroniques : {n_pred} détectées / {n_gt} attendues")
     print(f"- La Cardinalité (40%) : {cardinality_score*100:.1f}%")
     print(f"- L'Alignement Temporel (60%) : {alignment_score*100:.1f}%")
     print("="*40)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Évalue la qualité de détection pour le modèle Random Forest.")
-    parser.add_argument("--model", default="models/radio_chronique_rf.pkl", help="Chemin vers le modèle (.pkl)")
+    parser = argparse.ArgumentParser(description="Évalue la qualité de détection pour le modèle Hybride.")
+    parser.add_argument("--base", default="models/radio_chronique_hybrid_base.pkl", help="Modèle de base (.pkl)")
+    parser.add_argument("--hybrid", default="models/radio_chronique_hybrid_hybrid.pt", help="Modèle hybride (.pt)")
     parser.add_argument("--srt", required=True, help="Chemin vers la transcription SRT")
     parser.add_argument("--gt", required=True, help="Chemin vers le ground truth (timecodes)")
     
     args = parser.parse_args()
-    evaluate_quality(args.model, args.srt, args.gt)
+    evaluate_quality(args.base, args.hybrid, args.srt, args.gt)

@@ -15,7 +15,8 @@ def parse_timecode_to_timedelta(time_str: str) -> timedelta:
 
 
 def parse_timecode(timecode_str: str) -> float:
-    """Convertit un timecode MM:SS.ms en secondes (fichiers config)"""
+    """Convertit un timecode MM:SS.ms ou HH:MM:SS.ms en secondes"""
+    timecode_str = timecode_str.replace('[', '').replace(']', '').strip()
     parts = timecode_str.replace(',', '.').split(':')
     if len(parts) == 2:
         return int(parts[0]) * 60 + float(parts[1])
@@ -25,13 +26,24 @@ def parse_timecode(timecode_str: str) -> float:
 
 
 def parse_timecode_range(timecode_range: str) -> Tuple[float, float]:
-    if ' - ' in timecode_range:
-        parts = timecode_range.strip().split(' - ')
-    elif '-' in timecode_range:
-        parts = timecode_range.strip().split('-')
+    # On nettoie d'abord les crochets
+    line = timecode_range.replace('[', '').replace(']', '')
+    
+    if ' - ' in line:
+        parts = line.strip().split(' - ')
+    elif '-' in line:
+        # On fait attention à ne pas splitter sur les tirets des noms de fichiers
+        # On cherche le premier tiret qui sépare deux timecodes
+        parts = line.strip().split('-', 1)
     else:
-        raise ValueError(f"Format invalide : {timecode_range}")
-    return parse_timecode(parts[0].strip()), parse_timecode(parts[1].strip())
+        raise ValueError(f"Format invalide : {line}")
+    
+    start_str = parts[0].strip()
+    # Pour la fin, on prend le premier bloc de texte (le timecode) et on ignore le reste (nom du fichier)
+    end_part = parts[1].strip().split()
+    end_str = end_part[0] if end_part else ""
+    
+    return parse_timecode(start_str), parse_timecode(end_str)
 
 
 def load_timecodes(filepath: str) -> List[Tuple[float, float]]:

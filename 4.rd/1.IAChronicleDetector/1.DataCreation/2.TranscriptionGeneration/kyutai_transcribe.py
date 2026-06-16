@@ -170,10 +170,12 @@ def transcribe_audio_mlx(file_path, model, mimi_path, text_tokenizer, lm_config,
             char = char.replace(" ", " ") 
             char = char.replace("▁", " ")
             
-            if char.strip():
-                if start_time is None:
+            if char:
+                if start_time is None and char.strip():
                     start_time = timestamp
-                current_text.append(char)
+                
+                if start_time is not None:
+                    current_text.append(char)
                 
                 # Découpage en segments SRT (par ponctuation ou longueur)
                 if len(current_text) > 12 or any(p in char for p in ".!?"):
