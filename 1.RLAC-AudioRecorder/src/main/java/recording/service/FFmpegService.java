@@ -43,10 +43,7 @@ public class FFmpegService {
 
         ProcessBuilder pb = new ProcessBuilder(
                 FFMPEG_PATH,
-                "-f", "s16le",
-                "-ar", "16000",
-                "-ac", "1",
-                "-i", AUDIO_PIPE_PATH,
+                "-i", "http://icecast.radiofrance.fr/franceinter-hifi.aac",
                 "-c:a", "aac",
                 "-b:a", "192k",
                 "-ar", "48000",

@@ -313,8 +313,8 @@ class UnifiedLiveSegmenter:
                 "last_chronicle": self.last_chronicle_name
             })
 
-        print("📡 API démarrée sur http://localhost:8001")
-        app.run(host='0.0.0.0', port=8001, debug=False, use_reloader=False)
+        print("📡 API démarrée sur http://localhost:8002")
+        app.run(host='0.0.0.0', port=8002, debug=False, use_reloader=False)
 
     def run(self, simu=True):
         threading.Thread(target=self.transcription_worker, daemon=True).start()
@@ -377,10 +377,10 @@ class UnifiedLiveSegmenter:
                 except: pass
 
 if __name__ == "__main__":
-    SIMU = False # True: écoute sur /tmp/audio_pipe, False: écoute sur le flux Live
+    # On récupère le mode SIMU depuis l'environnement (par défaut False)
+    SIMU = os.environ.get("SIMU", "false").lower() == "true"
     
     # Chemin vers les jingles (ajusté pour Docker)
-    # Le script est dans /app/src, les jingles sont dans /app/assets
     jingles_path = "/app/assets/jingles_chroniques/jingles_m4a"
     if not os.path.exists(jingles_path):
         jingles_path = "assets/jingles_chroniques/jingles_m4a"

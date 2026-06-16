@@ -82,3 +82,9 @@ Le système permet aux utilisateurs de programmer l'enregistrement de leurs chro
     ```
 
 Ceci planifiera les enregistrements en respectant l'ordre et les durées définies dans les chroniques de l'utilisateur `testUser`, en commençant à 7h00. Chaque enregistrement sera nommé d'après la chronique correspondante.
+
+### 5.Lancer l'app
+```
+gradle run
+```
+Attention, si on veut utiliser le workflow avec Python, il faut lancer le serveur Java **avant** le serveur Python.
