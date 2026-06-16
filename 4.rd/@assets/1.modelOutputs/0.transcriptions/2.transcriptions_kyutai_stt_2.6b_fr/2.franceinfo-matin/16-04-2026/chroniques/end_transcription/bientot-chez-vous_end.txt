@@ -1,4 +1,0 @@
-Muse spark une intelligence artificielle qui pourrait entre
-autres déterminer lenombre de calories d'un repas juste en
-analysant une photo de ce repas.
-Merci Loïc Pialat.
