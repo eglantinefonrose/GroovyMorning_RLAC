@@ -228,7 +228,24 @@ fun PlayerView(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Minimize Button
+            IconButton(
+                onClick = onClose,
+                modifier = Modifier
+                    .size(44.dp)
+                    .background(Color.White.copy(alpha = 0.15f), androidx.compose.foundation.shape.CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Réduire",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Chronicles List
             Text(
@@ -291,15 +308,6 @@ fun PlayerView(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            IconButton(onClick = onClose) {
-                Icon(
-                    Icons.Default.Close, 
-                    "Close", 
-                    tint = Color.White, 
-                    modifier = Modifier.size(32.dp)
-                )
-            }
         }
     }
 }

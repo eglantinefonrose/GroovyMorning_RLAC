@@ -152,20 +152,11 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
         Screen.Library
     )
 
-    LaunchedEffect(currentRoute, mediaController?.currentMediaItem) {
-        if (currentRoute == Screen.Live.route && mediaController?.currentMediaItem != null) {
-            isPlayerOpen = true
-        }
-    }
-
     Scaffold(
         bottomBar = {
             Column {
                 // Mini Player
-                val showMiniPlayer = currentRoute != Screen.Live.route && 
-                                   currentRoute != Screen.Schedule.route && 
-                                   !isPlayerOpen && 
-                                   mediaController?.currentMediaItem != null
+                val showMiniPlayer = !isPlayerOpen && mediaController?.currentMediaItem != null
                 
                 AnimatedVisibility(
                     visible = showMiniPlayer,
@@ -175,6 +166,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                     MiniPlayer(
                         mediaController = mediaController,
                         onClick = {
+                            isPlayerOpen = true
                             navController.navigate(Screen.Live.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
@@ -233,8 +225,16 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                 }
                 composable(Screen.Music.route) { MusicView() }
                 composable(Screen.Live.route) { 
+                    val currentMediaItem by remember(mediaController) { 
+                        derivedStateOf { mediaController?.currentMediaItem } 
+                    }
+                    // We need a more reactive way to get the title since currentMediaItem might not trigger recomposition 
+                    // in the same way as a StateFlow or State.
+                    // Let's use the same listener logic as in PlayerView or just pass the mediaController.
+                    
                     LiveView(
                         chronicles = chronicles,
+                        mediaController = mediaController,
                         onNavigateToSchedule = { navController.navigate(Screen.Schedule.route) },
                         onPlayLiveClick = { 
                             playLive()

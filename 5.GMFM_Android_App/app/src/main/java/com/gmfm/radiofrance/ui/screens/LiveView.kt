@@ -22,13 +22,36 @@ import androidx.compose.foundation.lazy.items
 import com.gmfm.radiofrance.model.Chronicle
 import com.gmfm.radiofrance.ui.theme.FranceInter
 
+import androidx.compose.runtime.*
+import androidx.media3.session.MediaController
+import androidx.media3.common.Player
+
 @Composable
 fun LiveView(
     chronicles: List<Chronicle>,
+    mediaController: MediaController?,
     onNavigateToSchedule: () -> Unit,
     onPlayLiveClick: () -> Unit,
     onChronicleClick: (Chronicle) -> Unit
 ) {
+    var currentTitle by remember { mutableStateOf(mediaController?.currentMediaItem?.mediaMetadata?.title?.toString()) }
+    var isPlaying by remember { mutableStateOf(mediaController?.isPlaying ?: false) }
+
+    DisposableEffect(mediaController) {
+        val listener = object : Player.Listener {
+            override fun onMediaMetadataChanged(metadata: androidx.media3.common.MediaMetadata) {
+                currentTitle = metadata.title?.toString()
+            }
+            override fun onIsPlayingChanged(playing: Boolean) {
+                isPlaying = playing
+            }
+        }
+        mediaController?.addListener(listener)
+        onDispose {
+            mediaController?.removeListener(listener)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -62,20 +85,39 @@ fun LiveView(
             }
 
             items(chronicles) { chronicle ->
-                LiveChronicleItem(chronicle, onClick = { onChronicleClick(chronicle) })
+                val isCurrent = chronicle.title == currentTitle
+                LiveChronicleItem(
+                    chronicle = chronicle, 
+                    isCurrent = isCurrent,
+                    isPlaying = isPlaying && isCurrent,
+                    onClick = { onChronicleClick(chronicle) }
+                )
             }
         }
     }
 }
 
 @Composable
-fun LiveChronicleItem(chronicle: Chronicle, onClick: () -> Unit) {
+fun LiveChronicleItem(
+    chronicle: Chronicle, 
+    isCurrent: Boolean,
+    isPlaying: Boolean,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .border(
+                width = if (isCurrent) 1.dp else 0.dp,
+                color = if (isCurrent) FranceInter else Color.Transparent,
+                shape = RoundedCornerShape(16.dp)
+            )
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A))
+        colors = CardDefaults.cardColors(
+            containerColor = if (isCurrent) FranceInter.copy(alpha = 0.1f) else Color(0xFF1A1A1A)
+        )
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -85,13 +127,29 @@ fun LiveChronicleItem(chronicle: Chronicle, onClick: () -> Unit) {
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color.Gray)
-            )
+                    .background(if (isCurrent) FranceInter else Color.Gray),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isCurrent && isPlaying) {
+                    Icon(
+                        Icons.Default.VolumeUp, 
+                        null, 
+                        tint = Color.White, 
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    Icon(
+                        Icons.Default.PlayArrow,
+                        null,
+                        tint = Color.White
+                    )
+                }
+            }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     chronicle.title ?: "Sans titre",
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
                     color = Color.White
                 )
                 val durationText = chronicle.duration?.let {
@@ -105,11 +163,14 @@ fun LiveChronicleItem(chronicle: Chronicle, onClick: () -> Unit) {
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-            Icon(
-                Icons.Default.PlayArrow,
-                contentDescription = "Play",
-                tint = Color.White
-            )
+            if (isCurrent && isPlaying) {
+                Text(
+                    "EN LECTURE",
+                    color = FranceInter,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }
