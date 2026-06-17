@@ -31,6 +31,7 @@ import com.google.common.util.concurrent.MoreExecutors
 
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gmfm.radiofrance.viewmodel.MainViewModel
+import androidx.activity.compose.BackHandler
 
 @Composable
 fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
@@ -43,6 +44,10 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     
     var isPlayerOpen by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
+
+    BackHandler(enabled = isPlayerOpen) {
+        isPlayerOpen = false
+    }
     
     var mediaController by remember { mutableStateOf<MediaController?>(null) }
 
@@ -159,6 +164,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                         label = { Text(screen.label!!) },
                         selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                         onClick = {
+                            isPlayerOpen = false
                             navController.navigate(screen.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
@@ -172,10 +178,18 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            NavHost(navController, startDestination = Screen.Home.route) {
+        Box(modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxSize()
+        ) {
+            NavHost(
+                navController, 
+                startDestination = Screen.Home.route,
+                modifier = Modifier.fillMaxSize()
+            ) {
                 composable(Screen.Home.route) { 
                     HomeView(
+                        viewModel = viewModel,
                         onSettingsClick = { showSettingsDialog = true },
                         onPlayClick = { chronicle ->
                             playChronicle(chronicle)
@@ -194,7 +208,9 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                 }
                 composable(Screen.Search.route) { SearchView() }
                 composable(Screen.Library.route) { LibraryView() }
-                composable(Screen.Schedule.route) { ScheduleView() }
+                composable(Screen.Schedule.route) { 
+                    ScheduleView(viewModel = viewModel) 
+                }
             }
 
             // Settings & Simu Overlay
