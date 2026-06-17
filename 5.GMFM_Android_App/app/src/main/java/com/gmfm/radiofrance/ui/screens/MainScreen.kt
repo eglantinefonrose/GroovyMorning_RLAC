@@ -32,6 +32,15 @@ import com.google.common.util.concurrent.MoreExecutors
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gmfm.radiofrance.viewmodel.MainViewModel
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.*
+import com.gmfm.radiofrance.ui.theme.FranceInter
+import androidx.media3.common.Player
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
@@ -44,6 +53,9 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     
     var isPlayerOpen by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     BackHandler(enabled = isPlayerOpen) {
         isPlayerOpen = false
@@ -150,22 +162,30 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
         Screen.Library
     )
 
+    LaunchedEffect(currentRoute, mediaController?.currentMediaItem) {
+        if (currentRoute == Screen.Live.route && mediaController?.currentMediaItem != null) {
+            isPlayerOpen = true
+        }
+    }
+
     Scaffold(
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.onBackground
-            ) {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
-                items.forEach { screen ->
-                    NavigationBarItem(
-                        icon = { Icon(screen.icon!!, contentDescription = null) },
-                        label = { Text(screen.label!!) },
-                        selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+            Column {
+                // Mini Player
+                val showMiniPlayer = currentRoute != Screen.Live.route && 
+                                   currentRoute != Screen.Schedule.route && 
+                                   !isPlayerOpen && 
+                                   mediaController?.currentMediaItem != null
+                
+                AnimatedVisibility(
+                    visible = showMiniPlayer,
+                    enter = slideInVertically(initialOffsetY = { it }),
+                    exit = slideOutVertically(targetOffsetY = { it })
+                ) {
+                    MiniPlayer(
+                        mediaController = mediaController,
                         onClick = {
-                            isPlayerOpen = false
-                            navController.navigate(screen.route) {
+                            navController.navigate(Screen.Live.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
@@ -174,6 +194,30 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                             }
                         }
                     )
+                }
+
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.onBackground
+                ) {
+                    val currentDestination = navBackStackEntry?.destination
+                    items.forEach { screen ->
+                        NavigationBarItem(
+                            icon = { Icon(screen.icon!!, contentDescription = null) },
+                            label = { Text(screen.label!!) },
+                            selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                            onClick = {
+                                isPlayerOpen = false
+                                navController.navigate(screen.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -307,3 +351,93 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
 @Composable fun MusicView() { Box(modifier = Modifier.padding(16.dp)) { Text("Musique View Placeholder", color = MaterialTheme.colorScheme.onBackground) } }
 @Composable fun SearchView() { Box(modifier = Modifier.padding(16.dp)) { Text("Search View Placeholder", color = MaterialTheme.colorScheme.onBackground) } }
 @Composable fun LibraryView() { Box(modifier = Modifier.padding(16.dp)) { Text("Library View Placeholder", color = MaterialTheme.colorScheme.onBackground) } }
+
+@Composable
+fun MiniPlayer(
+    mediaController: MediaController?,
+    onClick: () -> Unit
+) {
+    var isPlaying by remember { mutableStateOf(mediaController?.isPlaying ?: false) }
+    var currentTitle by remember { mutableStateOf(mediaController?.currentMediaItem?.mediaMetadata?.title?.toString() ?: "Aucun titre") }
+
+    DisposableEffect(mediaController) {
+        val listener = object : Player.Listener {
+            override fun onIsPlayingChanged(playing: Boolean) {
+                isPlaying = playing
+            }
+            override fun onMediaMetadataChanged(metadata: androidx.media3.common.MediaMetadata) {
+                currentTitle = metadata.title?.toString() ?: "Inconnu"
+            }
+        }
+        mediaController?.addListener(listener)
+        onDispose {
+            mediaController?.removeListener(listener)
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth(0.95f)
+                .height(64.dp)
+                .clickable { onClick() },
+            shape = RoundedCornerShape(16.dp),
+            color = FranceInter,
+            tonalElevation = 8.dp
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Mini Logo/Icon
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Default.Radio, null, tint = androidx.compose.ui.graphics.Color.White)
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "France Inter",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = currentTitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = androidx.compose.ui.graphics.Color.White,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    )
+                }
+
+                IconButton(
+                    onClick = { 
+                        if (isPlaying) mediaController?.pause() else mediaController?.play()
+                    }
+                ) {
+                    Icon(
+                        if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        contentDescription = "Play/Pause",
+                        tint = androidx.compose.ui.graphics.Color.White,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
+        }
+    }
+}
