@@ -94,9 +94,9 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                 viewModel.fetchData()
             } else {
                 mediaController?.let { controller ->
-                    val currentIndex = chronicles.indexOf(chronicle)
-                    if (currentIndex != -1) {
-                        val mediaItems = chronicles.drop(currentIndex).mapNotNull { item ->
+                    val startIndex = chronicles.indexOf(chronicle)
+                    if (startIndex != -1) {
+                        val mediaItems = chronicles.mapNotNull { item ->
                             val itemTitle = item.title ?: return@mapNotNull null
                             val cleanName = cleanChronicleName(itemTitle)
                             val encodedTitle = android.net.Uri.encode(cleanName, ":@!$&'()*+,;=")
@@ -115,7 +115,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                                 .build()
                         }
                         
-                        controller.setMediaItems(mediaItems)
+                        controller.setMediaItems(mediaItems, startIndex, 0L)
                         controller.prepare()
                         controller.play()
                     }
@@ -234,9 +234,14 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                 composable(Screen.Music.route) { MusicView() }
                 composable(Screen.Live.route) { 
                     LiveView(
+                        chronicles = chronicles,
                         onNavigateToSchedule = { navController.navigate(Screen.Schedule.route) },
-                        onPlayClick = { 
+                        onPlayLiveClick = { 
                             playLive()
+                        },
+                        onChronicleClick = { chronicle ->
+                            playChronicle(chronicle)
+                            isPlayerOpen = true
                         }
                     ) 
                 }
@@ -332,6 +337,9 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
             PlayerView(
                 mediaController = mediaController,
                 chronicles = chronicles,
+                onChronicleClick = { chronicle ->
+                    playChronicle(chronicle)
+                },
                 onClose = { isPlayerOpen = false }
             )
         }

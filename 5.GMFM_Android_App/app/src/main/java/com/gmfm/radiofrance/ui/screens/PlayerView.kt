@@ -2,6 +2,8 @@ package com.gmfm.radiofrance.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,6 +30,7 @@ import kotlinx.coroutines.delay
 fun PlayerView(
     mediaController: MediaController?,
     chronicles: List<Chronicle>,
+    onChronicleClick: (Chronicle) -> Unit,
     onClose: () -> Unit
 ) {
     var isPlaying by remember { mutableStateOf(mediaController?.isPlaying ?: false) }
@@ -170,12 +173,8 @@ fun PlayerView(
                         }
 
                         IconButton(onClick = {
-                            val currentIndex = chronicles.indexOfFirst { it.title == currentTitle }
-                            if (currentIndex > 0) {
-                                // This assumes a way to play by chronicle, 
-                                // but MediaController only has seekToNext/Previous if items are in a playlist.
-                                // For now, we use seekToPrevious which is standard for MediaController.
-                                mediaController?.seekToPrevious()
+                            if (mediaController?.hasPreviousMediaItem() == true) {
+                                mediaController.seekToPreviousMediaItem()
                             }
                         }) {
                             Icon(Icons.Default.SkipPrevious, "", tint = Color.White, modifier = Modifier.size(32.dp))
@@ -196,9 +195,8 @@ fun PlayerView(
                         }
 
                         IconButton(onClick = {
-                            val currentIndex = chronicles.indexOfFirst { it.title == currentTitle }
-                            if (currentIndex != -1 && currentIndex < chronicles.size - 1) {
-                                mediaController?.seekToNext()
+                            if (mediaController?.hasNextMediaItem() == true) {
+                                mediaController.seekToNextMediaItem()
                             }
                         }) {
                             Icon(Icons.Default.SkipNext, "", tint = Color.White, modifier = Modifier.size(32.dp))
@@ -248,11 +246,18 @@ fun PlayerView(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(chronicles) { chronicle ->
+                    val isCurrent = chronicle.title == currentTitle
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF1A1A1A))
+                            .background(if (isCurrent) FranceInter.copy(alpha = 0.2f) else Color(0xFF1A1A1A))
+                            .border(
+                                width = if (isCurrent) 1.dp else 0.dp,
+                                color = if (isCurrent) FranceInter else Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .clickable { onChronicleClick(chronicle) }
                             .padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -260,11 +265,20 @@ fun PlayerView(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color.Gray)
-                        )
+                                .background(if (isCurrent) FranceInter else Color.Gray),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (isCurrent && isPlaying) {
+                                Icon(Icons.Default.VolumeUp, null, tint = Color.White, modifier = Modifier.size(20.dp))
+                            }
+                        }
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
-                            Text(chronicle.title ?: "", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text(
+                                chronicle.title ?: "", 
+                                color = if (isCurrent) Color.White else Color.White.copy(alpha = 0.9f), 
+                                fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal
+                            )
                             val durationText = chronicle.duration?.let { 
                                 val mins = it / 60
                                 val secs = it % 60
