@@ -48,9 +48,14 @@ fun PlayerView(
                 currentTitle = metadata.title?.toString() ?: "Inconnu"
             }
             override fun onPlaybackStateChanged(state: Int) {
-                if (state == Player.STATE_READY) {
-                    duration = mediaController?.duration?.coerceAtLeast(0L) ?: 0L
+                if (state == Player.STATE_READY || state == Player.STATE_BUFFERING) {
+                    val newDuration = mediaController?.duration ?: 0L
+                    if (newDuration > 0) duration = newDuration
                 }
+            }
+            override fun onTimelineChanged(timeline: androidx.media3.common.Timeline, reason: Int) {
+                val newDuration = mediaController?.duration ?: 0L
+                if (newDuration > 0) duration = newDuration
             }
             override fun onPositionDiscontinuity(
                 oldPosition: Player.PositionInfo,
@@ -66,11 +71,16 @@ fun PlayerView(
         }
     }
 
-    // Update position periodically
+    // Update position and duration periodically
     LaunchedEffect(isPlaying) {
         if (isPlaying) {
             while (true) {
                 currentPosition = mediaController?.currentPosition ?: 0L
+                // In live streams, duration can increase as segments are added
+                val newDuration = mediaController?.duration ?: 0L
+                if (newDuration > 0 && newDuration != duration) {
+                    duration = newDuration
+                }
                 delay(500)
             }
         }

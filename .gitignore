@@ -36,3 +36,5 @@
 1.RLAC-AudioRecorder/.gradle
 1.RLAC-AudioRecorder/media
 *.hprof
+*.m3u8
+*.mp4

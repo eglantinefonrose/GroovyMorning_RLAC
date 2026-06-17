@@ -4,6 +4,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.media3.common.Player
 import androidx.media3.common.PlaybackException
+import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
@@ -25,6 +26,8 @@ class PlaybackService : MediaSessionService() {
             .build()
             
         player.addListener(object : Player.Listener {
+            private var lastMediaItem: MediaItem? = null
+
             override fun onPlaybackStateChanged(playbackState: Int) {
                 val stateString = when (playbackState) {
                     Player.STATE_IDLE -> "IDLE"
@@ -34,6 +37,15 @@ class PlaybackService : MediaSessionService() {
                     else -> "UNKNOWN"
                 }
                 Log.d("GMFM_Audio", "Playback State changed to: $stateString")
+
+                if (playbackState == Player.STATE_READY) {
+                    val currentItem = player.currentMediaItem
+                    if (currentItem != null && currentItem != lastMediaItem) {
+                        lastMediaItem = currentItem
+                        Log.d("GMFM_Audio", "🎵 New track ready: ${currentItem.mediaMetadata.title}. Forcing seek to 0L.")
+                        player.seekTo(0L)
+                    }
+                }
             }
 
             override fun onPlayerError(error: PlaybackException) {
