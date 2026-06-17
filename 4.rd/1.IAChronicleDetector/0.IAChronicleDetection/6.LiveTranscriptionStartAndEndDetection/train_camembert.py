@@ -162,7 +162,8 @@ def train():
             "epochs": 3,
             "batch_size": 16,
             "learning_rate": 5e-5,
-        }
+        },
+        settings=wandb.Settings(init_timeout=300)
     )
 
     # 6. Arguments d'entrainement

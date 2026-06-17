@@ -191,7 +191,11 @@ def train():
     model = CamembertForSequenceClassification.from_pretrained(MODEL_NAME, num_labels=2)
 
     # 5. WandB
-    wandb.init(project=WANDB_PROJECT, name=f"camembert-chronicle-v2-{pd.Timestamp.now().strftime('%m%d-%H%M')}")
+    wandb.init(
+        project=WANDB_PROJECT, 
+        name=f"camembert-chronicle-v2-{pd.Timestamp.now().strftime('%m%d-%H%M')}",
+        settings=wandb.Settings(init_timeout=300)
+    )
 
     # 6. Training Arguments (Optimisés)
     training_args = TrainingArguments(
