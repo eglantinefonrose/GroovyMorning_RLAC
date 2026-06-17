@@ -168,6 +168,19 @@ fun PlayerView(
                         IconButton(onClick = { mediaController?.seekBack() }) { 
                             Icon(Icons.Default.Replay, "", tint = Color.White) 
                         }
+
+                        IconButton(onClick = {
+                            val currentIndex = chronicles.indexOfFirst { it.title == currentTitle }
+                            if (currentIndex > 0) {
+                                // This assumes a way to play by chronicle, 
+                                // but MediaController only has seekToNext/Previous if items are in a playlist.
+                                // For now, we use seekToPrevious which is standard for MediaController.
+                                mediaController?.seekToPrevious()
+                            }
+                        }) {
+                            Icon(Icons.Default.SkipPrevious, "", tint = Color.White, modifier = Modifier.size(32.dp))
+                        }
+
                         IconButton(
                             onClick = { 
                                 if (isPlaying) mediaController?.pause() else mediaController?.play()
@@ -181,6 +194,16 @@ fun PlayerView(
                                 modifier = Modifier.size(64.dp)
                             ) 
                         }
+
+                        IconButton(onClick = {
+                            val currentIndex = chronicles.indexOfFirst { it.title == currentTitle }
+                            if (currentIndex != -1 && currentIndex < chronicles.size - 1) {
+                                mediaController?.seekToNext()
+                            }
+                        }) {
+                            Icon(Icons.Default.SkipNext, "", tint = Color.White, modifier = Modifier.size(32.dp))
+                        }
+
                         IconButton(onClick = { mediaController?.seekForward() }) { 
                             Icon(Icons.Default.Forward, "", tint = Color.White) 
                         }

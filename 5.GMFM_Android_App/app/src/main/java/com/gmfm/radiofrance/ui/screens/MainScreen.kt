@@ -94,41 +94,31 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                 viewModel.fetchData()
             } else {
                 mediaController?.let { controller ->
-                    // Match Backend Cleaning:
-                    val cleanName = cleanChronicleName(title)
-                    
-                    // iOS logic: addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)
-                    // We encode the cleanName but allow characters that iOS urlPathAllowed includes.
-                    // Note: slashes in cleanName (if any) would be underscores anyway now.
-                    val encodedTitle = android.net.Uri.encode(cleanName, ":@!$&'()*+,;=")
-                    
-                    val baseUrl = viewModel.baseUrl.removeSuffix("/")
-                    
-                    // The 'folder' already contains 'userID_testUser/session_...'
-                    // We must ensure the slashes in 'folder' are preserved and not encoded.
-                    val rawUrl = "$baseUrl/$folder/$encodedTitle/$encodedTitle.m3u8"
-                    
-                    // Clean URL to prevent double slashes (common source of 404)
-                    val url = rawUrl.replace(Regex("(?<!:)/{2,}"), "/")
-                    
-                    Log.d("GMFM_Audio", "🎵 Audio Playback Call: $url")
-                    Log.d("GMFM_Audio", "DEBUG: baseUrl=$baseUrl")
-                    Log.d("GMFM_Audio", "DEBUG: folder=$folder")
-                    Log.d("GMFM_Audio", "DEBUG: clean=$cleanName")
-                    
-                    val mediaItem = MediaItem.Builder()
-                        .setUri(url)
-                        .setMimeType(androidx.media3.common.MimeTypes.APPLICATION_M3U8)
-                        .setMediaMetadata(
-                            androidx.media3.common.MediaMetadata.Builder()
-                                .setTitle(title)
+                    val currentIndex = chronicles.indexOf(chronicle)
+                    if (currentIndex != -1) {
+                        val mediaItems = chronicles.drop(currentIndex).mapNotNull { item ->
+                            val itemTitle = item.title ?: return@mapNotNull null
+                            val cleanName = cleanChronicleName(itemTitle)
+                            val encodedTitle = android.net.Uri.encode(cleanName, ":@!$&'()*+,;=")
+                            val baseUrl = viewModel.baseUrl.removeSuffix("/")
+                            val rawUrl = "$baseUrl/$folder/$encodedTitle/$encodedTitle.m3u8"
+                            val url = rawUrl.replace(Regex("(?<!:)/{2,}"), "/")
+                            
+                            MediaItem.Builder()
+                                .setUri(url)
+                                .setMimeType(androidx.media3.common.MimeTypes.APPLICATION_M3U8)
+                                .setMediaMetadata(
+                                    androidx.media3.common.MediaMetadata.Builder()
+                                        .setTitle(itemTitle)
+                                        .build()
+                                )
                                 .build()
-                        )
-                        .build()
-                    
-                    controller.setMediaItem(mediaItem)
-                    controller.prepare()
-                    controller.play()
+                        }
+                        
+                        controller.setMediaItems(mediaItems)
+                        controller.prepare()
+                        controller.play()
+                    }
                 } ?: Log.e("GMFM_Audio", "MediaController not ready!")
             }
         } catch (e: Exception) {
