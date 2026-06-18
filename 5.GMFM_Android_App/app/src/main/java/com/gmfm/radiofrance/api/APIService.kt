@@ -18,8 +18,11 @@ interface APIService {
 
     @POST
     suspend fun addChronicle(
-        @Url url: String, 
-        @Body chronicle: Chronicle
+        @Url url: String,
+        @Query("userId") userId: String,
+        @Query("nomDeChroniques") title: String,
+        @Query("chroniqueRealTimecode") startTime: Int,
+        @Query("duration") duration: Int
     )
 
     @DELETE

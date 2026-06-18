@@ -248,7 +248,10 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                 composable(Screen.Search.route) { SearchView() }
                 composable(Screen.Library.route) { LibraryView() }
                 composable(Screen.Schedule.route) { 
-                    ScheduleView(viewModel = viewModel) 
+                    ScheduleView(
+                        viewModel = viewModel,
+                        onClose = { navController.popBackStack() }
+                    ) 
                 }
             }
 

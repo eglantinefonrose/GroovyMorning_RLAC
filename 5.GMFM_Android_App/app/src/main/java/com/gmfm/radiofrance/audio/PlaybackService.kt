@@ -27,6 +27,7 @@ class PlaybackService : MediaSessionService() {
             
         player.addListener(object : Player.Listener {
             private var lastMediaItem: MediaItem? = null
+            private var hasSoughtToStartForCurrentItem = false
 
             override fun onPlaybackStateChanged(playbackState: Int) {
                 val stateString = when (playbackState) {
@@ -39,10 +40,36 @@ class PlaybackService : MediaSessionService() {
                 Log.d("GMFM_Audio", "Playback State changed to: $stateString")
 
                 if (playbackState == Player.STATE_READY) {
-                    val currentItem = player.currentMediaItem
-                    if (currentItem != null && currentItem != lastMediaItem) {
+                    checkAndSeekToStart()
+                }
+            }
+
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                Log.d("GMFM_Audio", "🎵 Media Item Transition: ${mediaItem?.mediaMetadata?.title} (Reason: $reason)")
+                hasSoughtToStartForCurrentItem = false
+                checkAndSeekToStart()
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                Log.d("GMFM_Audio", "Is Playing: $isPlaying")
+                if (isPlaying) {
+                    checkAndSeekToStart()
+                }
+            }
+
+            private fun checkAndSeekToStart() {
+                val currentItem = player.currentMediaItem
+                if (currentItem != null) {
+                    // Reset flag if the media item has changed
+                    if (currentItem != lastMediaItem) {
                         lastMediaItem = currentItem
-                        Log.d("GMFM_Audio", "🎵 New track ready: ${currentItem.mediaMetadata.title}. Forcing seek to 0L.")
+                        hasSoughtToStartForCurrentItem = false
+                    }
+
+                    // Only seek if we haven't for this item yet AND the player is ready
+                    if (!hasSoughtToStartForCurrentItem && player.playbackState == Player.STATE_READY) {
+                        hasSoughtToStartForCurrentItem = true
+                        Log.d("GMFM_Audio", "🚀 Forcing INITIAL seek to 0L for track: ${currentItem.mediaMetadata.title}")
                         player.seekTo(0L)
                     }
                 }
@@ -53,10 +80,6 @@ class PlaybackService : MediaSessionService() {
                 Log.e("GMFM_Audio", "Player Error: ${error.message}")
                 Log.e("GMFM_Audio", "Failing URI: $failingUri")
                 Log.e("GMFM_Audio", "Full Error StackTrace:", error)
-            }
-
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                Log.d("GMFM_Audio", "Is Playing: $isPlaying")
             }
         })
         mediaSession = MediaSession.Builder(this, player).build()

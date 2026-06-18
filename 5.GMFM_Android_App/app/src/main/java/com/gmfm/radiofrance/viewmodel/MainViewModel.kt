@@ -19,6 +19,9 @@ class MainViewModel @Inject constructor(
     private val _chronicles = MutableStateFlow<List<Chronicle>>(emptyList())
     val chronicles: StateFlow<List<Chronicle>> = _chronicles
 
+    private val _isProgramming = MutableStateFlow(false)
+    val isProgramming: StateFlow<Boolean> = _isProgramming
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
@@ -33,9 +36,8 @@ class MainViewModel @Inject constructor(
 
     val baseUrl: String
         get() {
-            // iOS: isSimulatorMode ? "http://localhost:8000" : customIPAddress
             return if (_isSimuMode.value) {
-                "http://10.0.2.2:8000" // Android equivalent of localhost:8000 for host access
+                "http://10.0.2.2:8000"
             } else {
                 val ip = _serverIp.value
                 when {
@@ -60,7 +62,6 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                // Ensure baseUrl for API calls matches the one used for audio
                 val apiBaseUrl = if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/"
                 
                 // 1. Fetch Folder Name
@@ -89,6 +90,48 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    // Temporary backward compatibility
+    fun moveChronicle(fromIndex: Int, toIndex: Int) {
+        val list = _chronicles.value.toMutableList()
+        if (fromIndex in list.indices && toIndex in list.indices) {
+            val item = list.removeAt(fromIndex)
+            list.add(toIndex, item)
+            _chronicles.value = list
+        }
+    }
+
+    fun saveProgramming() {
+        viewModelScope.launch {
+            _isProgramming.value = true
+            try {
+                val apiBaseUrl = if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/"
+                
+                // 1. Remove existing chronicles
+                val removeUrl = "${apiBaseUrl}api/removeChronicles"
+                apiService.removeChronicles(removeUrl, "testUser")
+                
+                // 2. Add each chronicle in the new order
+                val addUrl = "${apiBaseUrl}api/addChronicle"
+                val programsToSave = _chronicles.value
+                for (chronicle in programsToSave) {
+                    apiService.addChronicle(
+                        url = addUrl,
+                        userId = "testUser",
+                        title = chronicle.title ?: "",
+                        startTime = chronicle.startTime ?: 0,
+                        duration = chronicle.duration ?: 300
+                    )
+                }
+                
+                // 3. Refresh data
+                fetchData()
+                Log.d("GMFM_Data", "Successfully saved programming")
+            } catch (e: Exception) {
+                Log.e("GMFM_Data", "Error saving programming: ${e.message}", e)
+            } finally {
+                _isProgramming.value = false
+            }
+        }
+    }
+
     fun fetchChronicles() = fetchData()
 }
