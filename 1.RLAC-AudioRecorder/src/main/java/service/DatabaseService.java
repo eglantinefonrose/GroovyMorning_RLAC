@@ -105,12 +105,15 @@ public class DatabaseService {
             pstmt.setString(1, userId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
+                logger.info("Infos sur le user récupérées");
+                System.out.println(rs.getInt("base_hour"));
+                System.out.println(rs.getInt("base_minute"));
                 return new UserConfig(rs.getInt("base_hour"), rs.getInt("base_minute"));
             }
         } catch (SQLException e) {
             logger.error("Erreur lors de la récupération de la config pour l'utilisateur {}", userId, e);
         }
-        return new UserConfig(7, 0); // Default values
+        return new UserConfig(10, 10); // Default values
     }
 
     public static class UserConfig {

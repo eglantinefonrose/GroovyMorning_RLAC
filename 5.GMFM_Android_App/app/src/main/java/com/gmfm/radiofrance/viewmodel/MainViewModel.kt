@@ -16,6 +16,12 @@ class MainViewModel @Inject constructor(
     private val apiService: APIService
 ) : ViewModel() {
 
+    init {
+        Log.e("GMFM_DEBUG", "------------------------------------------")
+        Log.e("GMFM_DEBUG", "🔴 LE VIEWMODEL EST INITIALISÉ")
+        Log.e("GMFM_DEBUG", "------------------------------------------")
+    }
+
     private val _chronicles = MutableStateFlow<List<Chronicle>>(emptyList())
     val chronicles: StateFlow<List<Chronicle>> = _chronicles
 
@@ -33,6 +39,12 @@ class MainViewModel @Inject constructor(
 
     private val _folderName = MutableStateFlow<String?>(null)
     val folderName: StateFlow<String?> = _folderName
+
+    private val _baseHour = MutableStateFlow(7)
+    val baseHour: StateFlow<Int> = _baseHour
+
+    private val _baseMinute = MutableStateFlow(0)
+    val baseMinute: StateFlow<Int> = _baseMinute
 
     val baseUrl: String
         get() {
@@ -60,6 +72,7 @@ class MainViewModel @Inject constructor(
 
     fun fetchData() {
         viewModelScope.launch {
+            Log.i("GMFM_Data", "🚀 Démarrage de fetchData...")
             _isLoading.value = true
             try {
                 val apiBaseUrl = if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/"
@@ -69,18 +82,34 @@ class MainViewModel @Inject constructor(
                     val folderUrl = "${apiBaseUrl}api/findTodayFolder"
                     val folderResponse = apiService.findTodayFolder(folderUrl, "testUser")
                     _folderName.value = folderResponse["folderName"]
-                    Log.d("GMFM_Data", "Today folder: ${_folderName.value}")
+                    Log.i("GMFM_Data", "📂 Dossier du jour trouvé: ${_folderName.value}")
                 } catch (e: Exception) {
-                    Log.e("GMFM_Data", "Error fetching folder name: ${e.message}")
+                    Log.e("GMFM_Data", "❌ Erreur dossier: ${e.message}")
+                }
+
+                // 1b. Fetch User Base Time
+                try {
+                    val baseTimeUrl = "${apiBaseUrl}api/getUserBaseTime"
+                    Log.i("GMFM_Data", "🌐 Appel API Heure: $baseTimeUrl")
+                    val baseTimeResponse = apiService.getUserBaseTime(baseTimeUrl, "testUser")
+                    Log.i("GMFM_Data", "📦 Réponse Heure: $baseTimeResponse")
+                    val hour = baseTimeResponse.baseHour ?: 7
+                    val minute = baseTimeResponse.baseMinute ?: 0
+                    _baseHour.value = hour
+                    _baseMinute.value = minute
+                    Chronicle.updateGlobalStartTime(hour, minute)
+                    Log.i("GMFM_Data", "✅ Heure de base appliquée: $hour h $minute")
+                } catch (e: Exception) {
+                    Log.e("GMFM_Data", "❌ Erreur heure: ${e.message}")
                 }
 
                 // 2. Fetch Chronicles
                 val chroniclesUrl = "${apiBaseUrl}api/getUserChronicles"
-                Log.d("GMFM_Data", "Fetching chronicles from: $chroniclesUrl")
+                Log.i("GMFM_Data", "🌐 Appel API Chroniques: $chroniclesUrl")
                 
                 val response = apiService.getUserChronicles(chroniclesUrl, "testUser")
                 _chronicles.value = response
-                Log.d("GMFM_Data", "Successfully fetched ${response.size} chronicles")
+                Log.i("GMFM_Data", "✅ ${response.size} chroniques récupérées")
                 
             } catch (e: Exception) {
                 Log.e("GMFM_Data", "Error fetching data: ${e.message}", e)
@@ -134,4 +163,25 @@ class MainViewModel @Inject constructor(
     }
 
     fun fetchChronicles() = fetchData()
+
+    fun setUserBaseTime(hour: Int, minute: Int) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val apiBaseUrl = if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/"
+                val url = "${apiBaseUrl}api/setUserBaseTime"
+                apiService.setUserBaseTime(url, "testUser", hour, minute)
+                _baseHour.value = hour
+                _baseMinute.value = minute
+                Chronicle.updateGlobalStartTime(hour, minute)
+                Log.d("GMFM_Data", "Successfully set base time to ${hour}h${minute}")
+                // Refresh data to update program times
+                fetchData()
+            } catch (e: Exception) {
+                Log.e("GMFM_Data", "Error setting base time: ${e.message}", e)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
 }

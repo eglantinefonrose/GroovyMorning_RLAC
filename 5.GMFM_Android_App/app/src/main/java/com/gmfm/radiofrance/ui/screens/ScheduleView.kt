@@ -144,7 +144,7 @@ fun TimelineRow(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "--h--", 
+                text = chronicle.formattedTime, 
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color.White.copy(alpha = 0.6f)

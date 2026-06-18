@@ -42,6 +42,7 @@ import androidx.media3.common.Player
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -50,9 +51,12 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     val isSimuMode by viewModel.isSimuMode.collectAsState()
     val serverIp by viewModel.serverIp.collectAsState()
     val chronicles by viewModel.chronicles.collectAsState()
+    val baseHour by viewModel.baseHour.collectAsState()
+    val baseMinute by viewModel.baseMinute.collectAsState()
     
     var isPlayerOpen by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -64,6 +68,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     var mediaController by remember { mutableStateOf<MediaController?>(null) }
 
     LaunchedEffect(Unit) {
+        Log.e("GMFM_DEBUG", "🚀🚀🚀 L'ÉCRAN PRINCIPAL EST LANCÉ 🚀🚀🚀")
         viewModel.fetchChronicles()
         
         val sessionToken = SessionToken(context, ComponentName(context, PlaybackService::class.java))
@@ -263,6 +268,16 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
             ) {
                 Column(horizontalAlignment = Alignment.End) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
+                        // Clock Icon Button
+                        IconButton(onClick = { showTimePicker = true }) {
+                            Icon(
+                                Icons.Default.Schedule, 
+                                contentDescription = "Réglage heure de base", 
+                                tint = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
                         // Gear Icon Button
                         IconButton(onClick = { showSettingsDialog = true }) {
                             Icon(
@@ -326,6 +341,37 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                 dismissButton = {
                     TextButton(onClick = { showSettingsDialog = false }) {
                         Text("Annuler")
+                    }
+                }
+            )
+        }
+
+        if (showTimePicker) {
+            val timePickerState = rememberTimePickerState(
+                initialHour = baseHour,
+                initialMinute = baseMinute,
+                is24Hour = true
+            )
+            
+            AlertDialog(
+                onDismissRequest = { showTimePicker = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        viewModel.setUserBaseTime(timePickerState.hour, timePickerState.minute)
+                        showTimePicker = false
+                    }) {
+                        Text("Valider")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showTimePicker = false }) {
+                        Text("Annuler")
+                    }
+                },
+                title = { Text("Début de l'enregistrement") },
+                text = {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        TimePicker(state = timePickerState)
                     }
                 }
             )
