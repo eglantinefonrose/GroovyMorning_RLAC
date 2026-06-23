@@ -34,6 +34,10 @@ import service.WebSocketClientService;
 
 import java.io.File;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.*;
 
 @Path("/api")
@@ -302,6 +306,10 @@ public class RLACServerAPI {
 
         try {
             DatabaseService.getInstance().updateUserBaseTime(userId, baseHour, baseMinute);
+            
+            // Notification au scheduler Python
+            notifyPythonScheduler(baseHour, baseMinute);
+
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("message", "Heure de base mise à jour pour " + userId + " : " + String.format("%02d:%02d", baseHour, baseMinute));
@@ -309,6 +317,38 @@ public class RLACServerAPI {
         } catch (Exception e) {
             logger.error("Erreur lors de la mise à jour de l'heure de base", e);
             return createErrorResponse("Erreur: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Notifie le segmenter Python pour mettre à jour son scheduler
+     */
+    private void notifyPythonScheduler(int hour, int minute) {
+        String pythonApiUrl = System.getenv().getOrDefault("PYTHON_API_URL", "http://localhost:8001");
+        String url = pythonApiUrl + "/api/updateSchedulerTime?hour=" + hour + "&minute=" + minute;
+        
+        logger.info("Notification du scheduler Python à l'URL : {}", url);
+        
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .POST(HttpRequest.BodyPublishers.noBody())
+                    .build();
+            
+            client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                    .thenAccept(response -> {
+                        if (response.statusCode() == 200) {
+                            logger.info("Scheduler Python mis à jour avec succès : {}", response.body());
+                        } else {
+                            logger.warn("Échec de la mise à jour du scheduler Python. Status code : {}", response.statusCode());
+                        }
+                    })
+                    .exceptionally(ex -> {
+                        logger.error("Erreur lors de la notification du scheduler Python", ex);
+                        return null;
+                    });
+        } catch (Exception e) {
+            logger.error("Erreur lors de la création du client HTTP pour notifier Python", e);
         }
     }
 

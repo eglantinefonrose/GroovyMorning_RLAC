@@ -3,6 +3,11 @@ from flask_socketio import SocketIO, emit
 import psycopg2
 import psycopg2.extras
 import os
+import subprocess
+import sys
+import time
+import threading
+import schedule
 from datetime import datetime
 
 app = Flask(__name__)
@@ -20,9 +25,72 @@ DB_CONFIG = {
 def get_db_connection():
     return psycopg2.connect(**DB_CONFIG)
 
+def run_segmenter():
+    """Lance le segmenter à l'heure programmée"""
+    print(f"[{datetime.now()}] Lancement du segmenter (Mode SIMU: {os.environ.get('SIMU', 'false')})...")
+
+    # Tuer l'ancien segmenter s'il tourne
+    subprocess.run(["pkill", "-f", "live_radio_segmenter.py"], stderr=subprocess.DEVNULL)
+
+    # Lancer le nouveau segmenter (dans le dossier src/)
+    # On s'assure de passer l'environnement actuel (contenant SIMU=true)
+    segmenter_process = subprocess.Popen(
+        [sys.executable, "src/live_radio_segmenter.py"],
+        env=os.environ.copy()
+    )
+
+    print(f"[{datetime.now()}] Segmenter lancé avec PID: {segmenter_process.pid}")
+
+def scheduler_loop():
+    """Boucle infinie pour exécuter les tâches planifiées"""
+    print("⏰ [Scheduler] Boucle de planification démarrée.")
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+def update_scheduler(hour, minute):
+    """Met à jour l'heure de lancement du segmenter"""
+    schedule.clear()
+    time_str = f"{int(hour):02d}:{int(minute):02d}"
+    schedule.every().day.at(time_str).do(run_segmenter)
+    print(f"⏰ [Scheduler] Prochain segmenter programmé à {time_str}")
+
+# Initialisation du scheduler
+# Par défaut à 09:30 comme dans l'ancien scheduler.py
+schedule.every().day.at("09:30").do(run_segmenter)
+
+# Lancement du thread scheduler
+threading.Thread(target=scheduler_loop, daemon=True).start()
+
+# SI on est en mode SIMU, on lance une première fois immédiatement pour tester
+if os.environ.get("SIMU", "").lower() == "true":
+    print("🧪 Mode SIMU détecté : Lancement immédiat pour test...")
+    run_segmenter()
+
+@app.route('/api/updateSchedulerTime', methods=['POST'])
+def api_update_scheduler_time():
+    """Met à jour l'heure du scheduler via API"""
+    data = request.args
+    hour = data.get('hour')
+    minute = data.get('minute')
+
+    if hour is None or minute is None:
+        return jsonify({"status": "error", "message": "Paramètres 'hour' et 'minute' requis"}), 400
+
+    try:
+        update_scheduler(hour, minute)
+        return jsonify({
+            "status": "success", 
+            "message": f"Scheduler mis à jour pour {int(hour):02d}:{int(minute):02d}"
+        })
+    except Exception as e:
+        print(f"⚠️ [Scheduler Error] {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/api/realChronicleStartTime', methods=['POST'])
 def chronicle_start():
-    """Reçoit le début d'une chronique du segmenter"""
+# ... (rest of the file)
+
     data = request.args
     user_id = data.get('userId')
     chronicle_name = data.get('nomDeChronique')
