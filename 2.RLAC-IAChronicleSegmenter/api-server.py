@@ -1,7 +1,4 @@
-from flask import Flask, request, jsonify
-from flask_socketio import SocketIO, emit
-import psycopg2
-import psycopg2.extras
+import sqlite3
 import os
 import subprocess
 import sys
@@ -9,21 +6,35 @@ import time
 import threading
 import schedule
 from datetime import datetime
+from flask import Flask, request, jsonify
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Configuration base de données
-DB_CONFIG = {
-    'host': os.environ.get('DB_HOST', 'localhost'),
-    'port': os.environ.get('DB_PORT', '5432'),
-    'database': os.environ.get('DB_NAME', 'radiodb'),
-    'user': os.environ.get('DB_USER', 'radiouser'),
-    'password': os.environ.get('DB_PASSWORD', 'radiopass')
-}
+# Configuration SQLite
+DB_PATH = os.environ.get('DB_PATH', 'data/master_events.db')
+
+def init_db():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS master_chronicle_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            chronicle_name TEXT,
+            event_type TEXT,
+            master_timestamp TEXT,
+            confidence FLOAT
+        )
+    """)
+    conn.commit()
+    conn.close()
 
 def get_db_connection():
-    return psycopg2.connect(**DB_CONFIG)
+    return sqlite3.connect(DB_PATH)
+
+init_db()
 
 def run_segmenter():
     """Lance le segmenter à l'heure programmée"""
@@ -89,44 +100,40 @@ def api_update_scheduler_time():
 
 @app.route('/api/realChronicleStartTime', methods=['POST'])
 def chronicle_start():
-# ... (rest of the file)
-
     data = request.args
-    user_id = data.get('userId')
+    user_id = data.get('userId', 'unknown')
     chronicle_name = data.get('nomDeChronique')
     start_time = data.get('startTime')
-    delta = data.get('deltaStartTimeInSeconds')
+    confidence = data.get('confidence', 1.0)
     
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO chronicle_events (user_id, chronicle_name, event_type, timestamp, delta)
-            VALUES (%s, %s, 'start', %s, %s)
-        """, (user_id, chronicle_name, start_time, delta))
+            INSERT INTO master_chronicle_events (chronicle_name, event_type, master_timestamp, confidence)
+            VALUES (?, 'start', ?, ?)
+        """, (chronicle_name, start_time, confidence))
         conn.commit()
-        cur.close()
         conn.close()
-        print(f"💾 [DB] Start event saved for {chronicle_name}")
+        print(f"💾 [DB] Master Start event saved for {chronicle_name}")
     except Exception as e:
-        print(f"⚠️ [DB Error] Could not save start event: {e}")
+        print(f"⚠️ [DB Error] Could not save master start event: {e}")
     
-    # WebSocket emit (toujours exécuté même si la DB échoue)
+    # WebSocket emit (Broadcast à tous)
     event_data = {
-        'userId': user_id,
+        'userId': user_id, # Gardé pour le log client, mais sera ignoré par le Java si pas concerné
         'nomDeChronique': chronicle_name,
-        'deltaStartTimeInSeconds': int(delta) if delta and (isinstance(delta, int) or delta.isdigit()) else delta
+        'masterTimestamp': start_time
     }
-    print(f"🚀 [Python API] Emitting START via WebSocket: {event_data}")
+    print(f"🚀 [Python API] Broadcasting START via WebSocket: {event_data}")
     socketio.emit('chronicle_start', event_data)
     
     return jsonify({"status": "success"})
 
 @app.route('/api/realChronicleEndTime', methods=['POST'])
 def chronicle_end():
-    """Reçoit la fin d'une chronique du segmenter"""
     data = request.args
-    user_id = data.get('userId')
+    user_id = data.get('userId', 'unknown')
     chronicle_name = data.get('nomDeChronique')
     duration = data.get('realDuration')
     end_time = data.get('endTime')
@@ -135,26 +142,47 @@ def chronicle_end():
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO chronicle_events (user_id, chronicle_name, event_type, timestamp, duration)
-            VALUES (%s, %s, 'end', %s, %s)
-        """, (user_id, chronicle_name, end_time, duration))
+            INSERT INTO master_chronicle_events (chronicle_name, event_type, master_timestamp)
+            VALUES (?, 'end', ?)
+        """, (chronicle_name, end_time))
         conn.commit()
-        cur.close()
         conn.close()
-        print(f"💾 [DB] End event saved for {chronicle_name}")
+        print(f"💾 [DB] Master End event saved for {chronicle_name}")
     except Exception as e:
-        print(f"⚠️ [DB Error] Could not save end event: {e}")
+        print(f"⚠️ [DB Error] Could not save master end event: {e}")
     
     # WebSocket emit
     event_data = {
         'userId': user_id,
         'nomDeChronique': chronicle_name,
-        'realDuration': duration
+        'realDuration': duration,
+        'masterTimestamp': end_time
     }
-    print(f"🚀 [Python API] Emitting END via WebSocket: {event_data}")
+    print(f"🚀 [Python API] Broadcasting END via WebSocket: {event_data}")
     socketio.emit('chronicle_end', event_data)
     
     return jsonify({"status": "success"})
+
+@app.route('/api/sync_offset', methods=['POST'])
+def sync_offset():
+    """
+    Reçoit un chunk audio (fingerprint) et renvoie le delta par rapport au flux maître.
+    On redirige vers le segmenter qui maintient le flux en mémoire.
+    """
+    import requests
+    try:
+        # On passe simplement la requête au segmenter qui tourne sur le port 8002
+        # C'est lui qui a la "mémoire" du flux audio récent
+        segmenter_url = "http://localhost:8002/api/get_offset"
+        resp = requests.post(
+            segmenter_url, 
+            params=request.args, 
+            data=request.get_data(),
+            timeout=5
+        )
+        return (resp.content, resp.status_code, resp.headers.items())
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/status', methods=['GET'])
 def status():

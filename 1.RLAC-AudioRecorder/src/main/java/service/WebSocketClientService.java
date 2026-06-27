@@ -47,13 +47,21 @@ public class WebSocketClientService {
                     JSONObject data = (JSONObject) args[0];
                     logger.info("📥 WebSocket event: chronicle_start -> {}", data);
                     
-                    String userId = data.optString("userId");
                     String chronicleName = data.optString("nomDeChronique");
-                    Integer delta = data.has("deltaStartTimeInSeconds") && !data.isNull("deltaStartTimeInSeconds") ? 
-                                    data.getInt("deltaStartTimeInSeconds") : null;
+                    
+                    // On utilise le localUserId pour la notification interne
+                    String localUserId = DatabaseService.getInstance().getLocalUserId();
+                    
+                    // Vérification si cette chronique est dans MON planning
+                    boolean isPlanned = DatabaseService.getInstance().getChronicles(localUserId).stream()
+                            .anyMatch(c -> c.getNomDeChronique().equals(chronicleName));
 
-                    if (userId != null && chronicleName != null) {
-                        DynamicRecordingService.getInstance().handleStartNotification(userId, chronicleName, delta);
+                    if (isPlanned) {
+                        logger.info("🎯 [User:{}] Chronicle {} is in my plan. Starting recording...", localUserId, chronicleName);
+                        // L'offset est géré à l'intérieur de DynamicRecordingService via FFmpegService
+                        DynamicRecordingService.getInstance().handleStartNotification(localUserId, chronicleName, null);
+                    } else {
+                        logger.debug("skipping chronicle {} (not in my plan)", chronicleName);
                     }
                 } catch (Exception e) {
                     logger.error("Error processing chronicle_start event", e);
@@ -65,13 +73,12 @@ public class WebSocketClientService {
                     JSONObject data = (JSONObject) args[0];
                     logger.info("📥 WebSocket event: chronicle_end -> {}", data);
                     
-                    String userId = data.optString("userId");
                     String chronicleName = data.optString("nomDeChronique");
                     String realDuration = data.optString("realDuration");
+                    String localUserId = DatabaseService.getInstance().getLocalUserId();
 
-                    if (userId != null && chronicleName != null) {
-                        DynamicRecordingService.getInstance().handleEndNotification(userId, chronicleName, realDuration);
-                    }
+                    // On ne stop que si on est en train d'enregistrer
+                    DynamicRecordingService.getInstance().handleEndNotification(localUserId, chronicleName, realDuration);
                 } catch (Exception e) {
                     logger.error("Error processing chronicle_end event", e);
                 }

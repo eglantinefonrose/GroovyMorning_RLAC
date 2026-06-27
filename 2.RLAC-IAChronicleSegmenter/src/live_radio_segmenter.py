@@ -42,6 +42,13 @@ class UnifiedLiveSegmenter:
         self.audio_buffer = np.zeros(self.buffer_size, dtype=np.float32)
         self.buffer_index = 0
         
+        # Buffer dédié à la synchronisation (plus léger : 4000Hz)
+        self.sync_sr = 4000
+        self.sync_buffer_size = self.max_history_seconds * self.sync_sr
+        self.sync_buffer = np.zeros(self.sync_buffer_size, dtype=np.float32)
+        self.sync_buffer_index = 0
+        self.total_sync_samples = 0
+        
         self.transcription_queue = queue.Queue()
         self.whisper_audio_accumulated = bytearray()
         
@@ -90,6 +97,20 @@ class UnifiedLiveSegmenter:
             self.buffer_index = n-part
         self.total_samples_processed += n
         
+        # Alimenter le sync_buffer (sous-échantillonnage simple par décimation)
+        factor = self.sample_rate // self.sync_sr
+        sync_chunk = chunk[::factor]
+        ns = len(sync_chunk)
+        if self.sync_buffer_index + ns <= self.sync_buffer_size:
+            self.sync_buffer[self.sync_buffer_index:self.sync_buffer_index + ns] = sync_chunk
+            self.sync_buffer_index = (self.sync_buffer_index + ns) % self.sync_buffer_size
+        else:
+            part = self.sync_buffer_size - self.sync_buffer_index
+            self.sync_buffer[self.sync_buffer_index:] = sync_chunk[:part]
+            self.sync_buffer[:ns-part] = sync_chunk[part:]
+            self.sync_buffer_index = ns-part
+        self.total_sync_samples += ns
+        
         pcm_chunk = (chunk * 32768).astype(np.int16).tobytes()
         self.whisper_audio_accumulated.extend(pcm_chunk)
         if len(self.whisper_audio_accumulated) >= (5 * self.sample_rate * 2):
@@ -102,6 +123,12 @@ class UnifiedLiveSegmenter:
         if self.buffer_index >= length:
             return self.audio_buffer[self.buffer_index-length:self.buffer_index]
         return np.concatenate((self.audio_buffer[-(length-self.buffer_index):], self.audio_buffer[:self.buffer_index]))
+
+    def get_latest_sync_audio(self, length):
+        length = int(length)
+        if self.sync_buffer_index >= length:
+            return self.sync_buffer[self.sync_buffer_index-length:self.sync_buffer_index]
+        return np.concatenate((self.sync_buffer[-(length-self.sync_buffer_index):], self.sync_buffer[:self.sync_buffer_index]))
 
     def on_detected(self, item, score=None, exact_time=None):
         time_sec = exact_time if exact_time is not None else (self.total_samples_processed / self.sample_rate)
@@ -124,12 +151,11 @@ class UnifiedLiveSegmenter:
                     python_api_url = os.environ.get('PYTHON_API_URL', 'http://localhost:8001')
                     url = f"{python_api_url}/api/realChronicleEndTime"
                     params = {
-                        "userId": "testUser",
+                        "userId": "master",
                         "nomDeChronique": prev_name,
                         "realDuration": duration,
                         "endTime": int(corrected_time)
                     }
-                    print(f"   [API CALL] POST {url} | Params: {params}")
                     requests.post(url, params=params, timeout=1)
                     print(f"   [API] Signal de fin envoyé pour '{prev_name}'")
                 except Exception as e:
@@ -149,14 +175,13 @@ class UnifiedLiveSegmenter:
                 python_api_url = os.environ.get('PYTHON_API_URL', 'http://localhost:8001')
                 url = f"{python_api_url}/api/realChronicleStartTime"
                 params = {
-                    "userId": "testUser",
+                    "userId": "master",
                     "nomDeChronique": item['name'],
                     "startTime": int(corrected_time),
-                    "deltaStartTimeInSeconds": int(corrected_time)
+                    "confidence": float(score) if score else 1.0
                 }
-                print(f"   [API CALL] POST {url} | Params: {params}")
                 requests.post(url, params=params, timeout=1)
-                print(f"   [API] Signal de début envoyé pour '{item['name']}' (Corrigé: {int(corrected_time)}s)")
+                print(f"   [API] Signal de début envoyé pour '{item['name']}'")
             except Exception as e:
                 print(f"   [API ERROR] Signal de début : {e}")
         threading.Thread(target=call_api_start, daemon=True).start()
@@ -234,29 +259,31 @@ class UnifiedLiveSegmenter:
             self.last_status_time = time.time()
             print(f"\r📡 LIVE | Flux: {self.total_samples_processed/self.sample_rate:5.1f}s | Cible: {item['name']} 🎤", end="", flush=True)
 
-    def find_offset(self, chunk, reported_seconds):
-        # On cherche dans tout le buffer historique (60s max)
-        search_len = min(len(self.audio_buffer), self.total_samples_processed)
-        if search_len < len(chunk):
+    def find_offset(self, sync_chunk, reported_seconds):
+        # sync_chunk est à 4000Hz (2s = 8000 samples)
+        # On cherche dans les 60 dernières secondes du sync_buffer
+        search_len = min(self.sync_buffer_size, self.total_sync_samples)
+        if search_len < len(sync_chunk):
             return 0, 0
             
-        search_audio = self.get_latest_audio(search_len)
+        search_audio = self.get_latest_sync_audio(search_len)
         
         # Corrélation croisée
-        corr = signal.correlate(search_audio, chunk, mode='valid')
+        corr = signal.correlate(search_audio, sync_chunk, mode='valid')
         # Énergie pour la normalisation
-        energy = self.fast_rolling_energy(search_audio**2, len(chunk))
-        chunk_norm = np.linalg.norm(chunk)
+        # Utilisation d'une version simplifiée pour 4000Hz
+        search_energy = np.sqrt(np.convolve(search_audio**2, np.ones(len(sync_chunk)), mode='valid'))
+        chunk_norm = np.linalg.norm(sync_chunk)
         
-        score_array = np.abs(corr) / (energy * chunk_norm + 1e-6)
+        score_array = np.abs(corr) / (search_energy * chunk_norm + 1e-6)
         best_pos = np.argmax(score_array)
         max_score = score_array[best_pos]
         
-        # Position réelle dans le flux total
-        # absolute_start_of_buffer = total_samples - search_len
-        real_samples = (self.total_samples_processed - search_len) + best_pos
-        real_seconds = real_samples / self.sample_rate
+        # Position réelle dans le flux sync (échantillons à 4000Hz)
+        real_sync_samples = (self.total_sync_samples - search_len) + best_pos
+        real_seconds = real_sync_samples / self.sync_sr
         
+        # Delta = Temps Master (reported) - Temps Local (real)
         delta = reported_seconds - real_seconds
         return delta, float(max_score)
 
@@ -280,7 +307,6 @@ class UnifiedLiveSegmenter:
                 "current_time": self.total_samples_processed / self.sample_rate,
                 "current_step": self.current_step
             })
-
         @app.route('/api/get_offset', methods=['POST'])
         def get_offset():
             raw_data = request.get_data()
@@ -288,20 +314,13 @@ class UnifiedLiveSegmenter:
             if not raw_data:
                 return jsonify({"error": "No data"}), 400
             
+            # On attend du 4000Hz pour la synchro
             chunk = np.frombuffer(raw_data, dtype=np.int16).astype(np.float32) / 32768.0
             delta, score = self.find_offset(chunk, pos_sec)
             
-            # Si la détection est fiable, on met à jour l'offset global
-            if score > 0.8:
-                self.time_offset = delta
-                print(f"\n🔄 OFFSET SYNCHRONISÉ : {delta:+.3f}s (Score: {score:.3f})")
-            
             return jsonify({
                 "delta": delta,
-                "score": score,
-                "reported_seconds": pos_sec,
-                "real_seconds": pos_sec - delta,
-                "global_offset": self.time_offset
+                "score": score
             })
 
         @app.route('/api/status', methods=['GET'])
@@ -323,8 +342,31 @@ class UnifiedLiveSegmenter:
         source = None
         try:
             if simu:
+                import stat
+                # Créer le pipe s'il n'existe pas
+                if not os.path.exists(self.pipe_path):
+                    os.mkfifo(self.pipe_path)
+                else:
+                    # Vérifier si c'est bien un FIFO
+                    mode = os.stat(self.pipe_path).st_mode
+                    if not stat.S_ISFIFO(mode):
+                        os.remove(self.pipe_path)
+                        os.mkfifo(self.pipe_path)
+                
                 print(f"📡 Mode SIMULATION (Pipe: {self.pipe_path})")
-                source = open(self.pipe_path, 'rb')
+                print("⏳ En attente de données dans le pipe... (Lancez votre commande ffmpeg)")
+                
+                # La boucle de simulation pour permettre de relancer ffmpeg sans couper le segmenter
+                while self.running:
+                    with open(self.pipe_path, 'rb') as source:
+                        print("✅ Flux connecté au pipe.")
+                        while self.running:
+                            raw = source.read(self.chunk_size * 2)
+                            if not raw:
+                                print("\n⚠️ Fin du flux dans le pipe. En attente de la prochaine connexion...")
+                                break
+                            chunk = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
+                            self.process_audio_chunk(chunk)
             else:
                 stream_url = "http://icecast.radiofrance.fr/franceinter-hifi.aac"
                 print(f"📡 Mode LIVE (Stream: {stream_url})")
@@ -336,14 +378,14 @@ class UnifiedLiveSegmenter:
                 self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
                 source = self.process.stdout
 
-            print(f"✅ Flux connecté. Analyse en cours...")
-            while self.running:
-                raw = source.read(self.chunk_size * 2)
-                if not raw:
-                    print("\n⚠️ Fin du flux ou erreur de lecture.")
-                    break
-                chunk = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
-                self.process_audio_chunk(chunk)
+                print(f"✅ Flux connecté. Analyse en cours...")
+                while self.running:
+                    raw = source.read(self.chunk_size * 2)
+                    if not raw:
+                        print("\n⚠️ Fin du flux ou erreur de lecture.")
+                        break
+                    chunk = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
+                    self.process_audio_chunk(chunk)
                 
         except KeyboardInterrupt:
             print("\nArrêt manuel.")
