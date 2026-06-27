@@ -232,7 +232,16 @@ public class FFmpegService {
         }
 
         String cleanChronicleName = chronicleName.replaceAll("[^a-zA-Z0-9]", "_");
-        File baseSessionDir = new File("media/userID_" + userId, folderName);
+        
+        File userDir = new File("media/userID_" + userId);
+        if (!userDir.exists() && !userId.startsWith("user_")) {
+            File altDir = new File("media/userID_user_" + userId);
+            if (altDir.exists()) {
+                userDir = altDir;
+            }
+        }
+        
+        File baseSessionDir = new File(userDir, folderName);
         File chronicleRecordingDir = new File(baseSessionDir, cleanChronicleName);
 
         if (!chronicleRecordingDir.exists()) {

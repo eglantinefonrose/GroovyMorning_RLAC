@@ -90,8 +90,8 @@ Une `NavigationBar` en bas avec 5 onglets :
 
 ## 5. API et Données (APIService)
 Endpoints à implémenter :
-- `GET /api/findTodayFolder?userId=testUser` : Récupère le dossier du jour.
-- `GET /api/getUserChronicles?userId=testUser` : Récupère la liste des chroniques.
+- `GET /api/findTodayFolder?userId=8dcb13c3` : Récupère le dossier du jour.
+- `GET /api/getUserChronicles?userId=8dcb13c3` : Récupère la liste des chroniques.
 - `POST /api/addChronicle` : Ajoute une chronique à la programmation.
 - `DELETE /api/removeChronicles` : Réinitialise la liste.
 - `POST /api/setUserBaseTime` : Définit l'heure de début de l'enregistrement.

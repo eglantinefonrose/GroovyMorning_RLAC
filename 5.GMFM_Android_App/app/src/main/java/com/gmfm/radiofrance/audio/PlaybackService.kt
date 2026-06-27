@@ -7,10 +7,27 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
+import androidx.media3.session.MediaSession.MediaItemsWithStartPosition
 import androidx.media3.session.MediaSessionService
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.ListenableFuture
 
 class PlaybackService : MediaSessionService() {
     private var mediaSession: MediaSession? = null
+
+    private val callback = object : MediaSession.Callback {
+        override fun onPlaybackResumption(
+            mediaSession: MediaSession,
+            controller: MediaSession.ControllerInfo
+        ): ListenableFuture<MediaItemsWithStartPosition> {
+            Log.d("GMFM_Audio", "onPlaybackResumption called")
+            // Return an empty list or the current player items if available
+            // In this case, we just satisfy the requirement to avoid the crash
+            return Futures.immediateFuture(
+                MediaItemsWithStartPosition(emptyList(), 0, 0L)
+            )
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -82,7 +99,9 @@ class PlaybackService : MediaSessionService() {
                 Log.e("GMFM_Audio", "Full Error StackTrace:", error)
             }
         })
-        mediaSession = MediaSession.Builder(this, player).build()
+        mediaSession = MediaSession.Builder(this, player)
+            .setCallback(callback)
+            .build()
         Log.d("GMFM_Audio", "PlaybackService created")
     }
 

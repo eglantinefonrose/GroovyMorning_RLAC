@@ -80,7 +80,7 @@ class MainViewModel @Inject constructor(
                 // 1. Fetch Folder Name
                 try {
                     val folderUrl = "${apiBaseUrl}api/findTodayFolder"
-                    val folderResponse = apiService.findTodayFolder(folderUrl, "testUser")
+                    val folderResponse = apiService.findTodayFolder(folderUrl, "user_8dcb13c3")
                     _folderName.value = folderResponse["folderName"]
                     Log.i("GMFM_Data", "📂 Dossier du jour trouvé: ${_folderName.value}")
                 } catch (e: Exception) {
@@ -91,7 +91,7 @@ class MainViewModel @Inject constructor(
                 try {
                     val baseTimeUrl = "${apiBaseUrl}api/getUserBaseTime"
                     Log.i("GMFM_Data", "🌐 Appel API Heure: $baseTimeUrl")
-                    val baseTimeResponse = apiService.getUserBaseTime(baseTimeUrl, "testUser")
+                    val baseTimeResponse = apiService.getUserBaseTime(baseTimeUrl, "user_8dcb13c3")
                     Log.i("GMFM_Data", "📦 Réponse Heure: $baseTimeResponse")
                     val hour = baseTimeResponse.baseHour ?: 7
                     val minute = baseTimeResponse.baseMinute ?: 0
@@ -107,7 +107,7 @@ class MainViewModel @Inject constructor(
                 val chroniclesUrl = "${apiBaseUrl}api/getUserChronicles"
                 Log.i("GMFM_Data", "🌐 Appel API Chroniques: $chroniclesUrl")
                 
-                val response = apiService.getUserChronicles(chroniclesUrl, "testUser")
+                val response = apiService.getUserChronicles(chroniclesUrl, "8dcb13c3")
                 _chronicles.value = response
                 Log.i("GMFM_Data", "✅ ${response.size} chroniques récupérées")
                 
@@ -136,7 +136,7 @@ class MainViewModel @Inject constructor(
                 
                 // 1. Remove existing chronicles
                 val removeUrl = "${apiBaseUrl}api/removeChronicles"
-                apiService.removeChronicles(removeUrl, "testUser")
+                apiService.removeChronicles(removeUrl, "user_8dcb13c3")
                 
                 // 2. Add each chronicle in the new order
                 val addUrl = "${apiBaseUrl}api/addChronicle"
@@ -144,7 +144,7 @@ class MainViewModel @Inject constructor(
                 for (chronicle in programsToSave) {
                     apiService.addChronicle(
                         url = addUrl,
-                        userId = "testUser",
+                        userId = "8dcb13c3",
                         title = chronicle.title ?: "",
                         startTime = chronicle.startTime ?: 0,
                         duration = chronicle.duration ?: 300
@@ -170,7 +170,7 @@ class MainViewModel @Inject constructor(
             try {
                 val apiBaseUrl = if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/"
                 val url = "${apiBaseUrl}api/setUserBaseTime"
-                apiService.setUserBaseTime(url, "testUser", hour, minute)
+                apiService.setUserBaseTime(url, "user_8dcb13c3", hour, minute)
                 _baseHour.value = hour
                 _baseMinute.value = minute
                 Chronicle.updateGlobalStartTime(hour, minute)
