@@ -31,6 +31,9 @@ class MainViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
     private val _isSimuMode = MutableStateFlow(false)
     val isSimuMode: StateFlow<Boolean> = _isSimuMode
 
@@ -74,6 +77,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             Log.i("GMFM_Data", "🚀 Démarrage de fetchData...")
             _isLoading.value = true
+            _error.value = null
             try {
                 val apiBaseUrl = if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/"
                 
@@ -85,6 +89,7 @@ class MainViewModel @Inject constructor(
                     Log.i("GMFM_Data", "📂 Dossier du jour trouvé: ${_folderName.value}")
                 } catch (e: Exception) {
                     Log.e("GMFM_Data", "❌ Erreur dossier: ${e.message}")
+                    // Don't fail the whole thing yet, but could be a sign of server down
                 }
 
                 // 1b. Fetch User Base Time
@@ -113,10 +118,16 @@ class MainViewModel @Inject constructor(
                 
             } catch (e: Exception) {
                 Log.e("GMFM_Data", "Error fetching data: ${e.message}", e)
+                _error.value = "Erreur de connexion au serveur"
+                _chronicles.value = emptyList() // Clear stale data
             } finally {
                 _isLoading.value = false
             }
         }
+    }
+
+    fun clearError() {
+        _error.value = null
     }
 
     fun moveChronicle(fromIndex: Int, toIndex: Int) {

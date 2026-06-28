@@ -9,11 +9,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.clickable
@@ -26,9 +29,12 @@ import androidx.compose.runtime.*
 import androidx.media3.session.MediaController
 import androidx.media3.common.Player
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LiveView(
     chronicles: List<Chronicle>,
+    isLoading: Boolean,
+    onRefresh: () -> Unit,
     mediaController: MediaController?,
     onNavigateToSchedule: () -> Unit,
     onPlayLiveClick: () -> Unit,
@@ -36,6 +42,20 @@ fun LiveView(
 ) {
     var currentTitle by remember { mutableStateOf(mediaController?.currentMediaItem?.mediaMetadata?.title?.toString()) }
     var isPlaying by remember { mutableStateOf(mediaController?.isPlaying ?: false) }
+
+    val pullToRefreshState = rememberPullToRefreshState()
+
+    if (pullToRefreshState.isRefreshing) {
+        LaunchedEffect(true) {
+            onRefresh()
+        }
+    }
+
+    LaunchedEffect(isLoading) {
+        if (!isLoading) {
+            pullToRefreshState.endRefresh()
+        }
+    }
 
     DisposableEffect(mediaController) {
         val listener = object : Player.Listener {
@@ -52,48 +72,61 @@ fun LiveView(
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .nestedScroll(pullToRefreshState.nestedScrollConnection)
     ) {
-        Text(
-            text = "Directs",
-            style = MaterialTheme.typography.displaySmall,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.fillMaxSize()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-            item {
-                FranceInterCard(onNavigateToSchedule, onPlayLiveClick)
-            }
+            Text(
+                text = "Directs",
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
 
-            item {
-                Text(
-                    "Chroniques",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
-            }
+            Spacer(modifier = Modifier.height(24.dp))
 
-            items(chronicles) { chronicle ->
-                val isCurrent = chronicle.title == currentTitle
-                LiveChronicleItem(
-                    chronicle = chronicle, 
-                    isCurrent = isCurrent,
-                    isPlaying = isPlaying && isCurrent,
-                    onClick = { onChronicleClick(chronicle) }
-                )
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                item {
+                    FranceInterCard(onNavigateToSchedule, onPlayLiveClick)
+                }
+
+                item {
+                    Text(
+                        "Chroniques",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+
+                items(chronicles) { chronicle ->
+                    val isCurrent = chronicle.title == currentTitle
+                    LiveChronicleItem(
+                        chronicle = chronicle, 
+                        isCurrent = isCurrent,
+                        isPlaying = isPlaying && isCurrent,
+                        onClick = { onChronicleClick(chronicle) }
+                    )
+                }
             }
         }
+
+        PullToRefreshContainer(
+            state = pullToRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter),
+            containerColor = Color.Black,
+            contentColor = Color.White
+        )
     }
 }
 
@@ -211,11 +244,6 @@ fun FranceInterCard(
                 "France Inter",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-            Text(
-                "L'émission en cours...",
-                style = MaterialTheme.typography.bodyLarge,
                 color = Color.White
             )
 

@@ -12,7 +12,10 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -20,12 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gmfm.radiofrance.model.Chronicle
 import com.gmfm.radiofrance.viewmodel.MainViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScheduleView(
     viewModel: MainViewModel = hiltViewModel(),
@@ -33,8 +38,28 @@ fun ScheduleView(
 ) {
     val chronicles by viewModel.chronicles.collectAsState()
     val isProgramming by viewModel.isProgramming.collectAsState()
+    val isLoadingData by viewModel.isLoading.collectAsState()
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+    val pullToRefreshState = rememberPullToRefreshState()
+
+    if (pullToRefreshState.isRefreshing) {
+        LaunchedEffect(true) {
+            viewModel.fetchChronicles()
+        }
+    }
+
+    LaunchedEffect(isLoadingData) {
+        if (!isLoadingData) {
+            pullToRefreshState.endRefresh()
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .nestedScroll(pullToRefreshState.nestedScrollConnection)
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Header
             Row(
@@ -88,6 +113,13 @@ fun ScheduleView(
             }
             Spacer(modifier = Modifier.height(100.dp)) // Space for button
         }
+
+        PullToRefreshContainer(
+            state = pullToRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter),
+            containerColor = Color.Black,
+            contentColor = Color.White
+        )
 
         // Programmer Button
         Box(

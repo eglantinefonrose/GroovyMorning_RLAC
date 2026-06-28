@@ -10,11 +10,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -22,6 +25,7 @@ import com.gmfm.radiofrance.model.Chronicle
 import com.gmfm.radiofrance.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeView(
     viewModel: MainViewModel = hiltViewModel(),
@@ -30,32 +34,59 @@ fun HomeView(
 ) {
     val chronicles by viewModel.chronicles.collectAsState()
     val isLoadingData by viewModel.isLoading.collectAsState()
+    
+    val pullToRefreshState = rememberPullToRefreshState()
+    
+    if (pullToRefreshState.isRefreshing) {
+        LaunchedEffect(true) {
+            viewModel.fetchData()
+        }
+    }
+    
+    LaunchedEffect(isLoadingData) {
+        if (!isLoadingData) {
+            pullToRefreshState.endRefresh()
+        }
+    }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .nestedScroll(pullToRefreshState.nestedScrollConnection)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-            Text(
-                text = "Bonjour",
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-        }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Bonjour",
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        if (isLoadingData && chronicles.isEmpty()) {
-            SkeletonLoading()
-        } else {
-            HomeContent(chronicles, onPlayClick)
+            if (isLoadingData && chronicles.isEmpty()) {
+                SkeletonLoading()
+            } else {
+                HomeContent(chronicles, onPlayClick)
+            }
         }
+        
+        PullToRefreshContainer(
+            state = pullToRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter),
+            containerColor = Color.Black,
+            contentColor = Color.White
+        )
     }
 }
 

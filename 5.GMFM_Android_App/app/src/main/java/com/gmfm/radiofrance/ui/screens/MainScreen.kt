@@ -53,7 +53,17 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     val chronicles by viewModel.chronicles.collectAsState()
     val baseHour by viewModel.baseHour.collectAsState()
     val baseMinute by viewModel.baseMinute.collectAsState()
+    val error by viewModel.error.collectAsState()
     
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(error) {
+        error?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearError()
+        }
+    }
+
     var isPlayerOpen by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
@@ -158,6 +168,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     )
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             Column {
                 // Mini Player
@@ -230,15 +241,12 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                 }
                 composable(Screen.Music.route) { MusicView() }
                 composable(Screen.Live.route) { 
-                    val currentMediaItem by remember(mediaController) { 
-                        derivedStateOf { mediaController?.currentMediaItem } 
-                    }
-                    // We need a more reactive way to get the title since currentMediaItem might not trigger recomposition 
-                    // in the same way as a StateFlow or State.
-                    // Let's use the same listener logic as in PlayerView or just pass the mediaController.
+                    val isLoadingData by viewModel.isLoading.collectAsState()
                     
                     LiveView(
                         chronicles = chronicles,
+                        isLoading = isLoadingData,
+                        onRefresh = { viewModel.fetchChronicles() },
                         mediaController = mediaController,
                         onNavigateToSchedule = { navController.navigate(Screen.Schedule.route) },
                         onPlayLiveClick = { 
