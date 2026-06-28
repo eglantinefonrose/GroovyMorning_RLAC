@@ -72,6 +72,11 @@ for res in results:
     print(f"Début détecté : {res['sentence']} ({res['confidence']:.2f})")
 ```
 
+### Comparer l'inférence avec le ground truth
+```
+python3 visualize_detection.py "../../../@assets/3.modelEvaluationData/france-inter/27-05-2026_transcription.txt" "../../../@assets/3.modelEvaluationData/france-inter/ground_truth_chroniques_start_transcriptions.txt" --output rapport_france_inter.html
+```
+
 ## 🌐 Intégrations
 
 *   **WandB** : Les métriques sont suivies en temps réel sur le projet `IAChronicleDetection`.
