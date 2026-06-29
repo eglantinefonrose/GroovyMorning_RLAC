@@ -1,0 +1,23 @@
+00:12:02.640 - 00:16:32.300 : RTL-évenement
+00:33:24.660 - 00:36:40.460 : angle-eco
+01:51:03.020 - 02:02:35.740 : c-est-notre-epoque
+01:07:53.980 - 01:17:35.240 : face-a-fogiel
+00:36:42.960 - 00:47:18.380 : invite-RTL-7h40
+00:01:49.360 - 00:11:54.960 : journal-7h
+01:42:17.200 - 01:50:16.500 : journal-9h
+00:52:27.260 - 01:03:29.540 : journal-de-8h
+02:03:08.780 - 02:07:56.000 : la-pepite
+01:23:26.340 - 01:26:58.100 : le-monde-en-marche
+01:47:19.040 - 01:49:06.820 : le-vrai-du-faux
+00:25:42.040 - 00:26:40.320 : meteo-7h30
+00:47:51.020 - 00:52:26.560 : oeil-phillipe
+01:28:05.160 - 01:31:29.060 : olivier-dauvers
+01:04:37.720 - 01:07:11.020 : question-internationelle
+
+
+NON TROUVÉES :
+ca-va-beaucoup-mieux
+edito-etienne-gernelle
+laurent-gerra
+meteo-7-jours
+visage-du-jour

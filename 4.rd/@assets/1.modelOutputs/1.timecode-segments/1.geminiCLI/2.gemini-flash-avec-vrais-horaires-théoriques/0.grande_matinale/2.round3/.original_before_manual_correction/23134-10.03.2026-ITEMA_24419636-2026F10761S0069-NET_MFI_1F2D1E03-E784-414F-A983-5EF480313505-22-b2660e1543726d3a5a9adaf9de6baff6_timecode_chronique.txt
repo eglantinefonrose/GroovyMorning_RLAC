@@ -1,0 +1,25 @@
+[00:00:00.000] - [00:13:21.800] Le journal - Anaïs Feuga
+[00:13:21.800] - [00:14:59.800] 80 secondes - Nicolas Demorand
+[00:15:00.800] - [00:16:05.800] Annonces - Florence Paracuellos
+[00:16:05.800] - [00:20:16.800] Grand reportage - Manon Lombart-Brunel
+[00:20:16.800] - [00:22:43.800] Édito média - Cyril Lacarrière
+[00:22:51.800] - [00:26:41.800] Musique - Aline Afanoukoe
+[00:26:41.800] - [00:27:14.800] Publicité - Alpine A290
+[00:27:14.800] - [00:27:44.800] Publicité - Crédit Agricole
+[00:27:44.800] - [00:27:56.800] Météo (Sponsor) - Huttopia
+[00:27:56.800] - [00:29:18.800] Météo - Marie-Pierre Planchon
+[00:29:22.800] - [00:41:40.800] Le journal de 7h30 - Kévin Dufreche
+[00:41:42.800] - [00:41:59.800] Annonce - Fabrice Drouelle
+[00:41:59.800] - [00:42:31.800] Publicité - Renault Clio
+[00:42:33.800] - [00:45:54.800] Édito politique - Patrick Cohen
+[00:45:56.800] - [00:48:46.800] Édito éco - Dominique Seux
+[00:48:52.800] - [00:58:13.800] L'invité de 7h50 - Yann LeCun (Benjamin Duhamel)
+[00:58:17.800] - [01:01:02.800] La chronique de Bertrand Péchaubrier - Bertrand Péchaubrier
+[01:01:02.800] - [01:18:18.800] Le journal de 8h - Alain Trenit
+[01:18:25.800] - [01:21:34.800] Géopolitique - Pierre Haski
+[01:21:56.800] - [01:22:29.800] Publicité / Promo - Podcast "In extremis"
+[01:22:33.800] - [01:47:02.800] Le grand entretien - Xavier Giannoli & Jean Dujardin (Benjamin Duhamel & Florence Paracuellos)
+[01:47:32.800] - [01:48:30.800] Annonces / Publicité - Florence Paracuellos
+[01:48:35.800] - [01:52:27.800] Dans l'œil de Nora - Nora Hamadi
+[01:54:28.800] - [01:58:22.800] La chronique de Mathilde Serrell - Mathilde Serrell
+[01:58:26.800] - [02:00:45.800] La chronique de Sophie Aram - Sophie Aram

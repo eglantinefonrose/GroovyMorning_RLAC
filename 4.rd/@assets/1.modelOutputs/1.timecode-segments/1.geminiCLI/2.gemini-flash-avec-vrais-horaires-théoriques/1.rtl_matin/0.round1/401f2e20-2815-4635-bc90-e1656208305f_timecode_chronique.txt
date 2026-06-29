@@ -1,0 +1,28 @@
+[00:00:00.000] - [00:00:30.000] Annonces et publicités
+[00:00:30.000] - [00:01:40.079] Introduction RTL Matin - Thomas Sotto
+[00:01:40.079] - [00:12:37.340] Le journal RTL - Antoine Cavallero
+[00:12:39.320] - [00:15:52.320] RTL Événement - Valentin Arquier
+[00:15:55.960] - [00:16:48.980] Annonces et publicités
+[00:16:55.879] - [00:19:39.859] L'édito de Mathilde Ciro - Mathilde Ciro
+[00:19:39.859] - [00:22:51.019] Le visage du jour - Cindy Hubert
+[00:22:52.480] - [00:26:15.278] Annonces et publicités
+[00:26:16.740] - [00:32:39.259] Le journal RTL - Aude Vernuccio
+[00:32:41.900] - [00:33:22.538] Annonce
+[00:33:25.140] - [00:36:49.920] L'angle éco de François Lenglet - François Lenglet
+[00:36:57.679] - [00:47:53.900] L'invité RTL de 7h40 - Jérôme Patrier-Lettus
+[00:47:54.360] - [00:48:00.139] Publicité
+[00:48:04.760] - [00:52:32.380] L'oeil
+[00:52:32.380] - [01:03:00.199] Le journal RTL - Céline Landreau
+[01:03:01.019] - [01:06:39.239] La météo - Louis Bodin
+[01:06:39.239] - [01:17:21.300] Face à Fogiel - Marc-Olivier Fogiel
+[01:17:21.300] - [01:22:48.800] Le journal RTL - Aude Vernuccio
+[01:22:48.800] - [01:24:20.060] La météo à 7 jours - Louis Bodin
+[01:24:20.060] - [01:27:25.420] Le monde en marche - William Galibert
+[01:27:25.420] - [01:28:15.079] Olivier Dauvers : les secrets de la conso - Olivier Dauvers
+[01:28:15.079] - [01:34:44.640] Ça va beaucoup mieux avec Jimmy Mohamed - Jimmy Mohamed
+[01:34:44.640] - [01:41:01.100] Laurent Gerra - Laurent Gerra
+[01:41:01.100] - [01:47:08.680] Le journal RTL - Antoine Cavallero
+[01:47:08.680] - [01:50:10.460] Le vrai du faux - Florian Gazan
+[01:50:10.460] - [02:03:16.159] C'est notre époque - Thomas Sotto
+[02:03:16.159] - [02:07:33.800] La pépite - Anthony Martin
+[02:07:33.800] - [02:08:12.899] Annonces et publicités

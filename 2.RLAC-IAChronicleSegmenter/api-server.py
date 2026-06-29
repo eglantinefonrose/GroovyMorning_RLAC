@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent')
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Configuration base de données
 DB_CONFIG = {

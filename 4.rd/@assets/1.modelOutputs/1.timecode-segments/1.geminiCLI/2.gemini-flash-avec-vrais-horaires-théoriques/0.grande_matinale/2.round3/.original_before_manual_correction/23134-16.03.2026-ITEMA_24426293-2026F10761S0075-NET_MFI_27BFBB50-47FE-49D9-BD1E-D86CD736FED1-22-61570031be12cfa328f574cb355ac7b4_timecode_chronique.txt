@@ -1,0 +1,20 @@
+[00:00:00.000] - [00:14:08.800] Le journal - Anaïs Feuga
+[00:14:08.800] - [00:15:36.200] Annonces - Florence Paracuellos
+[00:15:36.200] - [00:21:26.300] Analyse politique - Maxence Lambrek
+[00:21:34.200] - [00:24:01.200] Édito média - Cyril Lacarrière
+[00:24:08.200] - [00:27:41.300] Musique - Aline Afanoukoe
+[00:27:41.300] - [00:28:11.300] Publicité - Surfrider Foundation
+[00:28:11.300] - [00:28:40.300] Publicité / Promo - "J'apprends l'info"
+[00:28:40.300] - [00:28:50.300] Publicité / Sponsor - Maif
+[00:28:50.300] - [00:30:03.300] Météo - Marie-Pierre Planchon
+[00:30:08.300] - [00:42:23.300] Le journal de 7h30 - Kévin Dufreche
+[00:42:30.300] - [00:43:02.300] Publicité - Fondation Espaces Naturels de France
+[00:43:03.300] - [00:46:06.300] Édito politique - Patrick Cohen
+[00:46:09.300] - [00:49:00.300] Édito éco - Dominique Seux
+[00:49:07.300] - [00:58:22.300] L'invité de 7h50 - François Hollande (Benjamin Duhamel)
+[00:58:26.300] - [01:01:10.300] La chronique de Bertrand Péchaubrier - Bertrand Péchaubrier
+[01:01:16.300] - [01:14:06.300] Le journal de 8h - Hélène Fily
+[01:14:06.300] - [01:35:46.300] Grand Entretien XXL (Manuel Bompard) - Benjamin Duhamel
+[01:36:15.300] - [01:48:02.300] Grand Entretien XXL (Jean-Philippe Tanguy) - Benjamin Duhamel
+[01:48:10.300] - [01:48:50.300] Annonces / Publicité - Florence Paracuellos
+[01:49:11.300] - [01:59:22.300] Grand Entretien XXL (Brice Teinturier) - Benjamin Duhamel

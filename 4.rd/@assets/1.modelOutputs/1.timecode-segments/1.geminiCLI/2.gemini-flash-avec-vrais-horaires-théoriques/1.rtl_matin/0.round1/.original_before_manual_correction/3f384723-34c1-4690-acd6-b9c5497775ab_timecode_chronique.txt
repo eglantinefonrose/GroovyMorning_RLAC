@@ -1,0 +1,25 @@
+[00:00:00.000] - [00:01:02.040] Annonces et publicités
+[00:01:02.040] - [00:12:10.740] Le journal RTL - Olivier Boy
+[00:12:10.740] - [00:15:10.800] RTL Événement - Valentin Boisset
+[00:15:10.800] - [00:16:13.520] L'édito d'Etienne Gernelle - Etienne Gernelle
+[00:16:13.520] - [00:19:15.200] Transition / Annonces
+[00:19:15.200] - [00:22:46.040] Le visage du jour - Agnès Bonfillon
+[00:22:46.040] - [00:25:25.740] Annonces et publicités
+[00:25:25.740] - [00:30:50.120] Le journal RTL - Albane Leprince
+[00:30:50.120] - [00:34:47.060] L'angle éco de François Lenglet - François Lenglet
+[00:34:47.060] - [00:50:41.560] L'invité RTL de 7h40 - Thomas Sotto
+[00:50:41.560] - [01:01:23.680] Le journal RTL - Céline Landreau
+[01:01:23.680] - [01:02:28.420] La météo - Louis Bodin
+[01:02:28.420] - [01:05:32.340] La question internationale - Bénédicte Tassart
+[01:05:32.340] - [01:17:24.520] Face à Fogiel - Marc-Olivier Fogiel
+[01:17:24.520] - [01:19:43.640] Le journal RTL - Albane Leprince
+[01:19:43.640] - [01:21:13.680] La météo à 7 jours - Louis Bodin
+[01:21:13.680] - [01:24:26.360] Le monde en marche - William Galibert
+[01:24:26.360] - [01:25:31.620] Olivier Dauvers : les secrets de la conso - Olivier Dauvers
+[01:25:31.620] - [01:38:26.880] Ça va beaucoup mieux avec Jimmy Mohamed - Jimmy Mohamed
+[01:38:26.880] - [01:44:01.680] Laurent Gerra - Laurent Gerra
+[01:44:01.680] - [01:47:08.940] Le journal RTL - Olivier Boy
+[01:47:08.940] - [01:49:12.180] Le vrai du faux - Florian Gazan
+[01:49:12.180] - [02:00:12.420] C'est notre époque - Thomas Sotto
+[02:00:12.420] - [02:05:00.640] La pépite - Anthony Martin
+[02:05:00.640] - [02:06:00.000] Annonces et publicités

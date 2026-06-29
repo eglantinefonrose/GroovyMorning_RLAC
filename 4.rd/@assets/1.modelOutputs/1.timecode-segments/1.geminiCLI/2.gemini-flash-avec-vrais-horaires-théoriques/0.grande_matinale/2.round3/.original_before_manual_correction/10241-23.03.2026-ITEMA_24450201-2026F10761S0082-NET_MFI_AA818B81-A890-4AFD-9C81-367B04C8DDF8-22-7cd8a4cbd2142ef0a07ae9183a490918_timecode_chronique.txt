@@ -1,0 +1,23 @@
+[00:00:02.960] - [00:14:07.520] La Grande Matinale (Journal de 7h - Spécial Municipales) - Anaïs Fegard
+[00:15:12.740] - [00:23:02.600] Spécial Élections Municipales (Analyse) - Brice Tinturier
+[00:23:07.500] - [00:25:18.380] L'édito Média (Démentis de l'Élysée) - Cyril Lacarrière
+[00:25:27.040] - [00:28:43.160] Musicaline (Céla Sou - Move In) - Aline Afanouko
+[00:28:44.800] - [00:29:16.940] Publicité - Crédit Mutuel / Hyper Weekend Festival
+[00:29:19.480] - [00:29:27.600] Publicité - Utopia
+[00:29:27.600] - [00:30:22.180] La météo - Marie-Pierre Planchon
+[00:30:23.340] - [00:42:41.100] Le journal de 7h30 (Spécial Municipales) - Kevin Dufraîche
+[00:42:49.700] - [00:46:07.000] L'édito politique (Vaguelettes dégagistes) - Patrick Cohen
+[00:46:18.940] - [00:48:46.280] L'édito éco (Impôts locaux et maires) - Dominique Seux
+[00:48:58.980] - [00:57:51.100] L'invité de 7h50 (Analyse Municipales) - Raphaël Glucksmann
+[00:58:05.280] - [01:00:52.920] Chronique (L'école des fans des politiques) - Bertrand Chameroy
+[01:01:03.000] - [01:14:06.980] Le journal de 8h - Hélène Philly
+[01:16:00.100] - [01:17:35.380] Reportage (Frelon asiatique) - Faustine Calmel
+[01:17:43.040] - [01:19:14.680] La météo - Marie-Pierre Planchon
+[01:19:22.780] - [01:22:40.980] Géopolitique (Ultimatum Trump à l'Iran) - Pierre Haski
+[01:22:56.720] - [01:23:14.460] Publicité - Alain Afflelou
+[01:23:14.460] - [01:23:44.980] Publicité - EDF
+[01:23:44.980] - [01:24:14.080] Publicité - Penny Lane
+[01:24:48.000] - [01:35:41.980] Le Grand Entretien (Partie 1 - LR) - François-Xavier Bellamy
+[01:35:48.100] - [01:47:17.040] Le Grand Entretien (Partie 2 - LFI) - Mathilde Panot
+[01:47:20.920] - [01:47:48.200] Publicité - Petit-fils
+[01:47:54.300] - [01:59:26.620] Le Grand Entretien (Partie 3 - RN) - Sébastien Chenu

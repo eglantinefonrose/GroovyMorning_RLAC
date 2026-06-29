@@ -1,0 +1,34 @@
+[
+    {
+        "start": 0.0,
+        "end": 1320.0,
+        "confidence": 0.9989834427833557,
+        "type": "speech",
+        "start_time": "00:00:00",
+        "end_time": "00:22:00"
+    },
+    {
+        "start": 1330.0,
+        "end": 1875.0,
+        "confidence": 0.9984769225120544,
+        "type": "speech",
+        "start_time": "00:22:10",
+        "end_time": "00:31:15"
+    },
+    {
+        "start": 1880.0,
+        "end": 6410.0,
+        "confidence": 0.9987602233886719,
+        "type": "speech",
+        "start_time": "00:31:20",
+        "end_time": "01:46:50"
+    },
+    {
+        "start": 6415.0,
+        "end": 9000.0,
+        "confidence": 0.9989616870880127,
+        "type": "ambiguous",
+        "start_time": "01:46:55",
+        "end_time": "02:30:00"
+    }
+]

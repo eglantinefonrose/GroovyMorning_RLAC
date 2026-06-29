@@ -1,0 +1,15 @@
+[project]
+name = "2-transcriptiongeneration"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "huggingface-hub<0.29",
+    "librosa>=0.11.0",
+    "mlx>=0.26.5",
+    "moshi-mlx>=0.3.0",
+    "numpy<2.3",
+    "sentencepiece>=0.2.0",
+    "tqdm>=4.67.3",
+]
