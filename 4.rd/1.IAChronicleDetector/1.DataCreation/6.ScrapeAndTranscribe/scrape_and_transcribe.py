@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import subprocess
 import os
 import re
 import requests
@@ -21,7 +22,20 @@ from tqdm import tqdm
 from huggingface_hub import hf_hub_download
 from moshi_mlx import models, utils
 
-# --- Configuration ---
+# --- Utilities ---
+
+def get_audio_duration(file_path):
+    """Get duration of an audio file using ffprobe, fallback to librosa."""
+    try:
+        cmd = [
+            "ffprobe", "-v", "error", "-show_entries", "format=duration",
+            "-of", "default=noprint_wrappers=1:nokey=1", str(file_path)
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        return float(result.stdout.strip())
+    except Exception:
+        return librosa.get_duration(path=str(file_path))
+
 # Navigate up 3 levels from 1.IAChronicleDetector/1.DataCreation/6.ScrapeAndTranscribe
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 ASSETS_DIR = PROJECT_ROOT / "@assets"
@@ -38,8 +52,6 @@ RADIO_MAP = {
     "france-info": "2.franceinfo-matin",
     "france-culture": "3.franceculture-matin",
 }
-
-# --- Utilities ---
 
 def format_timestamp(seconds, offset_seconds=0):
     td = timedelta(seconds=float(seconds + offset_seconds))
@@ -83,7 +95,7 @@ def get_audio_url_from_page(page_url, headers=None):
 def scrape_radiofrance(brand, radio_id, label_time, target_date):
     headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:130.0) Gecko/20100101 Firefox/130.0'}
     radio_dir_name = RADIO_MAP.get(brand)
-    if not radio_dir_name: return []
+    if not radio_dir_name: return [], None
     
     radio_dir = MEDIA_DIR / radio_dir_name / target_date
     chroniques_dir = radio_dir / "chroniques"
@@ -96,23 +108,50 @@ def scrape_radiofrance(brand, radio_id, label_time, target_date):
         resp = requests.get(grid_url, timeout=10, headers=headers)
         if resp.status_code != 200: 
             print(f"      ⚠️ Grid unavailable for {brand}")
-            return []
+            return [], None
         content = resp.text
         
         build_hash_match = re.search(r"\"buildId\":\"([^\"]+)\"", content)
         build_hash = build_hash_match.group(1) if build_hash_match else "1vzv7fl"
         
-        # Try to find the show ID for the given time
-        match = re.search(rf'label[:=]"{label_time}"[^>]*id[:=]"([a-f0-9-]{{36}})"', content)
-        if not match:
-            match = re.search(rf'label[:=]"{label_time}"[^>]*data-element-id[:=]"([a-f0-9-]{{36}})"', content)
+        # Try to find the show ID and path for the given time
+        show_match = re.search(rf'label[:=]"{label_time}"[^>]*id[:=]"([a-f0-9-]{{36}})"', content)
+        if not show_match:
+            show_match = re.search(rf'label[:=]"{label_time}"[^>]*data-element-id[:=]"([a-f0-9-]{{36}})"', content)
         
-        if not match:
+        if not show_match:
             print(f"      ⚠️ Could not find show at {label_time} for {brand}")
-            return []
+            return [], None
             
-        show_id = match.group(1)
+        show_id = show_match.group(1)
         print(f"   [*] Show ID found: {show_id}")
+
+        # Try to find the show path for full show download
+        full_show_path = None
+        # Try finding path or href after label
+        path_match = re.search(rf'label[:=]"{label_time}"[^}}]*"?(?:path|href)"?[:=]"([^"]+)"', content)
+        if not path_match:
+            # Try finding path or href before label
+            path_match = re.search(rf'"?(?:path|href)"?[:=]"([^"]+)"[^}}]*label[:=]"{label_time}"', content)
+        
+        if path_match:
+            show_path = path_match.group(1)
+            print(f"   [*] Show path found: {show_path}")
+            full_audio_url = get_audio_url_from_page(show_path, headers=headers)
+            if full_audio_url:
+                ext = "m4a" if ".m4a" in full_audio_url.lower() else "mp3"
+                dest_path = radio_dir / f"full_show.{ext}"
+                if download_file(full_audio_url, dest_path, headers=headers):
+                    print(f"      ✅ Downloaded Full Show: {dest_path.name}")
+                    full_show_path = dest_path
+        
+        # fallback check for existing emission file
+        if not full_show_path:
+            for existing in radio_dir.glob("*Emission*"):
+                if existing.suffix.lower() in ['.mp3', '.m4a']:
+                    print(f"   [*] Found existing emission file: {existing.name}")
+                    full_show_path = existing
+                    break
         
         # API call to get chronicles
         payload_raw = [{"brand": 1, "parentStep": 2}, clean_brand, show_id]
@@ -140,10 +179,10 @@ def scrape_radiofrance(brand, radio_id, label_time, target_date):
                         if download_file(audio_url, dest_path, headers=headers):
                             print(f"      ✅ Downloaded: {show_name}")
                             downloaded_files.append(dest_path)
-        return downloaded_files
+        return downloaded_files, full_show_path
     except Exception as e:
         print(f"   ❌ Error scraping {brand}: {e}")
-        return []
+        return [], None
 
 def scrape_rtl(target_date_str):
     FEEDS = [
@@ -157,9 +196,10 @@ def scrape_rtl(target_date_str):
         target_date = datetime.strptime(target_date_str, "%d-%m-%Y")
     except ValueError:
         print(f"   ❌ Invalid date format: {target_date_str}")
-        return []
+        return [], None
         
     downloaded_files = []
+    full_show_file = None
     radio_dir_name = RADIO_MAP["rtl"]
     
     for feed_id, feed_slug in FEEDS:
@@ -183,110 +223,237 @@ def scrape_rtl(target_date_str):
                     audio_url = enclosure.get('url')
                     
                     title = item.find('title').text
-                    # Skip integrale if in general feed
-                    if feed_slug == "rtl-matin" and ("INTÉGRALE" in title.upper() or "RTL MATIN DU" in title.upper()):
-                        continue
                     
-                    dest_dir = MEDIA_DIR / radio_dir_name / target_date_str / "chroniques"
-                    dest_dir.mkdir(parents=True, exist_ok=True)
+                    # Handle integrale vs chronicles
+                    is_integrale = ("INTÉGRALE" in title.upper() or "RTL MATIN DU" in title.upper())
                     
-                    clean_title = re.sub(r'[^a-z0-9]', '-', title.lower())[:50].strip('-')
-                    dest_path = dest_dir / f"{clean_title}.mp3"
-                    
-                    if download_file(audio_url, dest_path):
-                        print(f"      ✅ Downloaded: {clean_title}")
-                        downloaded_files.append(dest_path)
+                    if is_integrale:
+                        dest_dir = MEDIA_DIR / radio_dir_name / target_date_str
+                        dest_dir.mkdir(parents=True, exist_ok=True)
+                        dest_path = dest_dir / "full_show.mp3"
+                        if download_file(audio_url, dest_path):
+                            print(f"      ✅ Downloaded Full Show: {title}")
+                            full_show_file = dest_path
+                    else:
+                        dest_dir = MEDIA_DIR / radio_dir_name / target_date_str / "chroniques"
+                        dest_dir.mkdir(parents=True, exist_ok=True)
+                        
+                        clean_title = re.sub(r'[^a-z0-9]', '-', title.lower())[:50].strip('-')
+                        dest_path = dest_dir / f"{clean_title}.mp3"
+                        
+                        if download_file(audio_url, dest_path):
+                            print(f"      ✅ Downloaded: {clean_title}")
+                            downloaded_files.append(dest_path)
         except Exception as e:
             print(f"   ❌ Error scraping RTL feed {feed_slug}: {e}")
             
-    return downloaded_files
+    # fallback check for existing integrale file
+    if not full_show_file:
+        rtl_dir = MEDIA_DIR / RADIO_MAP["rtl"] / target_date_str
+        for existing in rtl_dir.glob("*.mp3"):
+            if existing.name == f"{target_date_str}.mp3" or "integrale" in existing.name.lower():
+                print(f"   [*] Found existing RTL integrale: {existing.name}")
+                full_show_file = existing
+                break
+
+    return downloaded_files, full_show_file
 
 # --- Transcription Logic (Adapted from batch_transcribe_starts.py) ---
 
-def transcribe_segment(file_path, model, audio_tokenizer, text_tokenizer, lm_config, stt_config, offset=0, duration=20):
+import gc
+
+# Limit MLX cache to 4GB to prevent system saturation
+mx.metal.set_cache_limit(4 * 1024 * 1024 * 1024)
+
+def transcribe_segment(file_path, model, audio_tokenizer, text_tokenizer, lm_config, stt_config, offset=0, duration=None):
+    temp_wav = None
     try:
-        # Reset caches for clean state
-        if hasattr(audio_tokenizer, "reset"): audio_tokenizer.reset()
-        if hasattr(model, "transformer_cache"):
-            for c in model.transformer_cache: c.reset()
-        if hasattr(model, "depformer_cache"):
-            for c in model.depformer_cache: c.reset()
-        
-        # Load audio segment
-        audio, _ = librosa.load(str(file_path), sr=24000, offset=offset, duration=duration)
-        
-        # Apply padding as per STT config
-        if stt_config:
-            pad_left = int(stt_config.get("audio_silence_prefix_seconds", 0.0) * 24000)
-            pad_right = int((stt_config.get("audio_delay_seconds", 0.0) + 1.0) * 24000)
-            audio = np.pad(audio, (pad_left, pad_right), mode="constant")
-            
-        steps = len(audio) // 1920
-        gen = models.LmGen(
-            model=model,
-            max_steps=steps + 10,
-            text_sampler=utils.Sampler(temp=0.0), # Greedy
-            audio_sampler=utils.Sampler(temp=0.0),
-            check=False,
-        )
-        
-        all_tokens = []
-        other_codebooks = lm_config.other_codebooks
-        
-        for idx in range(steps):
-            pcm_chunk = audio[idx * 1920:(idx + 1) * 1920]
-            pcm_input = pcm_chunk[None, None, :]
-            
-            # Encode with Mimi
-            other_audio_tokens = audio_tokenizer.encode_step(pcm_input)
-            other_audio_tokens_mx = mx.array(other_audio_tokens).transpose(0, 2, 1)[:, :, :other_codebooks]
-            
-            # Predict text token
-            text_token = gen.step(other_audio_tokens_mx[0])
-            text_token_id = text_token[0].item()
-            mx.eval(gen.gen_sequence)
-            
-            delay = stt_config.get("audio_delay_seconds", 0.0) if stt_config else 0.0
-            timestamp = (idx * 0.08) - delay
-            if timestamp < 0: timestamp = 0
-            
-            all_tokens.append((timestamp, text_token_id))
+        # 1. Convert to temporary WAV if not already (SoundFile is much better with WAV)
+        # This avoids the slow and RAM-hungry 'audioread' fallback
+        print(f"   [*] Preparing audio for {file_path.name}...")
+        temp_wav = file_path.with_suffix(f".{os.getpid()}.temp.wav")
+        conv_cmd = [
+            "ffmpeg", "-i", str(file_path),
+            "-ar", "24000", "-ac", "1", # Mono 24kHz
+            "-y", str(temp_wav), "-loglevel", "error"
+        ]
+        subprocess.run(conv_cmd, check=True)
 
-        if not all_tokens: return ""
+        total_duration = get_audio_duration(temp_wav)
+        if duration is not None:
+            total_duration = min(total_duration, duration)
 
-        srt_entries = []
-        current_text = []
-        start_time = None
+        # Process in micro-chunks of 30 seconds for maximum RAM safety
+        step_duration = 30 
+        all_srt_entries = []
         
-        for timestamp, token_id in all_tokens:
-            if token_id in (0, 3): continue
-            char = text_tokenizer.id_to_piece(token_id)
-            char = char.replace(" ", " ").replace("▁", " ")
-            if char:
-                if start_time is None and char.strip():
-                    start_time = timestamp
-                if start_time is not None:
-                    current_text.append(char)
-                if len(current_text) > 15 or any(p in char for p in ".!?"):
-                    end_time = timestamp + 0.08
-                    text_content = "".join(current_text).strip()
-                    if text_content:
-                        srt_entries.append((start_time, end_time, text_content))
-                    current_text = []
-                    start_time = None
-        
-        if current_text and start_time is not None:
-            srt_entries.append((start_time, all_tokens[-1][0] + 0.08, "".join(current_text).strip()))
+        current_time = 0
+        while current_time < total_duration:
+            this_step_dur = min(step_duration, total_duration - current_time)
+            
+            # Load small slice
+            audio, _ = librosa.load(str(temp_wav), sr=24000, offset=offset + current_time, duration=this_step_dur)
+            
+            if stt_config and current_time == 0:
+                pad_left = int(stt_config.get("audio_silence_prefix_seconds", 0.0) * 24000)
+                pad_right = int((stt_config.get("audio_delay_seconds", 0.0) + 1.0) * 24000)
+                audio = np.pad(audio, (pad_left, pad_right), mode="constant")
+            
+            # Reset caches
+            if hasattr(audio_tokenizer, "reset"): audio_tokenizer.reset()
+            if hasattr(model, "transformer_cache"):
+                for c in model.transformer_cache: c.reset()
+            if hasattr(model, "depformer_cache"):
+                for c in model.depformer_cache: c.reset()
 
+            # Encode and Transcribe
+            audio_tokens = audio_tokenizer.encode(audio[None, None, :])
+            audio_tokens_mx = mx.array(audio_tokens)
+            actual_steps = min(len(audio) // 1920, audio_tokens_mx.shape[1])
+            
+            gen = models.LmGen(
+                model=model,
+                max_steps=actual_steps + 10,
+                text_sampler=utils.Sampler(temp=0.0),
+                audio_sampler=utils.Sampler(temp=0.0),
+                check=False,
+            )
+            
+            chunk_tokens = []
+            other_codebooks = lm_config.other_codebooks
+            
+            for idx in range(actual_steps):
+                step_tokens = audio_tokens_mx[:, idx:idx+1, :other_codebooks]
+                text_token = gen.step(step_tokens[0])
+                text_token_id = text_token[0].item()
+                mx.eval(gen.gen_sequence)
+                
+                delay = stt_config.get("audio_delay_seconds", 0.0) if stt_config else 0.0
+                timestamp = (current_time + (idx * 0.08)) - delay
+                chunk_tokens.append((max(0, timestamp), text_token_id))
+
+            # Convert to SRT entries
+            current_text = []
+            start_time = None
+            for timestamp, token_id in chunk_tokens:
+                if token_id in (0, 3): continue
+                char = text_tokenizer.id_to_piece(token_id).replace(" ", " ").replace("▁", " ")
+                if char:
+                    if start_time is None and char.strip(): start_time = timestamp
+                    if start_time is not None: current_text.append(char)
+                    if len(current_text) > 15 or any(p in char for p in ".!?"):
+                        text_content = "".join(current_text).strip()
+                        if text_content: all_srt_entries.append((start_time, timestamp + 0.08, text_content))
+                        current_text, start_time = [], None
+            
+            if current_text and start_time is not None:
+                all_srt_entries.append((start_time, chunk_tokens[-1][0] + 0.08, "".join(current_text).strip()))
+
+            # Cleanup this chunk
+            current_time += this_step_dur
+            del audio, audio_tokens, audio_tokens_mx, gen, chunk_tokens
+            mx.metal.clear_cache()
+            gc.collect()
+
+        if not all_srt_entries: return ""
         srt_content = ""
-        for i, (start, end, text) in enumerate(srt_entries):
-            srt_content += f"{i+1}\n"
-            srt_content += f"{format_timestamp(start, offset)} --> {format_timestamp(end, offset)}\n"
-            srt_content += f"{text}\n\n"
+        for i, (start, end, text) in enumerate(all_srt_entries):
+            srt_content += f"{i+1}\n{format_timestamp(start)} --> {format_timestamp(end)}\n{text}\n\n"
         return srt_content
+
     except Exception as e:
         print(f"   ❌ Error transcribing {file_path.name}: {e}")
         return None
+    finally:
+        if temp_wav and temp_wav.exists():
+            temp_wav.unlink()
+
+def parse_srt(srt_content):
+    entries = []
+    blocks = re.split(r'\n\n+', srt_content.strip())
+    for block in blocks:
+        lines = block.split('\n')
+        if len(lines) >= 3:
+            times = re.findall(r'(\d{2}:\d{2}:\d{2},\d{3})', lines[1])
+            if len(times) == 2:
+                text = " ".join(lines[2:]).strip()
+                entries.append({'start': times[0], 'end': times[1], 'text': text})
+    return entries
+
+def normalize_text(t):
+    return re.sub(r'[^a-z0-9 ]', '', t.lower()).strip()
+
+def filter_full_show_transcription(full_srt_path, chronicle_srts, output_path):
+    if not os.path.exists(full_srt_path): return
+    try:
+        with open(full_srt_path, 'r', encoding='utf-8') as f:
+            full_content = f.read()
+        full_entries = parse_srt(full_content)
+        if not full_entries: return
+        
+        full_words = []
+        word_to_entry = []
+        for i, e in enumerate(full_entries):
+            norm = normalize_text(e['text'])
+            for w in norm.split():
+                full_words.append(w)
+                word_to_entry.append(i)
+        
+        def find_subsequence(seq, target, min_match=5):
+            n = len(seq)
+            for k in range(min(n, 12), min_match - 1, -1):
+                for start in range(min(n - k + 1, 20)): # Check first 20 words for match
+                    sub = seq[start:start+k]
+                    for i in range(len(target) - k + 1):
+                        if target[i:i+k] == sub:
+                            return i
+            return -1
+
+        segments = []
+        for start_srt, end_srt in chronicle_srts:
+            start_norm = normalize_text(" ".join(e['text'] for e in parse_srt(start_srt)))
+            end_norm = normalize_text(" ".join(e['text'] for e in parse_srt(end_srt)))
+            
+            start_words = start_norm.split()
+            end_words = end_norm.split()
+            
+            if not start_words or not end_words: continue
+            
+            s_idx = find_subsequence(start_words, full_words)
+            e_idx = -1
+            if s_idx != -1:
+                search_base = full_words[s_idx:]
+                res = find_subsequence(end_words, search_base)
+                if res != -1:
+                    # Look at the end of the match
+                    e_idx = s_idx + res + 5 # Approximate end
+            else:
+                # Try finding end without start
+                e_idx = find_subsequence(end_words, full_words)
+
+            if s_idx != -1 or e_idx != -1:
+                start_entry = word_to_entry[s_idx] if s_idx != -1 else word_to_entry[max(0, e_idx - 100)]
+                end_entry = word_to_entry[min(len(word_to_entry)-1, e_idx)] if e_idx != -1 else word_to_entry[min(len(word_to_entry)-1, s_idx + 100)]
+                segments.append((start_entry, end_entry))
+
+        if not segments:
+            print("   ⚠️ No chronicles could be matched in the full show transcription.")
+            return
+
+        keep_indices = set()
+        for start, end in segments:
+            for i in range(min(start, end), max(start, end) + 1):
+                keep_indices.add(i)
+        
+        filtered_entries = [full_entries[i] for i in sorted(list(keep_indices))]
+        
+        with open(output_path, "w", encoding="utf-8") as out:
+            for i, entry in enumerate(filtered_entries):
+                out.write(f"{i+1}\n{entry['start']} --> {entry['end']}\n{entry['text']}\n\n")
+        print(f"   ✨ Cleaned transcription saved: {os.path.basename(output_path)}")
+        
+    except Exception as e:
+        print(f"   ❌ Error filtering transcription: {e}")
 
 # --- Main ---
 
@@ -305,22 +472,23 @@ def main():
     
     # 1. Scraping
     files = []
+    full_show_file = None
     if args.radio == "france-inter":
-        files = scrape_radiofrance("france-inter", "franceinter", "07h00", target_date)
+        files, full_show_file = scrape_radiofrance("france-inter", "franceinter", "07h00", target_date)
     elif args.radio == "france-info":
-        files = scrape_radiofrance("france-info", "franceinfo", "06h00", target_date)
+        files, full_show_file = scrape_radiofrance("france-info", "franceinfo", "06h00", target_date)
     elif args.radio == "france-culture":
-        files = scrape_radiofrance("france-culture", "franceculture", "07h00", target_date)
+        files, full_show_file = scrape_radiofrance("france-culture", "franceculture", "07h00", target_date)
     elif args.radio == "rtl":
-        files = scrape_rtl(target_date)
+        files, full_show_file = scrape_rtl(target_date)
         
-    if not files:
-        print("ℹ️ No chronicles found or downloaded.")
+    if not files and not full_show_file:
+        print("ℹ️ No chronicles or full show found.")
         return
 
-    print(f"✅ Found {len(files)} chronicles. Initializing STT model...")
+    print(f"✅ Found {len(files)} chronicles and {'a' if full_show_file else 'no'} full show. Initializing STT model...")
     
-    # 2. Model Initialization
+    # ... (Model initialization part remains same, I'll include it in the replace to be sure)
     try:
         config_path = hf_hub_download(args.model_id, "config.json")
         with open(config_path, "r") as f:
@@ -353,19 +521,36 @@ def main():
         return
 
     # 3. Transcription
-    chroniques_out_dir = OUTPUT_BASE_DIR / RADIO_MAP[args.radio] / target_date / "chroniques"
+    base_out_dir = OUTPUT_BASE_DIR / RADIO_MAP[args.radio] / target_date
+    chroniques_out_dir = base_out_dir / "chroniques"
     start_dir = chroniques_out_dir / "start_transcription"
     end_dir = chroniques_out_dir / "end_transcription"
     
+    base_out_dir.mkdir(parents=True, exist_ok=True)
     start_dir.mkdir(parents=True, exist_ok=True)
     end_dir.mkdir(parents=True, exist_ok=True)
     
-    print(f"📝 Transcribing and saving results to: {chroniques_out_dir}")
+    print(f"📝 Transcribing and saving results to: {base_out_dir}")
     
+    # 3.1 Full Show Transcription
+    if full_show_file:
+        print(f"⌛ Transcribing Full Show: {full_show_file.name}...")
+        full_transcription = transcribe_segment(
+            full_show_file, model, audio_tokenizer, text_tokenizer, lm_config, stt_config, 
+            offset=0, duration=None
+        )
+        if full_transcription:
+            out_path = base_out_dir / f"full_show_transcription.srt"
+            with open(out_path, "w", encoding="utf-8") as out:
+                out.write(full_transcription)
+            print(f"      ✅ Full show transcription saved: {out_path.name}")
+
+    # 3.2 Chronicles Transcription
     results_count = 0
-    for f_path in tqdm(files, desc="Transcribing", unit="file"):
+    chronicle_transcription_texts = []
+    for f_path in tqdm(files, desc="Transcribing Chronicles", unit="file"):
         try:
-            total_duration = librosa.get_duration(path=str(f_path))
+            total_duration = get_audio_duration(f_path)
         except Exception as e:
             print(f"   ❌ Could not get duration for {f_path.name}: {e}")
             continue
@@ -389,11 +574,22 @@ def main():
             with open(end_dir / f"{f_path.stem}_end.srt", "w", encoding="utf-8") as out:
                 out.write(end_transcription)
         
-        if start_transcription or end_transcription:
+        if start_transcription and end_transcription:
+            chronicle_transcription_texts.append((start_transcription, end_transcription))
+            results_count += 1
+        elif start_transcription or end_transcription:
             results_count += 1
 
     print(f"✨ Successfully processed {results_count}/{len(files)} chronicles.")
-    print(f"📂 Output saved in: {chroniques_out_dir}")
+    
+    # 3.3 Filtering Full Show Transcription
+    if full_show_file and chronicle_transcription_texts:
+        print(f"🧹 Filtering full show transcription to keep only chronicles...")
+        full_srt_path = base_out_dir / "full_show_transcription.srt"
+        filtered_srt_path = base_out_dir / "full_show_transcription_filtered.srt"
+        filter_full_show_transcription(full_srt_path, chronicle_transcription_texts, filtered_srt_path)
+
+    print(f"📂 Output saved in: {base_out_dir}")
 
 if __name__ == "__main__":
     main()
