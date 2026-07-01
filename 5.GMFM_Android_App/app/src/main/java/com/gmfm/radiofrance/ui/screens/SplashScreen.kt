@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material3.Icon
@@ -20,14 +21,10 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(onSplashFinished: () -> Unit) {
-    val alpha = remember { Animatable(0f) }
+    val alpha = remember { Animatable(1f) }
 
     LaunchedEffect(key1 = true) {
-        alpha.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 500)
-        )
-        delay(2000) 
+        delay(2500) 
         alpha.animateTo(
             targetValue = 0f,
             animationSpec = tween(durationMillis = 500)
@@ -46,7 +43,7 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
             contentDescription = "Splash Logo",
             tint = Color.White,
             modifier = Modifier
-                .fillMaxSize(0.3f)
+                .size(80.dp)
                 .alpha(alpha.value)
         )
     }
