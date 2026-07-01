@@ -155,10 +155,12 @@ def transcribe_segment_kyutai(file_path, model, audio_tokenizer, text_tokenizer,
 
         audio_tensor = torch.from_numpy(audio).to(device).unsqueeze(0).unsqueeze(0)
         
+        from moshi.models import LMGen
+        from moshi.utils import Sampler
+        
         with torch.no_grad():
             codes = audio_tokenizer.encode(audio_tensor)
-            from moshi.utils import Sampler
-            gen = models.LmGen(model, device=device, text_sampler=Sampler(temp=0.0), audio_sampler=Sampler(temp=0.0))
+            gen = LMGen(model, device=device, text_sampler=Sampler(temp=0.0), audio_sampler=Sampler(temp=0.0))
             
             tokens = []
             steps = codes.shape[-1]
@@ -215,26 +217,19 @@ def main():
     model, audio_tokenizer, text_tokenizer = None, None, None
     if not args.dry_run:
         print(f"🚀 Loading Kyutai STT on {args.device}...")
-        config_path = hf_hub_download(args.model_id, "config.json")
-        with open(config_path, "r") as f: config_dict = json.load(f)
-        lm_config = models.LmConfig.from_config_dict(config_dict)
-        model = models.Lm(lm_config).to(args.device).eval()
-        try:
-            weights_path = hf_hub_download(args.model_id, "model.safetensors")
-            from safetensors.torch import load_file
-            model.load_state_dict(load_file(weights_path, device=args.device))
-        except:
-            weights_path = hf_hub_download(args.model_id, "model.pt")
-            model.load_state_dict(torch.load(weights_path, map_location=args.device))
+        from moshi.models import loaders
         
-        text_tokenizer = sentencepiece.SentencePieceProcessor(hf_hub_download(args.model_id, config_dict["tokenizer_name"]))
-        # Mimi name can also be .safetensors or .pt
-        try:
-            mimi_path = hf_hub_download(args.model_id, "mimi.safetensors")
-        except:
-            mimi_path = hf_hub_download(args.model_id, config_dict["mimi_name"])
-            
-        audio_tokenizer = rustymimi.Tokenizer(mimi_path, device=args.device)
+        # CheckpointInfo is the standard way to load models in the PyTorch version
+        checkpoint = loaders.CheckpointInfo.from_hf_repo(args.model_id)
+        
+        # Load components
+        model = checkpoint.get_moshi_lm(device=args.device)
+        model.eval()
+        
+        audio_tokenizer = checkpoint.get_mimi(device=args.device)
+        audio_tokenizer.eval()
+        
+        text_tokenizer = checkpoint.get_text_tokenizer()
 
     curr = datetime.strptime(args.start_date, "%d-%m-%Y")
     end = datetime.strptime(args.end_date, "%d-%m-%Y")
