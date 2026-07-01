@@ -32,7 +32,7 @@ BASE_DIR = Path(__file__).resolve().parent
 MEDIA_DIR = BASE_DIR / "media" / "audio"
 OUTPUT_BASE_DIR = BASE_DIR / "transcriptions_kyutai"
 
-DEFAULT_MODEL_ID = "kyutai/stt-1b-en_fr-pytorch"
+DEFAULT_MODEL_ID = "kyutai/stt-1b-en_fr"
 
 RADIO_MAP = {
     "france-inter": "4.franceinter-matin",
@@ -219,9 +219,22 @@ def main():
         with open(config_path, "r") as f: config_dict = json.load(f)
         lm_config = models.LmConfig.from_config_dict(config_dict)
         model = models.Lm(lm_config).to(args.device).eval()
-        model.load_state_dict(torch.load(hf_hub_download(args.model_id, "model.pt"), map_location=args.device))
+        try:
+            weights_path = hf_hub_download(args.model_id, "model.safetensors")
+            from safetensors.torch import load_file
+            model.load_state_dict(load_file(weights_path, device=args.device))
+        except:
+            weights_path = hf_hub_download(args.model_id, "model.pt")
+            model.load_state_dict(torch.load(weights_path, map_location=args.device))
+        
         text_tokenizer = sentencepiece.SentencePieceProcessor(hf_hub_download(args.model_id, config_dict["tokenizer_name"]))
-        audio_tokenizer = rustymimi.Tokenizer(hf_hub_download(args.model_id, config_dict["mimi_name"]), device=args.device)
+        # Mimi name can also be .safetensors or .pt
+        try:
+            mimi_path = hf_hub_download(args.model_id, "mimi.safetensors")
+        except:
+            mimi_path = hf_hub_download(args.model_id, config_dict["mimi_name"])
+            
+        audio_tokenizer = rustymimi.Tokenizer(mimi_path, device=args.device)
 
     curr = datetime.strptime(args.start_date, "%d-%m-%Y")
     end = datetime.strptime(args.end_date, "%d-%m-%Y")

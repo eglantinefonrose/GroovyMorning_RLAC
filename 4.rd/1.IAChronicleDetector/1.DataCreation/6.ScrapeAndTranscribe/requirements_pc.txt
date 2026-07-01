@@ -1,3 +1,4 @@
+safetensors
 torch
 moshi
 rustymimi
