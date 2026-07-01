@@ -223,13 +223,18 @@ def main():
         checkpoint = loaders.CheckpointInfo.from_hf_repo(args.model_id)
         
         # Load components
-        model = checkpoint.get_moshi_lm(device=args.device)
+        model = checkpoint.get_moshi(device=args.device)
         model.eval()
         
         audio_tokenizer = checkpoint.get_mimi(device=args.device)
         audio_tokenizer.eval()
         
-        text_tokenizer = checkpoint.get_text_tokenizer()
+        # In the PyTorch version, it's often a property or needs a specific loader
+        try:
+            text_tokenizer = checkpoint.get_text_tokenizer()
+        except:
+            import sentencepiece
+            text_tokenizer = sentencepiece.SentencePieceProcessor(checkpoint.tokenizer)
 
     curr = datetime.strptime(args.start_date, "%d-%m-%Y")
     end = datetime.strptime(args.end_date, "%d-%m-%Y")
