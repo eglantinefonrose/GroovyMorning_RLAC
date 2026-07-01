@@ -19,13 +19,12 @@ try:
     import sentencepiece
     from moshi import models
     from huggingface_hub import hf_hub_download
+    import librosa
+    import numpy as np
 except ImportError as e:
     print(f"❌ Error: Missing dependencies ({e}).")
     print("Please install them with: pip install torch moshi rustymimi sentencepiece huggingface_hub librosa numpy")
     sys.exit(1)
-
-import librosa
-import numpy as np
 
 # --- Configuration & Paths ---
 
@@ -33,7 +32,7 @@ BASE_DIR = Path(__file__).resolve().parent
 MEDIA_DIR = BASE_DIR / "media" / "audio"
 OUTPUT_BASE_DIR = BASE_DIR / "transcriptions_kyutai"
 
-DEFAULT_MODEL_ID = "kyutai/stt-1b-en_fr-pytorch" # Using PyTorch version for PC
+DEFAULT_MODEL_ID = "kyutai/stt-1b-en_fr-pytorch"
 
 RADIO_MAP = {
     "france-inter": "4.franceinter-matin",
@@ -50,7 +49,7 @@ def get_audio_duration(file_path):
     except:
         return 0
 
-# --- Scraping Logic (Same as before) ---
+# --- Scraping Logic ---
 
 def download_file(url, dest_path, headers=None, dry_run=False):
     if url.startswith('//'): url = 'https:' + url
@@ -124,16 +123,19 @@ def scrape_rtl(target_date_str, dry_run=False):
     downloaded, full_show = [], None
     for f_id, _ in FEEDS:
         try:
-            root = ET.fromstring(requests.get(ff"https://feeds.audiomeans.fr/feed/{f_id}.xml", timeout=20).content)
+            feed_url = f"https://feeds.audiomeans.fr/feed/{f_id}.xml"
+            root = ET.fromstring(requests.get(feed_url, timeout=20).content)
             for item in root.findall('.//item'):
-                if datetime.strptime(item.find('pubDate').text[:16], "%a, %d %b %Y").date() == target_date.date():
+                pub_date = item.find('pubDate').text[:16]
+                if datetime.strptime(pub_date, "%a, %d %b %Y").date() == target_date.date():
                     url = item.find('enclosure').get('url')
                     title = item.find('title').text
                     if "INTÉGRALE" in title.upper() or "RTL MATIN DU" in title.upper():
                         dest = MEDIA_DIR / RADIO_MAP["rtl"] / target_date_str / "full_show.mp3"
                         if download_file(url, dest, dry_run=dry_run): full_show = dest
                     else:
-                        dest = MEDIA_DIR / RADIO_MAP["rtl"] / target_date_str / "chroniques" / f"{re.sub(r'[^a-z0-9]', '-', title.lower())[:50].strip('-')}.mp3"
+                        clean_title = re.sub(r'[^a-z0-9]', '-', title.lower())[:50].strip('-')
+                        dest = MEDIA_DIR / RADIO_MAP["rtl"] / target_date_str / "chroniques" / f"{clean_title}.mp3"
                         if download_file(url, dest, dry_run=dry_run): downloaded.append(dest)
         except: pass
     return downloaded, full_show
@@ -153,27 +155,18 @@ def transcribe_segment_kyutai(file_path, model, audio_tokenizer, text_tokenizer,
 
         audio_tensor = torch.from_numpy(audio).to(device).unsqueeze(0).unsqueeze(0)
         
-        # Kyutai STT works by encoding audio then decoding text tokens
-        # Simplified inference loop based on moshi.models.Lm
         with torch.no_grad():
-            codes = audio_tokenizer.encode(audio_tensor) # [1, K, T]
-            # STT usually uses a specific step-by-step or block-based generation
-            # For brevity and robustness on PC, we'll use a simplified version of the generation logic
-            # Note: The exact gen.step loop depends on the model's LmGen implementation
-            
-            # This is a high-level representation. Kyutai STT models in 'moshi'
-            # often use LmGen for streaming or batch processing.
+            codes = audio_tokenizer.encode(audio_tensor)
             from moshi.utils import Sampler
             gen = models.LmGen(model, device=device, text_sampler=Sampler(temp=0.0), audio_sampler=Sampler(temp=0.0))
             
             tokens = []
             steps = codes.shape[-1]
             for i in range(steps):
-                # Feed one audio frame at a time
                 input_codes = codes[:, :, i:i+1]
                 text_token = gen.step(input_codes[0])
                 token_id = text_token[0].item()
-                if token_id not in (0, 3): # Skip special tokens
+                if token_id not in (0, 3):
                     tokens.append(token_id)
 
         text = ""
@@ -199,14 +192,12 @@ def process_single_date(radio, target_date, duration, model, audio_tokenizer, te
         txt = transcribe_segment_kyutai(full_show, model, audio_tokenizer, text_tokenizer, device)
         if txt: (base_out / "full_show_transcription.txt").write_text(txt, encoding='utf-8')
 
-    chron_texts = []
     for f in files:
         print(f"   🎙️ {f.name}")
         total = get_audio_duration(f)
         s_txt = transcribe_segment_kyutai(f, model, audio_tokenizer, text_tokenizer, device, 0, duration)
         e_txt = transcribe_segment_kyutai(f, model, audio_tokenizer, text_tokenizer, device, max(0, total-duration), duration)
         if s_txt and e_txt:
-            chron_texts.append((s_txt, e_txt))
             (base_out / "chroniques" / f"{f.stem}_start.txt").write_text(s_txt, encoding='utf-8')
             (base_out / "chroniques" / f"{f.stem}_end.txt").write_text(e_txt, encoding='utf-8')
 
