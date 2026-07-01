@@ -1,4 +1,9 @@
+torch
+moshi
+rustymimi
+sentencepiece
+huggingface_hub
+librosa
+numpy
 requests
-faster-whisper
 tqdm
-pathlib

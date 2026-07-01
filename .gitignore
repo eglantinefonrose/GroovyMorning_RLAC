@@ -38,3 +38,4 @@
 *.m3u8
 *.mp4
 4.rd/@assets/1.modelOutputs/0.transcriptions/2.transcriptions_kyutai_stt_2.6b_fr
+*.hprof
