@@ -32,8 +32,8 @@ WORKDIR /app
 RUN mkdir -p data media
 
 # Copy the built distribution from the builder stage
-# The application plugin creates the distribution in build/install/1.RLAC-AudioRecorder
-COPY --from=builder /app/build/install/1.RLAC-AudioRecorder .
+# The application plugin creates the distribution in build/install/rlac-audio-recorder
+COPY --from=builder /app/build/install/rlac-audio-recorder .
 
 # Expose the API port
 EXPOSE 8000
@@ -44,6 +44,6 @@ EXPOSE 8000
 ENV DB_PATH=/app/data/rlac.db
 ENV FFMPEG_PATH=/usr/bin/ffmpeg
 
-# The application plugin creates a start script in bin/1.RLAC-AudioRecorder
+# The application plugin creates a start script in bin/rlac-audio-recorder
 # We use this as the entrypoint
-ENTRYPOINT ["./bin/1.RLAC-AudioRecorder"]
+ENTRYPOINT ["./bin/rlac-audio-recorder"]
