@@ -179,7 +179,7 @@ fun PlayerView(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(onClick = { mediaController?.seekBack() }) { 
-                            Icon(Icons.Default.Replay, "", tint = Color.White) 
+                            Icon(Icons.Filled.Replay10, "", tint = Color.White, modifier = Modifier.size(32.dp)) 
                         }
 
                         IconButton(onClick = {
@@ -213,26 +213,7 @@ fun PlayerView(
                         }
 
                         IconButton(onClick = { mediaController?.seekForward() }) { 
-                            Icon(Icons.Default.Forward, "", tint = Color.White) 
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Tool Pill
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = Color.Black.copy(alpha = 0.3f)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), 
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(Icons.Default.Snooze, "", tint = Color.White)
-                            Text("x1", color = Color.White)
-                            Icon(Icons.Default.VolumeUp, "", tint = Color.White)
-                            Icon(Icons.Default.List, "", tint = Color.White)
+                            Icon(Icons.Filled.Forward10, "", tint = Color.White, modifier = Modifier.size(32.dp)) 
                         }
                     }
                 }

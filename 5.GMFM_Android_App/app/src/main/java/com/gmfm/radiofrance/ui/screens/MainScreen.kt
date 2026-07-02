@@ -161,10 +161,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
 
     val items = listOf(
         Screen.Home,
-        Screen.Music,
-        Screen.Live,
-        Screen.Search,
-        Screen.Library
+        Screen.Live
     )
 
     Scaffold(
@@ -239,7 +236,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                         }
                     ) 
                 }
-                composable(Screen.Music.route) { MusicView() }
                 composable(Screen.Live.route) { 
                     val isLoadingData by viewModel.isLoading.collectAsState()
                     
@@ -258,8 +254,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                         }
                     ) 
                 }
-                composable(Screen.Search.route) { SearchView() }
-                composable(Screen.Library.route) { LibraryView() }
                 composable(Screen.Schedule.route) { 
                     ScheduleView(
                         viewModel = viewModel,
@@ -402,10 +396,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
         }
     }
 }
-
-@Composable fun MusicView() { Box(modifier = Modifier.padding(16.dp)) { Text("Musique View Placeholder", color = MaterialTheme.colorScheme.onBackground) } }
-@Composable fun SearchView() { Box(modifier = Modifier.padding(16.dp)) { Text("Search View Placeholder", color = MaterialTheme.colorScheme.onBackground) } }
-@Composable fun LibraryView() { Box(modifier = Modifier.padding(16.dp)) { Text("Library View Placeholder", color = MaterialTheme.colorScheme.onBackground) } }
 
 @Composable
 fun MiniPlayer(

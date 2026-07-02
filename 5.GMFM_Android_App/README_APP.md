@@ -5,7 +5,7 @@ Cette application est une réplique fidèle de la spécification GMFM pour Andro
 ## Fonctionnalités implémentées
 - **Thème Sombre Permanent** : Utilisation des couleurs spécifiées (Noir, Gris foncé, France Inter Rouge).
 - **Splash Screen** : Affichage pendant 2.5s avec transition en fondu.
-- **Navigation Principale** : 5 onglets (Accueil, Musique, Directs, Recherche, Bibliothèque).
+- **Navigation Principale** : 2 onglets (Accueil, Directs).
 - **Écran Accueil** : "Bonjour", carrousel de contenus, et skeleton loading (1.5s).
 - **Écran Directs** : Carte France Inter avec boutons Contact et Grille.
 - **Lecteur Plein Écran** : Overlay animé avec contrôles de lecture, slider et "Tool Pill".

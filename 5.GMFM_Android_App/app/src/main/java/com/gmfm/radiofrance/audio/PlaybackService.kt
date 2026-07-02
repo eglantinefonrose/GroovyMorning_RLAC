@@ -40,6 +40,8 @@ class PlaybackService : MediaSessionService() {
         val player = ExoPlayer.Builder(this)
             .setAudioAttributes(audioAttributes, true) // true = handle audio focus automatically
             .setHandleAudioBecomingNoisy(true) // pause when headphones unplugged
+            .setSeekBackIncrementMs(10000)
+            .setSeekForwardIncrementMs(10000)
             .build()
             
         player.addListener(object : Player.Listener {
