@@ -44,19 +44,43 @@ public class RLACService {
         logger.info("Successfully removed all chronicles and schedules for user: {}", userID);
     }
 
+    public static File getUserMediaDir(String userID) {
+        File mediaDir = new File("media");
+        File userDir = new File(mediaDir, "userID_" + userID);
+        
+        if (!userDir.exists() && !userID.startsWith("user_")) {
+            File alternativeDir = new File(mediaDir, "userID_user_" + userID);
+            if (alternativeDir.exists()) {
+                return alternativeDir;
+            }
+        }
+        return userDir;
+    }
+
     public static Map<String, Object> findTodayFolder(String userID) throws Exception {
         // Générer le timestamp du jour
         String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String prefix = "session_" + dateStr;
 
         // Chercher dans le dossier media
-        File userDir = new File("media", "userID_" + userID);
+        File mediaDir = new File("media");
+        if (!mediaDir.exists() || !mediaDir.isDirectory()) {
+            throw new Exception("Le dossier racine 'media' n'existe pas ou n'est pas un répertoire.");
+        }
+
+        File userDir = getUserMediaDir(userID);
+
         if (!userDir.exists() || !userDir.isDirectory()) {
-            throw new Exception("Le dossier 'media' n'existe pas ou n'est pas un répertoire.");
+            throw new Exception("Le dossier utilisateur '" + userDir.getPath() + "' n'existe pas.");
         }
 
         // Lister tous les dossiers qui commencent par le préfixe et trouver le plus récent
-        Optional<File> latestFolder = Arrays.stream(userDir.listFiles())
+        File[] files = userDir.listFiles();
+        if (files == null) {
+            throw new Exception("Impossible de lister le contenu de " + userDir.getPath());
+        }
+
+        Optional<File> latestFolder = Arrays.stream(files)
                 .filter(file -> file.isDirectory() && file.getName().startsWith(prefix))
                 .max(Comparator.comparing(File::getName));
 

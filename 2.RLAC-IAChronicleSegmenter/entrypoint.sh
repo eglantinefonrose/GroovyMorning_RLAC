@@ -21,7 +21,7 @@ echo "✅ [Entrypoint] Java backend is reachable!"
 
 # 3. Démarrer le scheduler et l'API Python en arrière-plan
 echo "🚀 [Entrypoint] Starting Python Services..."
-python scheduler.py &
+# python scheduler.py &  <-- Désormais intégré dans api-server.py
 python api-server.py &
 
 # 4. Attendre que l'API Python locale soit prête

@@ -26,6 +26,12 @@ public class PlaylistService {
         }
 
         File userDir = new File("media/userID_" + userId);
+        if (!userDir.exists() && !userId.startsWith("user_")) {
+            File altDir = new File("media/userID_user_" + userId);
+            if (altDir.exists()) {
+                userDir = altDir;
+            }
+        }
         File playlistsDir = new File(userDir, "playlists");
         if (!playlistsDir.exists()) {
             playlistsDir.mkdirs();

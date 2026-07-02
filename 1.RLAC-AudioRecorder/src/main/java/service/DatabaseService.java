@@ -27,6 +27,11 @@ public class DatabaseService {
     }
 
     private void initDatabase() {
+        String createConfigTableSQL = "CREATE TABLE IF NOT EXISTS app_config (" +
+                "key TEXT PRIMARY KEY," +
+                "value TEXT" +
+                ");";
+
         String createUsersTableSQL = "CREATE TABLE IF NOT EXISTS users (" +
                 "user_id TEXT PRIMARY KEY," +
                 "username TEXT," +
@@ -51,6 +56,7 @@ public class DatabaseService {
 
         try (Connection conn = DriverManager.getConnection(DB_URL);
              Statement stmt = conn.createStatement()) {
+            stmt.execute(createConfigTableSQL);
             stmt.execute(createUsersTableSQL);
             
             // Migration for existing databases
@@ -64,9 +70,90 @@ public class DatabaseService {
             stmt.execute(createTableSQL);
             stmt.execute(createStatusTableSQL);
             logger.info("Base de données SQLite initialisée à l'emplacement : {}", DB_URL);
+            
+            // Initialiser le localUserId s'il n'existe pas
+            ensureLocalUserId();
+            
+            // Migration automatique de testUser vers le nouvel ID si nécessaire
+            migrateFromTestUser();
         } catch (SQLException e) {
             logger.error("Erreur lors de l'initialisation de la base de données", e);
         }
+    }
+
+    private void migrateFromTestUser() {
+        String localId = getLocalUserId();
+        if ("testUser".equals(localId)) return;
+
+        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+            // Vérifier si testUser a des chroniques et si localId n'en a pas
+            boolean testUserHasData = false;
+            boolean localIdHasData = false;
+
+            try (PreparedStatement ps = conn.prepareStatement("SELECT count(*) FROM user_chronicles WHERE user_id = ?")) {
+                ps.setString(1, "testUser");
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) testUserHasData = rs.getInt(1) > 0;
+
+                ps.setString(1, localId);
+                rs = ps.executeQuery();
+                if (rs.next()) localIdHasData = rs.getInt(1) > 0;
+            }
+
+            if (testUserHasData && !localIdHasData) {
+                logger.info("Migrating chronicles from 'testUser' to new localId '{}'", localId);
+                
+                // Copier les chroniques
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "UPDATE user_chronicles SET user_id = ? WHERE user_id = 'testUser'")) {
+                    ps.setString(1, localId);
+                    ps.executeUpdate();
+                }
+                
+                // Copier la config utilisateur
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "INSERT OR IGNORE INTO users (user_id, username, base_hour, base_minute) " +
+                        "SELECT ?, username, base_hour, base_minute FROM users WHERE user_id = 'testUser'")) {
+                    ps.setString(1, localId);
+                    ps.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error during migration from testUser", e);
+        }
+    }
+
+    private void ensureLocalUserId() {
+        String checkSQL = "SELECT value FROM app_config WHERE key = 'local_user_id'";
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(checkSQL)) {
+            if (!rs.next()) {
+                String newId = "user_" + java.util.UUID.randomUUID().toString().substring(0, 8);
+                String insertSQL = "INSERT INTO app_config(key, value) VALUES('local_user_id', ?)";
+                try (PreparedStatement pstmt = conn.prepareStatement(insertSQL)) {
+                    pstmt.setString(1, newId);
+                    pstmt.executeUpdate();
+                    logger.info("Generated new localUserId: {}", newId);
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error ensuring localUserId", e);
+        }
+    }
+
+    public String getLocalUserId() {
+        String querySQL = "SELECT value FROM app_config WHERE key = 'local_user_id'";
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(querySQL)) {
+            if (rs.next()) {
+                return rs.getString("value");
+            }
+        } catch (SQLException e) {
+            logger.error("Error retrieving localUserId", e);
+        }
+        return "unknown_user";
     }
 
     public void addUser(String userId, String username) {
@@ -105,12 +192,15 @@ public class DatabaseService {
             pstmt.setString(1, userId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
+                logger.info("Infos sur le user récupérées");
+                System.out.println(rs.getInt("base_hour"));
+                System.out.println(rs.getInt("base_minute"));
                 return new UserConfig(rs.getInt("base_hour"), rs.getInt("base_minute"));
             }
         } catch (SQLException e) {
             logger.error("Erreur lors de la récupération de la config pour l'utilisateur {}", userId, e);
         }
-        return new UserConfig(7, 0); // Default values
+        return new UserConfig(10, 10); // Default values
     }
 
     public static class UserConfig {

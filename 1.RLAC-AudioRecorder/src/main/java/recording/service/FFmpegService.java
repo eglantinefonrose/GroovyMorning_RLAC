@@ -19,6 +19,8 @@ public class FFmpegService {
     private final Map<String, ChronicleRecordingTask> activeChronicleTasks = new ConcurrentHashMap<>();
     private Process continuousProcess;
     private long continuousStartTime;
+    private double masterOffsetSeconds = 0.0; // Offset calculé par rapport au serveur Python
+    private final boolean disableMasterSync = Boolean.parseBoolean(System.getenv().getOrDefault("DISABLE_MASTER_SYNC", "false"));
 
     public void startContinuousRecording() {
         if (continuousProcess != null && continuousProcess.isAlive()) {
@@ -43,10 +45,7 @@ public class FFmpegService {
 
         ProcessBuilder pb = new ProcessBuilder(
                 FFMPEG_PATH,
-                "-f", "s16le",
-                "-ar", "16000",
-                "-ac", "1",
-                "-i", AUDIO_PIPE_PATH,
+                "-i", "http://icecast.radiofrance.fr/franceinter-hifi.aac",
                 "-c:a", "aac",
                 "-b:a", "192k",
                 "-ar", "48000",
@@ -70,8 +69,12 @@ public class FFmpegService {
             // Shutdown hook pour FFmpeg
             Runtime.getRuntime().addShutdownHook(new Thread(this::stopContinuousRecording));
 
-            // Démarrer l'extraction automatique du chunk de 2s à 3s
-            startAutomaticChunkExtraction();
+            // Démarrer la synchronisation initiale si elle n'est pas désactivée
+            if (!disableMasterSync) {
+                startInitialSync();
+            } else {
+                logger.info("🚫 Master sync is disabled by configuration.");
+            }
 
             new Thread(() -> {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(continuousProcess.getInputStream()))) {
@@ -91,73 +94,84 @@ public class FFmpegService {
         }
     }
 
+    private void startInitialSync() {
+        new Thread(() -> {
+            // On attend que le segment 00005 soit généré (environ 6-7s après le début)
+            File segmentFile = new File("media/continuous/continuous_segment_00005.m4s");
+            logger.info("⏳ Waiting for segment 00005 for initial master sync...");
+            
+            for (int i = 0; i < 60; i++) {
+                if (segmentFile.exists() && segmentFile.length() > 0) break;
+                try { Thread.sleep(1000); } catch (InterruptedException e) { return; }
+            }
+            
+            if (segmentFile.exists()) {
+                calculateMasterOffset(segmentFile, 5);
+            } else {
+                logger.error("❌ Master sync failed: segment 00005 never appeared.");
+            }
+        }).start();
+    }
+
+    private void calculateMasterOffset(File segmentFile, int positionInSeconds) {
+        String fingerprintPath = "media/fingerprint_" + System.currentTimeMillis() + ".raw";
+        String pythonApiUrl = System.getenv().getOrDefault("PYTHON_API_URL", "http://localhost:8001");
+        String userId = service.DatabaseService.getInstance().getLocalUserId();
+
+        // Création d'une empreinte légère : 2s d'audio sous-échantillonné à 4000Hz mono
+        // On prend le segment actuel et celui d'avant pour avoir 2 secondes
+        File prevSegment = new File(segmentFile.getParent(), String.format("continuous_segment_%05d.m4s", positionInSeconds - 1));
+        
+        List<String> cmd = new ArrayList<>(List.of(FFMPEG_PATH, "-y"));
+        if (prevSegment.exists()) {
+            cmd.addAll(List.of("-i", prevSegment.getAbsolutePath()));
+        }
+        cmd.addAll(List.of("-i", segmentFile.getAbsolutePath(), "-filter_complex", "concat=n=" + (prevSegment.exists() ? "2" : "1") + ":v=0:a=1", "-f", "s16le", "-ar", "4000", "-ac", "1", fingerprintPath));
+
+        try {
+            Process p = new ProcessBuilder(cmd).start();
+            p.waitFor();
+
+            if (new File(fingerprintPath).exists()) {
+                logger.info("🚀 Sending fingerprint for sync (userId: {})", userId);
+                ProcessBuilder sendPb = new ProcessBuilder(
+                        "curl", "-s", "-X", "POST",
+                        pythonApiUrl + "/api/sync_offset?userId=" + userId + "&positionInSeconds=" + positionInSeconds,
+                        "--data-binary", "@" + fingerprintPath
+                );
+                Process sendProcess = sendPb.start();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(sendProcess.getInputStream()));
+                String response = reader.readLine();
+                sendProcess.waitFor();
+                
+                if (response != null && response.contains("\"delta\"")) {
+                    // Exemple de réponse : {"delta": 3.45, "score": 0.92}
+                    org.json.JSONObject json = new org.json.JSONObject(response);
+                    double delta = json.getDouble("delta");
+                    double score = json.getDouble("score");
+                    if (score > 0.7) {
+                        this.masterOffsetSeconds = delta;
+                        logger.info("✅ MASTER SYNC SUCCESS: Offset = {}s (Score: {})", delta, score);
+                    } else {
+                        logger.warn("⚠️ Master sync confidence too low: {} (Score: {})", delta, score);
+                    }
+                }
+                new File(fingerprintPath).delete();
+            }
+        } catch (Exception e) {
+            logger.error("Error during master sync calculation", e);
+        }
+    }
+
+    public double getMasterOffsetSeconds() {
+        return masterOffsetSeconds;
+    }
+
     public void stopContinuousRecording() {
         if (continuousProcess != null && continuousProcess.isAlive()) {
             logger.info("Stopping continuous recording");
             continuousProcess.destroy();
             continuousProcess = null;
-        }
-    }
-
-    private void startAutomaticChunkExtraction() {
-        new Thread(() -> {
-            // Le segment 00002.m4s correspond à l'intervalle [2s, 3s] (00000=[0,1], 00001=[1,2])
-            File segmentFile = new File("media/continuous/continuous_segment_00002.m4s");
-            logger.info("⏳ Waiting for segment 00002 to extract automatic chunk...");
-            
-            // Attendre jusqu'à 30 secondes que le segment soit généré
-            for (int i = 0; i < 30; i++) {
-                if (segmentFile.exists() && segmentFile.length() > 0) {
-                    break;
-                }
-                try { Thread.sleep(1000); } catch (InterruptedException e) { return; }
-            }
-            
-            if (segmentFile.exists()) {
-                logger.info("✅ Segment 00002 found, extracting and sending chunk...");
-                extractAndSendFromSegment(segmentFile, 2);
-            } else {
-                logger.error("❌ Segment 00002 never appeared, automatic extraction failed.");
-            }
-        }).start();
-    }
-
-    private void extractAndSendFromSegment(File segmentFile, int positionInSeconds) {
-        String chunkPath = "media/auto_chunk_" + System.currentTimeMillis() + ".raw";
-        
-        // Conversion du segment m4s (AAC) vers raw s16le (16kHz mono)
-        ProcessBuilder extractPb = new ProcessBuilder(
-                FFMPEG_PATH,
-                "-i", segmentFile.getAbsolutePath(),
-                "-f", "s16le",
-                "-ar", "16000",
-                "-ac", "1",
-                "-y",
-                chunkPath
-        );
-
-        try {
-            Process extractProcess = extractPb.start();
-            extractProcess.waitFor();
-
-            if (new File(chunkPath).exists()) {
-                // Envoi via curl
-                ProcessBuilder sendPb = new ProcessBuilder(
-                        "curl",
-                        "-X", "POST",
-                        "http://localhost:8001/api/feed_audio?positionInSeconds=" + positionInSeconds,
-                        "--data-binary", "@" + chunkPath
-                );
-                
-                logger.info("🚀 Automatically sending 1s chunk (2s-3s) to external API");
-                Process sendProcess = sendPb.start();
-                sendProcess.waitFor();
-                
-                // Nettoyage
-                new File(chunkPath).delete();
-            }
-        } catch (Exception e) {
-            logger.error("Error in extractAndSendFromSegment", e);
         }
     }
 
@@ -218,7 +232,16 @@ public class FFmpegService {
         }
 
         String cleanChronicleName = chronicleName.replaceAll("[^a-zA-Z0-9]", "_");
-        File baseSessionDir = new File("media/userID_" + userId, folderName);
+        
+        File userDir = new File("media/userID_" + userId);
+        if (!userDir.exists() && !userId.startsWith("user_")) {
+            File altDir = new File("media/userID_user_" + userId);
+            if (altDir.exists()) {
+                userDir = altDir;
+            }
+        }
+        
+        File baseSessionDir = new File(userDir, folderName);
         File chronicleRecordingDir = new File(baseSessionDir, cleanChronicleName);
 
         if (!chronicleRecordingDir.exists()) {

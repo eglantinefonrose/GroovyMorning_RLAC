@@ -34,6 +34,10 @@ import service.WebSocketClientService;
 
 import java.io.File;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.*;
 
 @Path("/api")
@@ -123,42 +127,37 @@ public class RLACServerAPI {
 
 
     @GET
-
-
     @Path("/status")
-
-
     @Produces(MediaType.APPLICATION_JSON)
-
-
     public Response getStatus() {
-
-
         Map<String, Object> status = new HashMap<>();
-
-
         status.put("status", "running");
-
-
         status.put("server", "MediaServer with Jersey");
-
-
         status.put("mediaDir", new File(MEDIA_DIR).getAbsolutePath());
-
-
+        status.put("localUserId", DatabaseService.getInstance().getLocalUserId());
         return Response.ok(status).build();
-
-
     }
 
     /**
-     * curl "http://localhost:8000/api/findTodayFolder?userId=testUser"
+     * curl "http://localhost:8000/api/config"
+     */
+    @GET
+    @Path("/config")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getConfig() {
+        Map<String, Object> config = new HashMap<>();
+        config.put("userId", DatabaseService.getInstance().getLocalUserId());
+        return Response.ok(config).build();
+    }
+
+    /**
+     * curl "http://localhost:8000/api/findTodayFolder"
      */
     @GET
     @Path("/findTodayFolder")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response findTodayFolder(@QueryParam("userId") String userId) {
-
+    public Response findTodayFolder() {
+        String userId = DatabaseService.getInstance().getLocalUserId();
         try {
             Map<String, Object> result = RLACService.findTodayFolder(userId);
             result.put("status", "success");
@@ -174,20 +173,17 @@ public class RLACServerAPI {
     }
 
     /**
-     * curl -X POST "http://localhost:8000/api/addChronicle?userId=testUser&nomDeChroniques=MaChronique&chroniqueRealTimecode=120&duration=300"
+     * curl -X POST "http://localhost:8000/api/addChronicle?nomDeChroniques=MaChronique&chroniqueRealTimecode=120&duration=300"
      */
     @POST
     @Path("/addChronicle")
     @Produces(MediaType.APPLICATION_JSON)
     public Response addChronicle(
-            @QueryParam("userId") String userId,
             @QueryParam("nomDeChroniques") String nomDeChronique,
             @QueryParam("chroniqueRealTimecode") Integer chroniqueRealTimecode,
             @QueryParam("duration") Integer duration) {
+        String userId = DatabaseService.getInstance().getLocalUserId();
         try {
-            if (userId == null || userId.trim().isEmpty()) {
-                return createErrorResponse("Le 'userId' est requis.");
-            }
             if (nomDeChronique == null || nomDeChronique.trim().isEmpty()) {
                 return createErrorResponse("Le nom de la chronique ne peut pas être vide.");
             }
@@ -201,7 +197,7 @@ public class RLACServerAPI {
             chroniclesManagerService.addChronicle(userId, chronicle);
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
-            response.put("message", "Chronique ajoutée avec succès pour l'utilisateur " + userId + ".");
+            response.put("message", "Chronique ajoutée avec succès.");
             response.put("chronicle", Map.of(
                     "nomDeChronique", chronicle.getNomDeChronique(),
                     "startTime", chronicle.getStartTime(),
@@ -215,60 +211,54 @@ public class RLACServerAPI {
     }
 
     /**
-     * curl "http://localhost:8000/api/getUserChronicles?userId=testUser"
+     * curl "http://localhost:8000/api/getUserChronicles"
      */
     @GET
     @Path("/getUserChronicles")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserChronicles(@QueryParam("userId") String userId) {
-        if (userId == null || userId.trim().isEmpty()) {
-            return createErrorResponse("Le \'userId\' est requis.");
-        }
+    public Response getUserChronicles() {
+        String userId = DatabaseService.getInstance().getLocalUserId();
         try {
             List<Chronicle> userChronicles = chroniclesManagerService.getChronicles(userId);
             return Response.ok(userChronicles).build();
         } catch (Exception e) {
-            logger.error("Erreur lors de la récupération des chroniques pour l'utilisateur " + userId, e);
+            logger.error("Erreur lors de la récupération des chroniques", e);
             return createErrorResponse("Erreur interne du serveur: " + e.getMessage());
         }
     }
 
     /**
-     * curl -X DELETE "http://localhost:8000/api/removeChronicles?userId=testUser"
+     * curl -X DELETE "http://localhost:8000/api/removeChronicles"
      */
     @DELETE
     @Path("/removeChronicles")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response removeUserChronicles(@QueryParam("userId") String userId) {
-        if (userId == null || userId.trim().isEmpty()) {
-            return createErrorResponse("Le 'userId' est requis.");
-        }
+    public Response removeUserChronicles() {
+        String userId = DatabaseService.getInstance().getLocalUserId();
         try {
-            logger.info("🗑️ Demande de suppression des chroniques pour l'utilisateur: {}", userId);
+            logger.info("🗑️ Demande de suppression des chroniques pour l'utilisateur local: {}", userId);
             
             rlacService.removeUserChronicles(userId);
             
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
-            response.put("message", "Toutes les chroniques pour l'utilisateur " + userId + " ont été supprimées.");
+            response.put("message", "Toutes les chroniques ont été supprimées.");
             
             return Response.ok(response).build();
         } catch (Exception e) {
-            logger.error("Erreur lors de la suppression des chroniques pour l'utilisateur " + userId, e);
+            logger.error("Erreur lors de la suppression des chroniques", e);
             return createErrorResponse("Erreur interne du serveur: " + e.getMessage());
         }
     }
 
     /**
-     * curl "http://localhost:8000/api/getUserBaseTime?userId=testUser"
+     * curl "http://localhost:8000/api/getUserBaseTime"
      */
     @GET
     @Path("/getUserBaseTime")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserBaseTime(@QueryParam("userId") String userId) {
-        if (userId == null || userId.trim().isEmpty()) {
-            return createErrorResponse("Le 'userId' est requis.");
-        }
+    public Response getUserBaseTime() {
+        String userId = DatabaseService.getInstance().getLocalUserId();
         try {
             DatabaseService.UserConfig config = DatabaseService.getInstance().getUserConfig(userId);
             Map<String, Object> response = new HashMap<>();
@@ -283,28 +273,29 @@ public class RLACServerAPI {
     }
 
     /**
-     * curl -X POST "http://localhost:8000/api/setUserBaseTime?userId=testUser&baseHour=8&baseMinute=30"
+     * curl -X POST "http://localhost:8000/api/setUserBaseTime?baseHour=8&baseMinute=30"
      */
     @POST
     @Path("/setUserBaseTime")
     @Produces(MediaType.APPLICATION_JSON)
     public Response setUserBaseTime(
-            @QueryParam("userId") String userId,
             @QueryParam("baseHour") int baseHour,
             @QueryParam("baseMinute") int baseMinute) {
 
-        if (userId == null || userId.trim().isEmpty()) {
-            return createErrorResponse("Le 'userId' est requis.");
-        }
+        String userId = DatabaseService.getInstance().getLocalUserId();
         if (baseHour < 0 || baseHour > 23 || baseMinute < 0 || baseMinute > 59) {
             return createErrorResponse("Heure ou minute invalide.");
         }
 
         try {
             DatabaseService.getInstance().updateUserBaseTime(userId, baseHour, baseMinute);
+            
+            // Notification au scheduler Python
+            notifyPythonScheduler(baseHour, baseMinute);
+
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
-            response.put("message", "Heure de base mise à jour pour " + userId + " : " + String.format("%02d:%02d", baseHour, baseMinute));
+            response.put("message", "Heure de base mise à jour : " + String.format("%02d:%02d", baseHour, baseMinute));
             return Response.ok(response).build();
         } catch (Exception e) {
             logger.error("Erreur lors de la mise à jour de l'heure de base", e);
@@ -313,30 +304,62 @@ public class RLACServerAPI {
     }
 
     /**
-     * curl -X POST "http://localhost:8000/api/realChronicleStartTime?userId=testUser&nomDeChronique=MaChronique&deltaStartTimeInSeconds=10"
+     * Notifie le segmenter Python pour mettre à jour son scheduler
+     */
+    private void notifyPythonScheduler(int hour, int minute) {
+        String pythonApiUrl = System.getenv().getOrDefault("PYTHON_API_URL", "http://localhost:8001");
+        String url = pythonApiUrl + "/api/updateSchedulerTime?hour=" + hour + "&minute=" + minute;
+        
+        logger.info("Notification du scheduler Python à l'URL : {}", url);
+        
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .POST(HttpRequest.BodyPublishers.noBody())
+                    .build();
+            
+            client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                    .thenAccept(response -> {
+                        if (response.statusCode() == 200) {
+                            logger.info("Scheduler Python mis à jour avec succès : {}", response.body());
+                        } else {
+                            logger.warn("Échec de la mise à jour du scheduler Python. Status code : {}", response.statusCode());
+                        }
+                    })
+                    .exceptionally(ex -> {
+                        logger.error("Erreur lors de la notification du scheduler Python", ex);
+                        return null;
+                    });
+        } catch (Exception e) {
+            logger.error("Erreur lors de la création du client HTTP pour notifier Python", e);
+        }
+    }
+
+    /**
+     * curl -X POST "http://localhost:8000/api/realChronicleStartTime?nomDeChronique=MaChronique&deltaStartTimeInSeconds=10"
      */
     @POST
     @Path("/realChronicleStartTime")
     @Produces(MediaType.APPLICATION_JSON)
     public Response realChronicleStartTime(
-            @QueryParam("userId") String userId,
             @QueryParam("nomDeChronique") String nomDeChronique,
             @QueryParam("deltaStartTimeInSeconds") Integer deltaStartTimeInSeconds) {
         
-        logger.info("Notification START: userId={}, chronicle={}, delta={}", userId, nomDeChronique, deltaStartTimeInSeconds);
+        String userId = DatabaseService.getInstance().getLocalUserId();
+        logger.info("Notification START: localUserId={}, chronicle={}, delta={}", userId, nomDeChronique, deltaStartTimeInSeconds);
         
-        if (userId == null || nomDeChronique == null) {
-            return createErrorResponse("Paramètres manquants (userId, nomDeChronique)");
+        if (nomDeChronique == null) {
+            return createErrorResponse("Paramètre manquant (nomDeChronique)");
         }
 
-        // Vérification que la chronique appartient à l'utilisateur
+        // Vérification que la chronique appartient à l'utilisateur local
         List<Chronicle> userChronicles = chroniclesManagerService.getChronicles(userId);
         boolean exists = userChronicles.stream()
                 .anyMatch(c -> c.getNomDeChronique().equals(nomDeChronique));
         
         if (!exists) {
-            logger.warn("Tentative de démarrage d'une chronique non autorisée: {} pour l'utilisateur {}", nomDeChronique, userId);
-            return createErrorResponse("La chronique '" + nomDeChronique + "' n'est pas autorisée pour l'utilisateur " + userId);
+            logger.warn("Tentative de démarrage d'une chronique non autorisée: {} pour l'utilisateur local {}", nomDeChronique, userId);
+            return createErrorResponse("La chronique '" + nomDeChronique + "' n'est pas autorisée.");
         }
 
         try {
@@ -349,30 +372,30 @@ public class RLACServerAPI {
     }
 
     /**
-     * curl -X POST "http://localhost:8000/api/realChronicleEndTime?userId=testUser&nomDeChronique=MaChronique&realDuration=realDuration"
+     * curl -X POST "http://localhost:8000/api/realChronicleEndTime?nomDeChronique=MaChronique&realDuration=realDuration"
      */
     @POST
     @Path("/realChronicleEndTime")
     @Produces(MediaType.APPLICATION_JSON)
     public Response realChronicleEndTime(
-            @QueryParam("userId") String userId,
             @QueryParam("nomDeChronique") String nomDeChronique,
             @QueryParam("realDuration") String realDuration) {
         
-        logger.info("Notification END: userId={}, chronicle={}, realDuration={}", userId, nomDeChronique, realDuration);
+        String userId = DatabaseService.getInstance().getLocalUserId();
+        logger.info("Notification END: localUserId={}, chronicle={}, realDuration={}", userId, nomDeChronique, realDuration);
         
-        if (userId == null || nomDeChronique == null) {
-            return createErrorResponse("Paramètres manquants (userId, nomDeChronique)");
+        if (nomDeChronique == null) {
+            return createErrorResponse("Paramètre manquant (nomDeChronique)");
         }
 
-        // Vérification que la chronique appartient à l'utilisateur
+        // Vérification que la chronique appartient à l'utilisateur local
         List<Chronicle> userChronicles = chroniclesManagerService.getChronicles(userId);
         boolean exists = userChronicles.stream()
                 .anyMatch(c -> c.getNomDeChronique().equals(nomDeChronique));
         
         if (!exists) {
-            logger.warn("Tentative de fin d'une chronique non autorisée: {} pour l'utilisateur {}", nomDeChronique, userId);
-            return createErrorResponse("La chronique '" + nomDeChronique + "' n'est pas autorisée pour l'utilisateur " + userId);
+            logger.warn("Tentative de fin d'une chronique non autorisée: {} pour l'utilisateur local {}", nomDeChronique, userId);
+            return createErrorResponse("La chronique '" + nomDeChronique + "' n'est pas autorisée.");
         }
 
         try {

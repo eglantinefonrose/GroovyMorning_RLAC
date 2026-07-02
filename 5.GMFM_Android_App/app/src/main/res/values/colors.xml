@@ -1,0 +1,10 @@
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="dark_gray">#FF1A1A1A</color>
+    <color name="gray">#FF808080</color>
+    <color name="france_inter">#FFE2001A</color>
+    <color name="france_info">#FFFFD000</color>
+    <color name="france_culture">#FF75338E</color>
+    <color name="france_musique">#FFE5007D</color>
+</resources>

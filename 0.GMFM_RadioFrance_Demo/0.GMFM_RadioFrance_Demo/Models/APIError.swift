@@ -61,6 +61,7 @@ class APIService {
         }
         set {
             UserDefaults.standard.set(newValue, forKey: "isSimulatorMode")
+            self.userId = nil // Clear cached userId when changing environment
             NotificationCenter.default.post(name: NSNotification.Name("BaseURLChanged"), object: nil)
         }
     }
@@ -71,6 +72,7 @@ class APIService {
         }
         set {
             UserDefaults.standard.set(newValue, forKey: "customIPAddress")
+            self.userId = nil // Clear cached userId when changing server
             NotificationCenter.default.post(name: NSNotification.Name("BaseURLChanged"), object: nil)
         }
     }
@@ -80,7 +82,7 @@ class APIService {
     }
     
     func getTodayFolderName() async throws -> String {
-        let urlString = "\(baseURL)/api/findTodayFolder?userId=testUser"
+        let urlString = "\(baseURL)/api/findTodayFolder"
                 print("🌐 API Call: \(urlString)")
                 
                 guard let url = URL(string: urlString) else {
@@ -134,7 +136,7 @@ class APIService {
     }
 
     func getUserChronicles() async throws -> [Program] {
-        let urlString = "\(baseURL)/api/getUserChronicles?userId=testUser"
+        let urlString = "\(baseURL)/api/getUserChronicles"
                 print("🌐 API Call: \(urlString)")
                 
                 guard let url = URL(string: urlString) else {
@@ -192,7 +194,7 @@ class APIService {
     }
     
     func removeChronicles() async throws {
-        let urlString = "\(baseURL)/api/removeChronicles?userId=testUser"
+        let urlString = "\(baseURL)/api/removeChronicles"
         print("🌐 API Call: \(urlString)")
         guard let url = URL(string: urlString) else { throw APIError.invalidURL }
         
@@ -216,7 +218,7 @@ class APIService {
     }
     
     func setUserBaseTime(hour: Int, minute: Int) async throws {
-        let urlString = "\(baseURL)/api/setUserBaseTime?userId=testUser&baseHour=\(hour)&baseMinute=\(minute)"
+        let urlString = "\(baseURL)/api/setUserBaseTime?baseHour=\(hour)&baseMinute=\(minute)"
         print("🌐 API Call: \(urlString)")
         guard let url = URL(string: urlString) else { throw APIError.invalidURL }
         
@@ -240,7 +242,7 @@ class APIService {
     }
     
     func getUserBaseTime() async throws -> (hour: Int, minute: Int) {
-        let urlString = "\(baseURL)/api/getUserBaseTime?userId=testUser"
+        let urlString = "\(baseURL)/api/getUserBaseTime"
         print("🌐 API Call: \(urlString)")
         guard let url = URL(string: urlString) else { throw APIError.invalidURL }
         
@@ -261,7 +263,7 @@ class APIService {
     
     func addChronicle(program: Program) async throws {
         let nameEncoded = program.title.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let urlString = "\(baseURL)/api/addChronicle?userId=testUser&nomDeChroniques=\(nameEncoded)&chroniqueRealTimecode=\(program.startTime)&duration=\(program.duration)"
+        let urlString = "\(baseURL)/api/addChronicle?nomDeChroniques=\(nameEncoded)&chroniqueRealTimecode=\(program.startTime)&duration=\(program.duration)"
         print("🌐 API Call: \(urlString)")
         
         guard let url = URL(string: urlString) else { throw APIError.invalidURL }
@@ -286,7 +288,7 @@ class APIService {
     }
     
     func scheduleAllUserChronicles() async throws {
-        let urlString = "\(baseURL)/api/scheduleAllUserChronicles?userId=testUser&baseHour=7&baseMinute=0"
+        let urlString = "\(baseURL)/api/scheduleAllUserChronicles?baseHour=7&baseMinute=0"
         print("🌐 API Call: \(urlString)")
         
         guard let url = URL(string: urlString) else { throw APIError.invalidURL }
@@ -311,7 +313,7 @@ class APIService {
     }
     
     func fetchSchedule() async throws -> Date {
-        let urlString = "\(baseURL)/api/getSchedule?userId=testUser"
+        let urlString = "\(baseURL)/api/getSchedule"
         print("🌐 API Call: \(urlString)")
         
         guard let url = URL(string: urlString) else {

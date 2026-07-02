@@ -40,6 +40,7 @@ test {
 
 application {
     mainClass = 'org.example.api.RLACServerAPI'
+    applicationName = 'rlac-audio-recorder'
 }
 
 jib {

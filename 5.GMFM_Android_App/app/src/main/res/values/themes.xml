@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.GMFMRadioFrance" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="android:windowBackground">@color/black</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>

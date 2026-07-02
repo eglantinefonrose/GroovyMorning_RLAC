@@ -58,13 +58,14 @@ public class DynamicRecordingService {
         }
 
         // Démarrer l'enregistrement continu s'il n'est pas déjà lancé
-        // C'est ici que le flux FFmpeg maître est initialisé
         ffmpegService.startContinuousRecording();
 
         DatabaseService.UserConfig config = DatabaseService.getInstance().getUserConfig(userId);
         int currentOffset = calculateCurrentOffset(config);
         
-        // Si on a un delta, on calcule le temps de début par rapport au début du flux continu
+        // On récupère l'offset de synchronisation maître
+        double masterOffset = ffmpegService.getMasterOffsetSeconds();
+        
         LocalDateTime absoluteStartTime;
         if (deltaStartTimeInSeconds != null) {
             long baseMs = ffmpegService.getContinuousStartTime();
@@ -72,10 +73,14 @@ public class DynamicRecordingService {
             absoluteStartTime = LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(targetMs), java.time.ZoneId.systemDefault());
             logger.info("Using delta start time: {}s from continuous start -> {}", deltaStartTimeInSeconds, absoluteStartTime);
         } else {
-            // Si on a un temps de fin de la chronique précédente, on l'utilise comme temps de début
-            absoluteStartTime = lastChronicleEndTime.get(userId);
-            if (absoluteStartTime == null) {
-                absoluteStartTime = LocalDateTime.now();
+            // Appliquer l'offset maître pour synchroniser avec le flux Python
+            // Si masterOffset > 0, le flux local est en retard, donc le point de début est dans le futur par rapport à "maintenant"
+            absoluteStartTime = LocalDateTime.now().plusNanos((long)(masterOffset * 1_000_000_000L));
+            
+            // Si on avait une fin de chronique précédente proche, on peut l'utiliser pour éviter les "trous"
+            LocalDateTime lastEnd = lastChronicleEndTime.get(userId);
+            if (lastEnd != null && lastEnd.isAfter(absoluteStartTime.minusSeconds(10)) && lastEnd.isBefore(absoluteStartTime)) {
+                absoluteStartTime = lastEnd;
             }
         }
 
