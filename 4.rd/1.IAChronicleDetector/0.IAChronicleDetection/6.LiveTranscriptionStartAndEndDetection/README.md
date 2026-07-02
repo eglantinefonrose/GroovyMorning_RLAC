@@ -18,14 +18,19 @@ pip install torch transformers pandas scikit-learn accelerate
 
 ## 🚀 Entraînement du modèle
 
-Le script `train_camembert.py` permet d'entraîner le modèle sur vos propres données.
+Le projet a évolué à travers plusieurs versions :
+- **v1/v2** : Entraînement initial sur des segments courts.
+- **v3** : Ajout des transitions entre chroniques et fenêtrage de 3 phrases.
+- **v4 (Actuelle)** : Intégration de la **transcription complète de l'émission** comme exemples négatifs. Cela permet de réduire les faux positifs en montrant au modèle tout ce qui n'est *pas* un début de chronique (publicités, journaux, discussions météo, etc.).
 
-1.  **Données** : Le script cherche des fichiers `.txt` dans des dossiers structurés par labels (positifs pour les débuts, négatifs pour le reste).
+Le script `train_camembert_4.py` permet d'entraîner la version la plus récente.
+
+1.  **Données** : Le script cherche des fichiers dans `DATA_PATH`. Il utilise les dossiers `start_transcription` et `end_transcription` pour les positifs, et `full_show_transcription.txt` pour générer une large base de négatifs réalistes.
 2.  **Lancement** :
     ```bash
-    python3 train_camembert.py
+    python3 train_camembert_4.py
     ```
-3.  **Sortie** : Le modèle entraîné est sauvegardé dans le dossier `./camembert_chronicle_start`.
+3.  **Sortie** : Le modèle entraîné est sauvegardé dans `./camembert_chronicle_start_v4`.
 
 ## 🔍 Inférence (Prédiction)
 
@@ -76,6 +81,11 @@ for res in results:
 ```
 python3 visualize_detection.py "../../../@assets/3.modelEvaluationData/france-inter/27-05-2026_transcription.txt" "../../../@assets/3.modelEvaluationData/france-inter/ground_truth_chroniques_start_transcriptions.txt" --output rapport_france_inter.html
 ```
+
+### Évaluer le modèle
+```
+python3 evaluate_quality.py ./camembert_chronicle_start_v4 --transcription "../../../@assets/3.modelEvaluationData/france-inter/27-05-2026_transcription.txt" --sentences "../../../@assets/3.modelEvaluationData/france-inter/ground_truth_chroniques_start_transcriptions.txt" --threshold 0.85
+``` 
 
 ## 🌐 Intégrations
 

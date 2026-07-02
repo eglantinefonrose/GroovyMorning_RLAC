@@ -3,7 +3,9 @@ import argparse
 import re
 import webbrowser
 from difflib import SequenceMatcher
-from inference import ChronicleDetector, clean_srt_content
+from inference_2 import ChronicleDetectorV2
+from inference_live_sim import LiveChronicleDetector
+from inference import clean_srt_content
 
 def string_similarity(a, b):
     """Calcule la similitude entre deux chaînes (0.0 à 1.0)."""
@@ -141,16 +143,16 @@ def main():
     parser = argparse.ArgumentParser(description="Visualise la détection des chroniques par rapport au ground truth.")
     parser.add_argument("transcription", help="Fichier transcription (.txt ou .srt)")
     parser.add_argument("ground_truth", help="Fichier ground truth (.txt)")
-    parser.add_argument("--model", default="./camembert_chronicle_start_v2", help="Modèle à utiliser")
-    parser.add_argument("--threshold", type=float, default=0.85, help="Seuil de confiance")
+    parser.add_argument("--model", default="./camembert_chronicle_start_v3", help="Modèle à utiliser")
+    parser.add_argument("--threshold", type=float, default=0.8, help="Seuil de confiance")
+    parser.add_argument("--window_size", type=int, default=3, help="Taille de la fenêtre (nombre de phrases)")
+    parser.add_argument("--live", action="store_true", help="Simuler une détection live (stricte)")
     parser.add_argument("--output", default="report.html", help="Nom du fichier de sortie")
     
     args = parser.parse_args()
 
-    # Import dynamique pour éviter de charger torch si on n'en a pas besoin tout de suite (mais ici on en a besoin)
+    # Import dynamique pour éviter de charger torch si on n'en a pas besoin tout de suite
     import torch
-    detector = ChronicleDetector(model_path=args.model)
-    detector.torch = torch
     
     with open(args.transcription, 'r', encoding='utf-8') as f:
         content = f.read()
@@ -162,45 +164,78 @@ def main():
     with open(args.ground_truth, 'r', encoding='utf-8') as f:
         gt_sentences = [line.strip() for line in f if line.strip()]
 
+    if args.live:
+        detector = LiveChronicleDetector(model_path=args.model, window_size=args.window_size, threshold=args.threshold)
+    else:
+        detector = ChronicleDetectorV2(model_path=args.model)
+
     sentences = detector.split_into_sentences(content)
-    sentences_data = []
     
     tp, fp, fn = 0, 0, 0
-    matched_gt_indices = set()
     similarity_threshold = 0.6
 
     print(f"Analyse de {len(sentences)} phrases...")
     
-    for sentence in sentences:
-        # Inférence
-        inputs = detector.tokenizer(
-            sentence, 
-            return_tensors="pt", 
-            truncation=True, 
-            max_length=128
-        ).to(detector.device)
-        
-        with detector.torch.no_grad():
-            outputs = detector.model(**inputs)
-            probs = detector.torch.nn.functional.softmax(outputs.logits, dim=-1)
-            prob_start = probs[0][1].item()
-        
-        is_detected = prob_start >= args.threshold
+    all_probs = [0.0] * len(sentences)
+    detected_indices = []
+
+    if args.live:
+        print("Mode LIVE activé")
+        for i, sentence in enumerate(sentences):
+            # En mode live, le détecteur gère son buffer et son état interne
+            res = detector.process_new_sentence(sentence)
+            if res:
+                # Dans LiveChronicleDetector, l'index retourné est 1-based par rapport au début du flux
+                # On le convertit en 0-based pour notre liste sentences
+                detected_indices.append(res['index'] - 1)
+                all_probs[res['index'] - 1] = res['confidence']
+    else:
+        print(f"Mode standard avec fenêtre de {args.window_size}...")
+        # 1. Calcul des probabilités pour chaque segment (fenêtre)
+        for i in range(len(sentences)):
+            context = " ".join(sentences[i : i + args.window_size])
+            inputs = detector.tokenizer(
+                context, 
+                return_tensors="pt", 
+                truncation=True, 
+                max_length=256
+            ).to(detector.device)
+            
+            with torch.no_grad():
+                outputs = detector.model(**inputs)
+                probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
+                prob_start = probs[0][1].item()
+                all_probs[i] = prob_start
+
+        # 2. Application du post-processing
+        for i, prob in enumerate(all_probs):
+            if prob >= args.threshold:
+                if not detected_indices or i > detected_indices[-1] + 5:
+                    detected_indices.append(i)
+
+    # 3. Construction des données pour le rapport et calcul des stats
+    sentences_data = []
+    matched_gt_indices = set()
+
+    for i, sentence in enumerate(sentences):
+        is_detected = i in detected_indices
+        prob_start = all_probs[i]
         
         # Matching GT
         is_gt = False
         best_gt_match = ""
         best_sim = 0
         
-        for i, gt in enumerate(gt_sentences):
+        for gt_idx, gt in enumerate(gt_sentences):
             sim = string_similarity(sentence[:200], gt[:200])
             if sim > best_sim:
                 best_sim = sim
                 best_gt_match = gt
+                current_gt_idx = gt_idx
         
         if best_sim >= similarity_threshold:
             is_gt = True
-            matched_gt_indices.add(gt_sentences.index(best_gt_match))
+            matched_gt_indices.add(current_gt_idx)
 
         if is_detected and is_gt: tp += 1
         elif is_detected and not is_gt: fp += 1

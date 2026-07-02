@@ -73,7 +73,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("file_path")
     parser.add_argument("--threshold", type=float, default=0.8)
-    parser.add_argument("--model", default="./camembert_chronicle_start")
+    parser.add_argument("--model", default="./camembert_chronicle_start_v4")
     
     args = parser.parse_args()
 

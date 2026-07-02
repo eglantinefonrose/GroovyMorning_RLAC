@@ -1,0 +1,26 @@
+# Default configuration for Chronicle Detector
+
+audio:
+  sample_rate: 16000
+  chunk_duration: 5.0  # seconds per processing chunk
+  overlap: 1.0        # seconds of overlap
+
+stt:
+  model: "mlx-community/whisper-base-mlx"       # mlx-whisper model size
+  language: "fr"
+
+semantic:
+  ollama_model: "llama3.2:3b"
+  prompt_path: "config/semantic_prompt.txt"
+
+fusion:
+  thresholds:
+    audio_novelty: 0.6
+    music_speech: 0.5
+    speaker_change: 0.7
+    llm_confidence: 0.8
+  combined_threshold: 0.75
+
+fingerprint:
+  db_path: "models/fingerprints.db"
+  match_threshold: 0.9
