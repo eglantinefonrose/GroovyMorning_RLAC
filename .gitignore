@@ -35,3 +35,6 @@
 5.GMFM_Android_App/app/build
 5.GMFM_Android_App/.gradle
 1.RLAC-AudioRecorder/.gradle
+4.rd/1.IAChronicleDetector/0.IAChronicleDetection/10.DeepSeekChronicleDetector/.env
+4.rd/1.IAChronicleDetector/0.IAChronicleDetection/9.ClaudeChronicleDetector/.env
+*.hprof
