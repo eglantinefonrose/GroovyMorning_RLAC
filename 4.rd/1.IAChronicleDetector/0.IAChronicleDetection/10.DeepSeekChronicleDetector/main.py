@@ -13,6 +13,8 @@ from dotenv import load_dotenv
 # Charger les variables d'environnement
 load_dotenv()
 
+from scrape_france_inter import get_chroniques
+
 # Configuration
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 MODEL = "deepseek-v4-flash"
@@ -21,30 +23,37 @@ if not DEEPSEEK_API_KEY:
     print("[ERREUR] La variable d'environnement DEEPSEEK_API_KEY n'est pas définie.")
     sys.exit(1)
 
-CHRONIQUES = [
-    "le journal de 7h",
-    "les 80 secondes",
-    "le grand reportage",
-    "l'édito média",
-    "musicaline",
-    "le journal de 7h30",
-    "l'édito politique",
-    "l'édito éco",
-    "l'invité de 7h50",
-    "le billet de bertrand chameroy",
-    "le journal de 8h",
-    "geopolitique",
-    "l'invité de 8h20",
-    "dans l'oeil de",
-    "un monde nouveau",
-    "le billet de mosimann",
-]
+# Chargement dynamique des chroniques du jour
+print("Chargement dynamique des chroniques France Inter...")
+CHRONIQUES_DATA = get_chroniques()
+
+if not CHRONIQUES_DATA:
+    print("[ALERTE] Aucune chronique récupérée, utilisation d'une liste par défaut.")
+    CHRONIQUES_DATA = [
+        {"time": "07h00", "title": "Le journal de 7h"},
+        {"time": "08h00", "title": "Le journal de 8h"},
+        {"time": "09h00", "title": "Le journal de 9h"},
+        {"time": "08h20", "title": "L'invité de 8h20"}
+    ]
+
+# Option pour inclure ou non les horaires dans le prompt
+INCLUDE_SCHEDULE = "no-schedule" not in sys.argv
+
+if INCLUDE_SCHEDULE:
+    # On garde les dicts {time, title}
+    CHRONIQUES_PROMPT = CHRONIQUES_DATA
+else:
+    # On ne garde que les titres
+    if CHRONIQUES_DATA and isinstance(CHRONIQUES_DATA[0], dict):
+        CHRONIQUES_PROMPT = [c['title'] for c in CHRONIQUES_DATA]
+    else:
+        CHRONIQUES_PROMPT = CHRONIQUES_DATA
 
 SYSTEM_PROMPT = f"""Tu es un expert radio chargé de détecter le début exact des chroniques.
 Tu reçois un flux de phrases. Ta mission est de dire si la TOUTE DERNIÈRE phrase reçue marque le début d'une chronique.
 
 Liste des chroniques à surveiller (dans l'ordre) :
-{json.dumps(CHRONIQUES, ensure_ascii=False)}
+{json.dumps(CHRONIQUES_PROMPT, ensure_ascii=False)}
 
 DÉFINITIONS CRUCIALES :
 - ANNONCE / TEASING (À IGNORER) : L'animateur annonce ce qui va arriver PLUS TARD ("Tout à l'heure à 8h20...", "On en parlera avec notre invité après le journal..."). Le futur est utilisé.
@@ -171,6 +180,14 @@ def simulate_audio_stream(file_path):
     return detections
 
 if __name__ == "__main__":
+    if "show-prompt" in sys.argv:
+        print("\n" + "="*50)
+        print(" SYSTEM PROMPT ")
+        print("="*50)
+        print(SYSTEM_PROMPT)
+        print("="*50 + "\n")
+        sys.exit(0)
+
     TRANSCRIPTION_FILE = "full_show_transcription.txt"
     all_detections = simulate_audio_stream(TRANSCRIPTION_FILE)
     
