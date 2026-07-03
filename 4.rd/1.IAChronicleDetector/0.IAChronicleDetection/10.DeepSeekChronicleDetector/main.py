@@ -48,7 +48,7 @@ Liste des chroniques à surveiller (dans l'ordre) :
 
 DÉFINITIONS CRUCIALES :
 - ANNONCE / TEASING (À IGNORER) : L'animateur annonce ce qui va arriver PLUS TARD ("Tout à l'heure à 8h20...", "On en parlera avec notre invité après le journal..."). Le futur est utilisé.
-- LANCEMENT RÉEL (À DÉTECTER) : C'est le moment précis où la chronique commence MAINTENANT. L'animateur donne la parole au chroniqueur ou présente l'invité présent.
+- LANCEMENT RÉEL (À DÉTECTER) : C'est le moment précis où la chronique commence MAINTENANT.
 
 EXEMPLES DE RÉFÉRENCE :
 
