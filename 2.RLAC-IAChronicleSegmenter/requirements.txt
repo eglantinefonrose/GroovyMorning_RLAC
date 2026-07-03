@@ -10,3 +10,7 @@ schedule>=1.2.0
 flask-socketio>=5.3.0
 gevent>=23.9.0
 gevent-websocket>=0.10.1
+python-dotenv
+torch
+transformers
+accelerate

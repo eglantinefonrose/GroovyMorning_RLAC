@@ -1,5 +1,10 @@
 import sqlite3
 import os
+from dotenv import load_dotenv
+
+# Charger les variables d'environnement depuis .env
+load_dotenv()
+
 import subprocess
 import sys
 import time
