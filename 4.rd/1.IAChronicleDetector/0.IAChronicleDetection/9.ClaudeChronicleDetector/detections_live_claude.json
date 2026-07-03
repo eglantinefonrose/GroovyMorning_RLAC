@@ -1,0 +1,47 @@
+[
+  {
+    "index": 0,
+    "result": {
+      "raisonnement": "La phrase commence par '80 secondes de science', ce qui correspond au lancement de la chronique 'les 80 secondes'. Le contenu démarre immédiatement.",
+      "detecte": true,
+      "chronique": "les 80 secondes",
+      "phrase": "Et maintenant, 80 secondes de science en couleur, car si la science est notre bien commun, elle doit sortir des labos de la blancheur, rien n'empêche d'être rigoureux et pop, et c'est le pari du magazine Epsilon qui fête ses 5 ans, une aventure singulière dans une presse scientifique en crise, ses fondateurs à l'époque ont quitté Science et Vie en estimant que leur indépendance était remise en cause, leur journal aujourd'hui est libre, il n'est pas la propriété d'un grand groupe industriel, il ne dépend pas de la publicité mais de ses ventes et de ses seuls abonnés."
+    }
+  },
+  {
+    "index": 6,
+    "result": {
+      "raisonnement": "Lancement direct de l'édito média avec salutation du chroniqueur Cyril Lacarrière et question sur le sujet du matin.",
+      "detecte": true,
+      "chronique": "l'édito média",
+      "phrase": "Il nous accompagne jusqu'à 7h30, bonjour, Aline Afanoukou et Cyril Lacarrière, on parle de quoi dans l'édito-média ce matin ?"
+    }
+  },
+  {
+    "index": 9,
+    "result": {
+      "raisonnement": "La phrase évoque un disque écouté en illimité, marquant le lancement de la chronique musicale 'musicaline' (mentionnée juste avant comme 'Musique Aline').",
+      "detecte": true,
+      "chronique": "musicaline",
+      "phrase": "Aïe aïe aïe aïe aïe aïe, c'est le disque que j'écoute en continu, en illimité, c'est le retour de Séoul Georges."
+    }
+  },
+  {
+    "index": 15,
+    "result": {
+      "raisonnement": "La phrase entre directement dans le contenu du grand reportage sur l'île d'Ouessant, décrivant le sujet. Le contexte annonçait 'dans un instant', et ici le reportage commence réellement.",
+      "detecte": true,
+      "chronique": "le grand reportage",
+      "phrase": "Le grand reportage de France Inter sur l'île d'Ouessant, ce matin, confronté comme bien des communes à la fermeture de son église, arrêté pris le mois dernier, car le bâtiment du 19e siècle menace de s'effondrer."
+    }
+  },
+  {
+    "index": 55,
+    "result": {
+      "raisonnement": "Lancement direct de la chronique avec salutation du chroniqueur au présent.",
+      "detecte": true,
+      "chronique": "l'édito média",
+      "phrase": "L'éditomédia, Cyril Lacarrière, vous nous parlez ce matin d'un exploit sportif qui se joue pas du tout sur les terrains, non ?"
+    }
+  }
+]

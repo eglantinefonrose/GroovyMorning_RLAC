@@ -12,7 +12,7 @@ from difflib import SequenceMatcher
 
 # --- Configuration par défaut ---
 DATA_PATH = "../../../@assets/1.modelOutputs/0.transcriptions/2.transcriptions_kyutai_stt_2.6b_fr"
-DEFAULT_MODEL = "./camembert_chronicle_start"
+DEFAULT_MODEL = "./camembert_chronicle_start_v4"
 
 class ChronicleDataset(torch.utils.data.Dataset):
     def __init__(self, encodings, labels):

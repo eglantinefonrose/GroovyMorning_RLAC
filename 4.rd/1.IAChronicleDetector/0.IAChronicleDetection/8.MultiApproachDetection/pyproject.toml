@@ -1,0 +1,36 @@
+[project]
+name = "multiapproach-detection"
+version = "0.1.0"
+description = "Radio chronicle detection using multi-modal signals (Audio, STT, LLM)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mlx-whisper",
+    "librosa",
+    "numpy",
+    "sounddevice",
+    "soundfile",
+    "ffmpeg-python",
+    "speechbrain",
+    "pyacoustid",
+    "pyyaml",
+    "ollama",
+    "scipy",
+    "scikit-learn",
+    "onnxruntime", # Official package now supports Apple Silicon
+    "loguru",
+    "pydantic",
+    "matplotlib",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

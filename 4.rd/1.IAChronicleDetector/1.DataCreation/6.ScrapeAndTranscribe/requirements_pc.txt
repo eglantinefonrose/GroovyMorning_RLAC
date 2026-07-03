@@ -1,0 +1,10 @@
+safetensors
+torch
+moshi
+rustymimi
+sentencepiece
+huggingface_hub
+librosa
+numpy
+requests
+tqdm

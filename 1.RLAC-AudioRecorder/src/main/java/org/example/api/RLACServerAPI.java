@@ -127,27 +127,32 @@ public class RLACServerAPI {
 
 
     @GET
-    @Path("/status")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getStatus() {
-        Map<String, Object> status = new HashMap<>();
-        status.put("status", "running");
-        status.put("server", "MediaServer with Jersey");
-        status.put("mediaDir", new File(MEDIA_DIR).getAbsolutePath());
-        status.put("localUserId", DatabaseService.getInstance().getLocalUserId());
-        return Response.ok(status).build();
-    }
 
-    /**
-     * curl "http://localhost:8000/api/config"
-     */
-    @GET
-    @Path("/config")
+
+    @Path("/status")
+
+
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getConfig() {
-        Map<String, Object> config = new HashMap<>();
-        config.put("userId", DatabaseService.getInstance().getLocalUserId());
-        return Response.ok(config).build();
+
+
+    public Response getStatus() {
+
+
+        Map<String, Object> status = new HashMap<>();
+
+
+        status.put("status", "running");
+
+
+        status.put("server", "MediaServer with Jersey");
+
+
+        status.put("mediaDir", new File(MEDIA_DIR).getAbsolutePath());
+
+
+        return Response.ok(status).build();
+
+
     }
 
     /**

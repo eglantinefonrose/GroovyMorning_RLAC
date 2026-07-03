@@ -1,0 +1,273 @@
+[DÉTECTION] 🔔 Chronique trouvée : les 80 secondes
+Raisonnement : La phrase commence par 'Et maintenant, 80 secondes de science en couleur' qui indique un lancement immédiat d'une chronique nommée 'les 80 secondes'. Le contexte ne suggère pas une annonce future.
+Phrase : "Et maintenant, 80 secondes de science en couleur, car si la science est notre bien commun, elle doit sortir des labos de la blancheur, rien n'empêche d'être rigoureux et pop, et c'est le pari du magazine Epsilon qui fête ses 5 ans, une aventure singulière dans une presse scientifique en crise, ses fondateurs à l'époque ont quitté Science et Vie en estimant que leur indépendance était remise en cause, leur journal aujourd'hui est libre, il n'est pas la propriété d'un grand groupe industriel, il ne dépend pas de la publicité mais de ses ventes et de ses seuls abonnés."
+--------------------------------------------------
+Traitement phrase 7/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : l'édito média
+Raisonnement : La phrase introduit directement Aline Afanoukou et Cyril Lacarrière pour l'édito média, mentionnant l'heure actuelle (jusqu'à 7h30) et demandant de quoi on parle dans l'édito-média ce matin, ce qui indique un lancement immédiat.
+Phrase : "Il nous accompagne jusqu'à 7h30, bonjour, Aline Afanoukou et Cyril Lacarrière, on parle de quoi dans l'édito-média ce matin ?"
+--------------------------------------------------
+Traitement phrase 8/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : l'édito média
+Raisonnement : L'animateur pose la question annonçant l'édito média, le chroniqueur répond et commence directement le segment.
+Phrase : "Eh bien je vous parle des bons résultats de l'équipe sur le numérique, mais c'est une exception dans la presse française."
+--------------------------------------------------
+Traitement phrase 16/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le grand reportage
+Raisonnement : La phrase commence par 'Le grand reportage' et décrit immédiatement le sujet, indiquant le début de la chronique.
+Phrase : "Le grand reportage de France Inter sur l'île d'Ouessant, ce matin, confronté comme bien des communes à la fermeture de son église, arrêté pris le mois dernier, car le bâtiment du 19e siècle menace de s'effondrer."
+--------------------------------------------------
+Traitement phrase 17/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le grand reportage
+Raisonnement : La phrase précédente introduit le grand reportage, et la nouvelle phrase est la première question qui lance le sujet.
+Phrase : "Alors comment trouver les fonds pour le réparer et ne pas voir disparaître le clocher du village ?"
+--------------------------------------------------
+Traitement phrase 18/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le grand reportage
+Raisonnement : La phrase introduit directement le reportage après une description du sujet, ce qui correspond au lancement de la chronique 'le grand reportage'.
+Phrase : "C'est le reportage de Faustine Calmel."
+--------------------------------------------------
+Traitement phrase 19/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le grand reportage
+Raisonnement : Le contexte précédent annonce le grand reportage, et la phrase suivante commence la narration du reportage.
+Phrase : "La porte en bois sombre est close, barrée de l'arrêté municipal, portant fermeture de l'église en pierre grise."
+--------------------------------------------------
+Traitement phrase 55/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le grand reportage
+Raisonnement : La phrase annonce directement le début du segment 'Le grand reportage' avec la journaliste nommée, c'est un lancement immédiat.
+Phrase : "Le grand reportage de Faustine Calmel à Ouessant."
+--------------------------------------------------
+Traitement phrase 56/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : l'édito média
+Raisonnement : La phrase interpelle directement Cyril Lacarrière pour lancer la chronique 'l'édito média', indiquant un début immédiat.
+Phrase : "L'éditomédia, Cyril Lacarrière, vous nous parlez ce matin d'un exploit sportif qui se joue pas du tout sur les terrains, non ?"
+--------------------------------------------------
+Traitement phrase 82/931...
+[ERREUR] Expecting value: line 1 column 1 (char 0)
+Traitement phrase 99/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : musicaline
+Raisonnement : La phrase introduit directement un album musical, ce qui correspond au début de la chronique 'musicaline' qui traite de musique.
+Phrase : "Avec The Other Side, le dernier album de C.O."
+(ATTENTION C’EST DEUX PHRASES TROP TARD)
+--------------------------------------------------
+Traitement phrase 103/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : musicaline
+Raisonnement : La phrase mentionne 'aujourd'hui' et présente un artiste et une chanson, ce qui correspond au lancement d'une chronique musicale. Aucune annonce future n'est présente.
+Phrase : "Creux, en 2004, porté par Tiver Assau, aujourd'hui, C.O."
+--------------------------------------------------
+Traitement phrase 107/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : musicaline
+Raisonnement : The context discusses music and introduces a song. The new phrase is a song lyric, likely starting the 'musicaline' segment.
+Phrase : "Every time you are around, girl, you move me."
+--------------------------------------------------
+Traitement phrase 110/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : musicaline
+Raisonnement : L'ambiance musicale et la présentation immédiate d'un titre inédit indiquent le début de la chronique 'musicaline'.
+Phrase : "Quando Chego, quand j'arrive, titre inédit, composé par C.O."
+--------------------------------------------------
+Traitement phrase 112/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : musicaline
+Raisonnement : Le contexte précédent décrit une présentation musicale (Beastie Boys, Tom Jobim, etc.), suggérant une chronique musicale. La nouvelle phrase semble être un vers de chanson, ce qui correspond au lancement de 'musicaline'.
+Phrase : "Away to love alone, where she believes."
+--------------------------------------------------
+Traitement phrase 124/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : l'édito politique
+Raisonnement : Phrase nomme explicitement la chronique 'l'édito politique' et le chroniqueur Patrick Cohen, en présent. C'est un lancement immédiat.
+Phrase : "L'édito politique, une illumination ce matin, Patrick Cohen."
+--------------------------------------------------
+Traitement phrase 159/931...
+[ERREUR] Expecting value: line 1 column 1 (char 0)
+Traitement phrase 171/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : l'invité de 7h50
+Raisonnement : La phrase présente des invités et une enquête, ce qui correspond au lancement direct d'une chronique d'invité.
+Phrase : "Du XXIe siècle, pour le savoir, il faut lire cette enquête événement main basse sur le Louvre aux éditions Flammarion publiées par nos invités, Jean-Michel Décugys et Nicolas Charles Torand."
+--------------------------------------------------
+Traitement phrase 210/931...
+[ERREUR] Expecting property name enclosed in double quotes: line 3 column 20 (char 138)
+Traitement phrase 274/931...
+[ERREUR] Expecting value: line 1 column 1 (char 0)
+Traitement phrase 290/931...
+[ERREUR] Expecting value: line 1 column 1 (char 0)
+Traitement phrase 291/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le journal de 8h
+Raisonnement : Le contexte précédent indique qu'il est 8h. La nouvelle phrase 'L'heure du grand journal d'Hélène Phili, bonjour.' introduit directement le journal de 8h, correspondant à la chronique 'le journal de 8h'.
+Phrase : "L'heure du grand journal d'Hélène Phili, bonjour."
+--------------------------------------------------
+Traitement phrase 300/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : l'édito politique
+Raisonnement : La phrase 'La politique à 8h20 Florence.' semble être un lancement immédiat vers une chronique politique, probablement l'édito politique, en utilisant le présent et en s'adressant directement à une collaboratrice.
+Phrase : "La politique à 8h20 Florence."
+--------------------------------------------------
+Traitement phrase 314/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : l'invité de 7h50
+Raisonnement : La phrase 'bonjour Sarah Guybodeau' introduit directement une invitée, indiquant le début d'une chronique d'interview. Le contexte précédent traite d'un procès, ce qui correspond à une interview d'actualité.
+Phrase : "Interrogé durant plus de cinq jours dans ce procès en appel, bonjour Sarah Guybodeau."
+--------------------------------------------------
+Traitement phrase 337/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le grand reportage
+Raisonnement : La phrase introduit directement une journaliste en direct, indiquant le début d'un reportage. Contexte précédent général, pas d'annonce future.
+Phrase : "Un logement sur trois, Mathilde Imberti est à Lyon."
+--------------------------------------------------
+Traitement phrase 358/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : l'invité de 7h50
+Raisonnement : La phrase pose directement une question à Delphine Simon, indiquant le début immédiat d'un entretien avec un expert, typique de la chronique 'l'invité'.
+Phrase : "Comment expliquer cette différence Delphine Simon ?"
+--------------------------------------------------
+Traitement phrase 380/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le grand reportage
+Raisonnement : La phrase introduit directement un témoignage spécifique (infirmière), typique du début d'un reportage, correspondant à la chronique 'le grand reportage'.
+Phrase : "Cette infirmière de Pithiviers dans le Loiret, Fabienne Pallier, ne comprend pas."
+--------------------------------------------------
+Traitement phrase 475/931...
+[ERREUR] Expecting value: line 1 column 1 (char 0)
+Traitement phrase 503/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : geopolitique
+Raisonnement : The phrase 'voici Géopolitique' is an immediate introduction of the chronicle, indicating it is starting now.
+Phrase : "Merci Marie-Pierre, ça rime aussi et voici Géopolitique."
+--------------------------------------------------
+Traitement phrase 504/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : géopolitique
+Raisonnement : Le contexte précédent annonce 'voici Géopolitique' puis la phrase 'Bonjour Pierre Aski' lance effectivement la chronique géopolitique.
+Phrase : "Bonjour Pierre Aski."
+--------------------------------------------------
+Traitement phrase 549/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : l'invité de 8h20
+Raisonnement : L'animateur introduit immédiatement un invité pour un entretien, ce qui correspond au lancement de la chronique 'l'invité de 8h20', malgré un léger décalage horaire.
+Phrase : "Dans le grand entretien ce matin, nous recevons donc un député européen qui se tourne désormais vers la France, co-fondateur de Place Publique."
+--------------------------------------------------
+Traitement phrase 551/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : l'invité de 8h20
+Raisonnement : Le contexte annonçait la venue de Raphaël Glucksmann pour le grand entretien. La phrase 'Bonjour Raphaël Glucksmann' marque le début de l'interview, correspondant à la chronique 'l'invité de 8h20'.
+Phrase : "Bonjour Raphaël Glucksmann."
+--------------------------------------------------
+Traitement phrase 566/931...
+[ERREUR] Expecting value: line 1 column 1 (char 0)
+Traitement phrase 598/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : l'invité de 7h50
+Raisonnement : La phrase interroge directement un invité (Raphaël Glucksmann), ce qui caractérise le lancement d'une interview. Sans indication horaire, mais typique du matin, je retiens 'l'invité de 7h50'.
+Phrase : "Vous vous sentez capable d'être président de la République, Raphaël Glucksmann."
+--------------------------------------------------
+Traitement phrase 654/931...
+[ERREUR] Expecting value: line 1 column 1 (char 0)
+Traitement phrase 683/931...
+[ERREUR] Expecting value: line 1 column 1 (char 0)
+Traitement phrase 687/931...
+[ERREUR] Expecting value: line 1 column 1 (char 0)
+Traitement phrase 744/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : l'invité de 8h20
+Raisonnement : La phrase s'adresse directement à l'invité Raphaël Glucksmann, indiquant le début immédiat d'une interview, typique de la chronique 'l'invité de 8h20'.
+Phrase : "Puisque maintenant la difficulté pour vous, Raphaël Glucksmann, ça va être de rassembler la gauche."
+--------------------------------------------------
+Traitement phrase 747/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : l'invité de 7h50
+Raisonnement : Bernard adresse directement l'invité 'Monsieur Glucksmann', marquant le début immédiat de l'interview.
+Phrase : "Bonjour Monsieur Glucksmann."
+--------------------------------------------------
+Traitement phrase 808/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le billet de mosimann
+Raisonnement : La phrase présente 'Mosi Man' comme une entité introduite, ce qui correspond à une chronique (le billet de mosimann). Le temps présent 'C'est elle' indique un lancement immédiat.
+Phrase : "C'est elle, Mosi Man et Sonia Deville."
+--------------------------------------------------
+Traitement phrase 818/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : dans l'oeil de
+Raisonnement : La phrase lance immédiatement la chronique 'dans l'oeil de' avec le nom de la chroniqueuse.
+Phrase : "La revue de presse dans l'œil de Nora Hamadi."
+--------------------------------------------------
+Traitement phrase 819/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : dans l'oeil de
+Raisonnement : Annonce de la chronique dans le contexte, puis Nora commence à parler.
+Phrase : "Nora, c'est une fronde inhabituelle, rue Saint-Guillaume."
+--------------------------------------------------
+Traitement phrase 865/931...
+[ERREUR] Expecting value: line 1 column 1 (char 0)
+Traitement phrase 869/931...
+[ERREUR] Expecting value: line 1 column 1 (char 0)
+Traitement phrase 879/931...
+[ERREUR] Expecting value: line 1 column 1 (char 0)
+Traitement phrase 880/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : un monde nouveau
+Raisonnement : La phrase introduit Mathilde Serrel pour la chronique 'un monde nouveau', indiquant un lancement immédiat.
+Phrase : "Mathilde Serrel pour un monde nouveau ce matin, un monde où un concert ça se mérite."
+--------------------------------------------------
+Traitement phrase 901/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le billet de mosimann
+Raisonnement : L'animateur introduit immédiatement Moziman (Mosimann) avec 'Il est là en chair et en os', indiquant le début de sa chronique.
+Phrase : "Il est là en chair et en os, Moziman, c'est à vous."
+--------------------------------------------------
+Traitement phrase 902/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le billet de mosimann
+Raisonnement : L'animateur introduit Mosimann en disant 'c'est à vous', la nouvelle phrase 'Merci' est le début de son intervention, marquant le lancement du billet de mosimann.
+Phrase : "Merci."
+--------------------------------------------------
+Traitement phrase 903/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le billet de mosimann
+Raisonnement : Le contexte montre que Moziman a été lancé juste avant. La nouvelle phrase est une question introductive typique de son billet.
+Phrase : "Qu'est-ce que ça veut dire être un ami aujourd'hui ?"
+--------------------------------------------------
+Traitement phrase 904/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le billet de mosimann
+Raisonnement : Moziman est présenté et prend la parole. La phrase 'On vit quand même dans une époque étrange' semble être le début de sa chronique.
+Phrase : "On vit quand même dans une époque étrange."
+--------------------------------------------------
+Traitement phrase 905/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le billet de mosimann
+Raisonnement : L'animateur introduit Mosimann et lui donne la parole, la phrase poursuit le thème de l'amitié, indiquant le début effectif de la chronique.
+Phrase : "Une époque où certains amis connaissent nos codes Netflix mieux que nos silences, où l'on peut parler à quelqu'un à l'autre bout du monde en une seconde et parfois ne plus savoir regarder les gens qu'on aime dans les yeux."
+--------------------------------------------------
+Traitement phrase 922/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le billet de mosimann
+Raisonnement : Le contexte précédent parle d'amitié et mentionne 'tonton Mozi', faisant référence à Mosimann. La phrase 'Ce jour-là j'ai compris une chose.' est typique d'une ouverture de chronique personnelle, probablement 'le billet de mosimann'. Aucun indice d'annonce future.
+Phrase : "Ce jour-là j'ai compris une chose."
+--------------------------------------------------
+Traitement phrase 924/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le billet de mosimann
+Raisonnement : Le contexte précédent mentionne 'tonton Mozi' (Mosimann), et la nouvelle phrase 'Alors ce matin, exceptionnellement pour vous je vais utiliser ma carte amie' semble lancer le billet de Mosimann en direct, avec 'ce matin' comme indicateur temporel immédiat.
+Phrase : "Alors ce matin, exceptionnellement pour vous je vais utiliser ma carte amie."
+--------------------------------------------------
+Traitement phrase 929/931...
+
+[DÉTECTION] 🔔 Chronique trouvée : le billet de mosimann
+Raisonnement : Le nouveau locuteur se présente comme 'Mozi Man', ce qui correspond probablement à la chronique 'le billet de mosimann'. La phrase indique le début d'un segment musical.
+Phrase : "Bonjour c'est Mozi Man et je produis le track de vos rêves."
+--------------------------------------------------
+Traitement phrase 931/931...
+Fin de la simulation. 41 chroniques détectées.

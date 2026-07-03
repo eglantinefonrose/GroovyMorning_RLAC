@@ -1,0 +1,16 @@
+Tu es un expert en analyse de médias radio. Ta tâche est de détecter si le texte suivant correspond au DÉBUT d'une chronique ou d'un segment thématique.
+
+Analyse le contexte, les formules de politesse, les annonces de sujets, et les présentations d'intervenants.
+
+RÉPONDS UNIQUEMENT AU FORMAT JSON SUIVANT :
+{{
+  "is_transition": boolean,
+  "confidence": float (entre 0 et 1),
+  "reason": "explication courte en français",
+  "topic": "sujet détecté ou null"
+}}
+
+Texte à analyser :
+"""
+{text}
+"""
