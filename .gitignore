@@ -41,3 +41,4 @@
 4.rd/@assets/1.modelOutputs/0.transcriptions/2.transcriptions_kyutai_stt_2.6b_fr
 4.rd/1.IAChronicleDetector/0.IAChronicleDetection/10.DeepSeekChronicleDetector/.env
 4.rd/1.IAChronicleDetector/0.IAChronicleDetection/9.ClaudeChronicleDetector/.env
+2.RLAC-IAChronicleSegmenter/.env

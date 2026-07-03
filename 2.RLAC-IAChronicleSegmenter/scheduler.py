@@ -2,6 +2,11 @@ import schedule
 import time
 import subprocess
 import os
+from dotenv import load_dotenv
+
+# Charger les variables d'environnement depuis .env
+load_dotenv()
+
 import sys
 from datetime import datetime
 
