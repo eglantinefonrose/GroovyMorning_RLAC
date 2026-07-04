@@ -59,8 +59,13 @@ class UnifiedLiveSegmenter:
                 print("⚠️ [DeepSeek] DEEPSEEK_API_KEY manquante. Repli sur le mode legacy.")
                 self.detection_mode = "legacy"
             else:
-                print("🔍 Récupération de la grille du jour...")
-                schedule_data = get_chroniques()
+                target_date = os.environ.get("TARGET_DATE")
+                if target_date:
+                    print(f"🔍 Récupération de la grille pour le {target_date}...")
+                else:
+                    print("🔍 Récupération de la grille du jour...")
+                
+                schedule_data = get_chroniques(target_date)
                 if schedule_data:
                     print(f"✅ {len(schedule_data)} chroniques trouvées :")
                     for item in schedule_data:
@@ -68,7 +73,7 @@ class UnifiedLiveSegmenter:
                 else:
                     print("⚠️ Aucune chronique trouvée dans la grille.")
                 
-                self.deepseek_detector = DeepSeekDetector(api_key, schedule=schedule_data)
+                self.deepseek_detector = DeepSeekDetector(api_key, schedule=schedule_data, is_simulation=os.environ.get("SIMU", "false").lower() == "true")
                 self.context_buffer = []
                 self.max_context = 5
         
@@ -309,10 +314,11 @@ class UnifiedLiveSegmenter:
                     
                     if self.detection_mode == "deepseek" and self.deepseek_detector:
                         # Analyse via DeepSeek
-                        res = self.deepseek_detector.analyze_sentence(text, self.context_buffer)
+                        current_time_sec = start_samples / self.sample_rate
+                        res = self.deepseek_detector.analyze_sentence(text, self.context_buffer, current_time_sec=current_time_sec)
                         if res.get("detecte"):
                             chronicle_name = res.get("chronique")
-                            self.on_detected({"name": chronicle_name, "type": "ai"}, exact_time=start_samples / self.sample_rate, trigger_text=text)
+                            self.on_detected({"name": chronicle_name, "type": "ai"}, exact_time=current_time_sec, trigger_text=text)
                         
                         # Mise à jour du buffer de contexte
                         self.context_buffer.append(text)

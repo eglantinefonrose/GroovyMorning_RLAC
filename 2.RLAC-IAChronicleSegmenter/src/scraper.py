@@ -46,18 +46,25 @@ def get_rpc_hash():
     
     return "10b9rtu" # Fallback actuel au 2026-07-03
 
-def get_matinale_step_ids():
+def get_matinale_step_ids(date_str=None):
     """
-    Récupère dynamiquement les IDs potentiels du segment 'Matinale' pour aujourd'hui
-    en interrogeant la grille des programmes via RPC.
+    Récupère dynamiquement les IDs potentiels du segment 'Matinale' pour une date donnée
+    (par défaut aujourd'hui) en interrogeant la grille des programmes via RPC.
     """
     rpc_hash = get_rpc_hash()
-    now = datetime.now()
-    today_str = now.strftime("%Y-%m-%d")
-    is_friday = now.weekday() == 4 # 4 = Vendredi
+    
+    if date_str:
+        # On parse la date pour savoir si c'est un vendredi
+        dt = datetime.strptime(date_str, "%Y-%m-%d")
+        is_friday = dt.weekday() == 4
+        target_date = date_str
+    else:
+        now = datetime.now()
+        target_date = now.strftime("%Y-%m-%d")
+        is_friday = now.weekday() == 4 # 4 = Vendredi
     
     # Construction du payload pour loadProgramGrid
-    payload_raw = [["__skrao", 1], {"brand": 2, "date": 3}, "franceinter", today_str]
+    payload_raw = [["__skrao", 1], {"brand": 2, "date": 3}, "franceinter", target_date]
     payload_b64 = base64.b64encode(json.dumps(payload_raw, separators=(',', ':')).encode()).decode()
     
     url_grid = f"https://www.radiofrance.fr/_app/remote/{rpc_hash}/loadProgramGrid?payload={payload_b64}"
@@ -69,12 +76,16 @@ def get_matinale_step_ids():
         data = response.json()
         items = json.loads(data.get('result', '[]'))
         
-        # Sur France Inter, la matinale s'appelle "Le 7/10" en semaine et "Le 6/9" le week-end.
+        # Sur France Inter, la matinale change de nom selon les périodes : 
+        # "Le 7/10" (actuel), "Le 6/9" (week-end/été), "La Grande matinale" (ancien), "Le 7/9" (ancien).
         # Règle spéciale utilisateur : Si on est vendredi, on cherche spécifiquement "Le 6/9".
-        target_programs = ["Le 6/9"] if is_friday else ["Le 7/10", "Le 6/9"]
+        if is_friday:
+            target_programs = ["Le 6/9"]
+        else:
+            target_programs = ["Le 7/10", "Le 6/9", "La Grande matinale", "Le 7/9"]
         
         for i, item in enumerate(items):
-            if isinstance(item, str) and item in target_programs:
+            if isinstance(item, str) and any(p in item for p in target_programs):
                 # On collecte tous les UUIDs à proximité (souvent ConceptID, StepID, PlayerID)
                 for offset in range(-15, 15):
                     idx = i + offset
@@ -88,13 +99,14 @@ def get_matinale_step_ids():
     
     # Fallback si rien trouvé
     if not potential_ids:
+        print(f"[SCRAPER] Attention: Aucun programme matinal trouvé pour cette date, utilisation du fallback.")
         potential_ids = ["4d701356-e8ea-40fc-b4e8-030bbd23ddce"]
     
     return potential_ids
 
-def fetch_chroniques_from_rpc():
+def fetch_chroniques_from_rpc(date_str=None):
     """Récupère et parse les chroniques via l'appel RPC complet."""
-    step_ids = get_matinale_step_ids()
+    step_ids = get_matinale_step_ids(date_str)
     
     # On tente avec le hash détecté, sinon on essaie un fallback connu
     hashes_to_try = [get_rpc_hash(), "1vzv7fl", "10b9rtu"]
@@ -182,5 +194,5 @@ def fetch_chroniques_from_rpc():
 
     return chroniques_ordered
 
-def get_chroniques():
-    return fetch_chroniques_from_rpc()
+def get_chroniques(date_str=None):
+    return fetch_chroniques_from_rpc(date_str)

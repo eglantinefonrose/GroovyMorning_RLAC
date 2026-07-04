@@ -10,12 +10,29 @@ import sys
 import time
 import threading
 import schedule
+import requests
 from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+# Configuration Java Backend
+JAVA_BASE_URL = os.environ.get('JAVA_API_URL', 'http://localhost:8080')
+
+def forward_to_java(endpoint, params):
+    """Envoie un signal HTTP POST au serveur Java"""
+    url = f"{JAVA_BASE_URL}{endpoint}"
+    def task():
+        try:
+            print(f"📡 [Forward] Sending to Java: {url} with {params}")
+            requests.post(url, params=params, timeout=2)
+        except Exception as e:
+            print(f"⚠️ [Forward Error] Could not reach Java backend: {e}")
+    
+    # On lance l'appel dans un thread pour ne pas bloquer l'API Python
+    threading.Thread(target=task, daemon=True).start()
 
 # Configuration SQLite
 DB_PATH = os.environ.get('DB_PATH', 'data/master_events.db')
@@ -43,7 +60,8 @@ init_db()
 
 def run_segmenter():
     """Lance le segmenter à l'heure programmée"""
-    print(f"[{datetime.now()}] Lancement du segmenter (Mode SIMU: {os.environ.get('SIMU', 'false')})...")
+    target_date = os.environ.get('TARGET_DATE', 'aujourd\'hui')
+    print(f"[{datetime.now()}] Lancement du segmenter (Mode SIMU: {os.environ.get('SIMU', 'false')}, Date: {target_date})...")
 
     # Tuer l'ancien segmenter s'il tourne
     subprocess.run(["pkill", "-f", "live_radio_segmenter.py"], stderr=subprocess.DEVNULL)
@@ -133,6 +151,14 @@ def chronicle_start():
     print(f"🚀 [Python API] Broadcasting START via WebSocket: {event_data}")
     socketio.emit('chronicle_start', event_data)
     
+    # Forward au Java via HTTP
+    forward_to_java("/api/realChronicleStartTime", {
+        "userId": user_id,
+        "nomDeChronique": chronicle_name,
+        "startTime": start_time,
+        "confidence": confidence
+    })
+    
     return jsonify({"status": "success"})
 
 @app.route('/api/realChronicleEndTime', methods=['POST'])
@@ -165,6 +191,14 @@ def chronicle_end():
     }
     print(f"🚀 [Python API] Broadcasting END via WebSocket: {event_data}")
     socketio.emit('chronicle_end', event_data)
+    
+    # Forward au Java via HTTP
+    forward_to_java("/api/realChronicleEndTime", {
+        "userId": user_id,
+        "nomDeChronique": chronicle_name,
+        "realDuration": duration,
+        "endTime": end_time
+    })
     
     return jsonify({"status": "success"})
 
