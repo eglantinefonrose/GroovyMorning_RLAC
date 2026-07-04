@@ -4,15 +4,26 @@ import requests
 from datetime import datetime, timedelta
 
 class DeepSeekDetector:
-    def __init__(self, api_key, model="deepseek-chat", schedule=None):
+    def __init__(self, api_key, model="deepseek-chat", schedule=None, is_simulation=False):
         self.api_key = api_key
         self.model = model
         self.schedule = schedule or []
         self.validated_chroniques = set()
         self.last_theo_minutes = -1
+        self.is_simulation = is_simulation
         
+        # Déterminer l'heure de début du flux (pour la simulation)
+        # On prend l'heure de la première chronique de la grille (ex: 06:00 ou 07:00)
+        self.show_start_minutes = 420 # Par défaut 07:00 (7*60)
+        if self.schedule:
+            first_time = self.schedule[0].get("time", "07:00")
+            self.show_start_minutes = self._time_to_minutes(first_time)
+            # Si c'est 06:11 par exemple, on arrondit à l'heure pile (06:00)
+            if self.show_start_minutes > 0:
+                self.show_start_minutes = (self.show_start_minutes // 60) * 60
+
         self.system_prompt = self._generate_system_prompt()
-        print(f"[DeepSeekDetector] Initialized with {len(self.schedule)} chroniques in schedule. Model: {self.model}")
+        print(f"[DeepSeekDetector] Initialized. Model: {self.model}, Simu: {self.is_simulation}, Base Time: {self.show_start_minutes//60}h")
 
     def _generate_system_prompt(self):
         chroniques_json = json.dumps(self.schedule, ensure_ascii=False)
@@ -93,43 +104,53 @@ Format de réponse attendu :
             "max_tokens": 500
         }
         
-        try:
-            response = requests.post(url, headers=headers, json=data, timeout=10)
-            if response.status_code != 200:
-                print(f"[DeepSeek API Error] {response.status_code}: {response.text}")
-                return {"detecte": False}
-                
-            result = response.json()
-            if not result.get("choices"):
-                print(f"[DeepSeek Error] No choices in response: {result}")
-                return {"detecte": False}
-
-            content = result["choices"][0]["message"]["content"].strip()
-            
-            # Nettoyage au cas où le modèle renvoie des blocs de code markdown
-            if content.startswith("```"):
-                content = content.split("```")[1]
-                if content.startswith("json"):
-                    content = content[4:].strip()
-            
-            if not content:
-                print("[DeepSeek Error] Empty content in response")
-                return {"detecte": False}
-
+        max_retries = 2
+        for attempt in range(max_retries + 1):
             try:
-                detection = json.loads(content)
-            except json.JSONDecodeError as je:
-                print(f"[DeepSeek JSON Error] {je}")
-                print(f"Raw content: {content}")
+                response = requests.post(url, headers=headers, json=data, timeout=20)
+                if response.status_code == 200:
+                    result = response.json()
+                    if not result.get("choices"):
+                        print(f"[DeepSeek Error] No choices in response: {result}")
+                        return {"detecte": False}
+
+                    content = result["choices"][0]["message"]["content"].strip()
+                    
+                    # Nettoyage au cas où le modèle renvoie des blocs de code markdown
+                    if content.startswith("```"):
+                        content = content.split("```")[1]
+                        if content.startswith("json"):
+                            content = content[4:].strip()
+                    
+                    if not content:
+                        print("[DeepSeek Error] Empty content in response")
+                        return {"detecte": False}
+
+                    try:
+                        detection = json.loads(content)
+                    except json.JSONDecodeError as je:
+                        print(f"[DeepSeek JSON Error] {je}")
+                        print(f"Raw content: {content}")
+                        return {"detecte": False}
+                    
+                    if detection.get("detecte"):
+                        return self.validate_detection(detection, current_time_sec)
+                    
+                    return detection
+                elif response.status_code == 429:
+                    print(f"⚠️ [DeepSeek API] Rate limit (429). Tentative {attempt+1}/{max_retries+1}...")
+                    time.sleep(2)
+                else:
+                    print(f"[DeepSeek API Error] {response.status_code}: {response.text}")
+                    return {"detecte": False}
+            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+                print(f"⚠️ [DeepSeek Network Error] {e}. Tentative {attempt+1}/{max_retries+1}...")
+                time.sleep(1)
+            except Exception as e:
+                print(f"[DeepSeek Error] {e}")
                 return {"detecte": False}
-            
-            if detection.get("detecte"):
-                return self.validate_detection(detection, current_time_sec)
-            
-            return detection
-        except Exception as e:
-            print(f"[DeepSeek Error] {e}")
-            return {"detecte": False}
+        
+        return {"detecte": False}
 
     def validate_detection(self, detection, current_time_sec):
         """
@@ -140,13 +161,12 @@ Format de réponse attendu :
             detection["detecte"] = False
             return detection
 
-        # Heure actuelle estimée (basée sur le flux ou l'heure réelle)
-        if current_time_sec:
-            # On suppose que 0s = début de la matinale à 07:00 (à adapter si besoin)
-            # Mais ici on va plutôt utiliser l'heure système car on est en live
-            now = datetime.now()
-            current_minutes = now.hour * 60 + now.minute
+        # CALCUL DE L'HEURE COURANTE
+        if self.is_simulation and current_time_sec is not None:
+            # En simulation, l'heure = Heure de début + secondes écoulées dans le flux
+            current_minutes = self.show_start_minutes + (current_time_sec / 60.0)
         else:
+            # En live, on utilise l'horloge réelle
             now = datetime.now()
             current_minutes = now.hour * 60 + now.minute
 
@@ -172,7 +192,8 @@ Format de réponse attendu :
         
         # RÈGLE 1 : Trop tôt (> 5 min avant l'horaire théorique)
         if diff < -5:
-            print(f"[DeepSeek] Rejeté: '{name}' trop tôt ({diff} min).")
+            time_info = f"{int(current_minutes//60)}h{int(current_minutes%60):02d}"
+            print(f"[DeepSeek] Rejeté: '{name}' trop tôt à {time_info} (Prévu: {best_match.get('time')}, Delta: {diff:.1f} min).")
             detection["detecte"] = False
             detection["raison"] = "Trop tôt"
             return detection
@@ -192,7 +213,8 @@ Format de réponse attendu :
             return detection
 
         # VALIDÉ
-        print(f"[DeepSeek] VALIDÉ: '{name}' à {datetime.now().strftime('%H:%M:%S')} (Ecart: {diff:+} min)")
+        log_time = datetime.now().strftime('%H:%M:%S') if not self.is_simulation else f"Flux+{int(current_time_sec)}s"
+        print(f"[DeepSeek] VALIDÉ: '{name}' à {log_time} (Ecart: {diff:+.1f} min)")
         self.validated_chroniques.add(best_match["title"])
         self.last_theo_minutes = theo_minutes
         detection["chronique"] = best_match["title"] # Utiliser le nom officiel
