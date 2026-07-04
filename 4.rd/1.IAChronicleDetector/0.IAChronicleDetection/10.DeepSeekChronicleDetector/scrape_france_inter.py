@@ -1,8 +1,6 @@
 import requests
 import re
 import json
-import sys
-import os
 import base64
 from datetime import datetime
 
@@ -13,67 +11,143 @@ HEADERS = {
     'Content-Type': 'application/json',
 }
 
-def get_matinale_step_id(date_str=None):
+_cached_hash = None
+
+def get_rpc_hash(date_str=None):
+    """Récupère dynamiquement le hash RPC (ex: 1vzv7fl) depuis la page d'accueil."""
+    global _cached_hash
+    if _cached_hash:
+        return _cached_hash
+    
+    try:
+        # On tente de trouver le hash dans la page de la grille
+        url = "https://www.radiofrance.fr/franceinter/grille-programmes"
+        if date_str:
+            try:
+                dt = datetime.strptime(date_str, "%Y-%m-%d")
+                url += f"?date={dt.strftime('%d-%m-%Y')}"
+            except:
+                pass
+        
+        print(f"[SCRAPER] Récupération du hash RPC depuis : {url}")
+        res = requests.get(url, headers=HEADERS, timeout=5)
+        res.raise_for_status()
+        
+        # Pattern 1: "HASH/loadProgramGrid" (nouveau format JSON)
+        match = re.search(r'["\']([a-z0-9]+)/loadProgramGrid', res.text)
+        if match:
+            _cached_hash = match.group(1)
+            return _cached_hash
+
+        # Pattern 2: /_app/remote/HASH/loadProgramGrid
+        match = re.search(r'/_app/remote/([a-z0-9]+)/loadProgramGrid', res.text)
+        if match:
+            _cached_hash = match.group(1)
+            return _cached_hash
+        
+        # Fallback regex: chercher n'importe quel hash après /_app/remote/
+        match = re.search(r'/_app/remote/([a-z0-9]+)/', res.text)
+        if match:
+            _cached_hash = match.group(1)
+            return _cached_hash
+    except Exception as e:
+        print(f"[SCRAPER] Erreur lors de la récupération du hash RPC : {e}")
+    
+    return "10b9rtu" # Fallback actuel au 2026-07-03
+
+def get_matinale_step_ids(date_str=None):
     """
-    Récupère dynamiquement l'ID du segment 'Matinale' pour une date donnée
+    Récupère dynamiquement les IDs potentiels du segment 'Matinale' pour aujourd'hui
     en interrogeant la grille des programmes via RPC.
     """
-    # Date au format YYYY-MM-DD
-    today = date_str if date_str else datetime.now().strftime("%Y-%m-%d")
+    if not date_str:
+        now = datetime.now()
+        date_str = now.strftime("%Y-%m-%d")
+        day_of_week = now.weekday()
+    else:
+        try:
+            dt = datetime.strptime(date_str, "%Y-%m-%d")
+            day_of_week = dt.weekday()
+        except:
+            day_of_week = datetime.now().weekday()
+
+    rpc_hash = get_rpc_hash(date_str)
+    is_friday = day_of_week == 4 # 4 = Vendredi
     
     # Construction du payload pour loadProgramGrid
-    # [["__skrao",1],{"brand":2,"date":3},"franceinter","YYYY-MM-DD"]
-    payload_raw = [["__skrao", 1], {"brand": 2, "date": 3}, "franceinter", today]
+    # Note : Radio France RPC semble préférer YYYY-MM-DD dans le payload JSON
+    payload_raw = [["__skrao", 1], {"brand": 2, "date": 3}, "franceinter", date_str]
     payload_b64 = base64.b64encode(json.dumps(payload_raw, separators=(',', ':')).encode()).decode()
     
-    url_grid = f"https://www.radiofrance.fr/_app/remote/1vzv7fl/loadProgramGrid?payload={payload_b64}"
+    url_grid = f"https://www.radiofrance.fr/_app/remote/{rpc_hash}/loadProgramGrid?payload={payload_b64}"
     
+    potential_ids = []
     try:
         response = requests.get(url_grid, headers=HEADERS, timeout=10)
         response.raise_for_status()
         data = response.json()
         items = json.loads(data.get('result', '[]'))
         
-        # On cherche l'item qui correspond à la matinale (entre 6h et 9h ou 7h et 10h)
-        # On cherche le UUID associé à "Le 6/9" ou "Le 7/10"
+        # Sur France Inter, la matinale s'appelle "Le 7/10" en semaine et "Le 6/9" le week-end.
+        # Règle spéciale utilisateur : Si on est vendredi, on cherche spécifiquement "Le 6/9".
+        target_programs = ["Le 7/10", "Le 6/9", "Le 7/9", "La Grande matinale"]
+        if is_friday:
+            target_programs = ["Le 6/9"] + target_programs
+        
         for i, item in enumerate(items):
-            if isinstance(item, str) and (item == "Le 6/9" or item == "Le 7/10"):
-                # L'ID est souvent quelques indices avant ou après. 
-                # Dans le format observé, l'ID (UUID) est à l'offset -2 ou -3 du titre du programme
-                for offset in range(-10, 10):
+            if isinstance(item, str) and any(tp in item for tp in target_programs):
+                # On collecte tous les UUIDs à proximité (souvent ConceptID, StepID, PlayerID)
+                for offset in range(-15, 15):
                     idx = i + offset
                     if 0 <= idx < len(items):
                         val = items[idx]
                         if isinstance(val, str) and re.match(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', val):
-                            return val
+                            if val not in potential_ids:
+                                potential_ids.append(val)
     except Exception as e:
         print(f"[SCRAPER] Erreur lors de la recherche de l'ID matinale : {e}")
     
-    # Fallback
-    return "4d701356-e8ea-40fc-b4e8-030bbd23ddce"
+    # Fallback si rien trouvé
+    if not potential_ids:
+        potential_ids = ["4d701356-e8ea-40fc-b4e8-030bbd23ddce"]
+    
+    return potential_ids
 
 def fetch_chroniques_from_rpc(date_str=None):
     """Récupère et parse les chroniques via l'appel RPC complet."""
-    step_id = get_matinale_step_id(date_str)
+    step_ids = get_matinale_step_ids(date_str)
     
-    # Payload : [["__skrao",1],{"brand":2,"parentStep":3},"franceinter","STEP_ID"]
-    payload_raw = [["__skrao", 1], {"brand": 2, "parentStep": 3}, "franceinter", step_id]
-    payload_b64 = base64.b64encode(json.dumps(payload_raw, separators=(',', ':')).encode()).decode()
+    # On tente avec le hash détecté, sinon on essaie un fallback connu
+    rpc_hash_detected = get_rpc_hash(date_str)
+    hashes_to_try = [rpc_hash_detected, "1vzv7fl", "10b9rtu"]
     
-    url_rpc = f'https://www.radiofrance.fr/_app/remote/1vzv7fl/loadChroniclesGrid?payload={payload_b64}'
+    items = []
+    last_error = None
     
-    print(f"Appel API : {url_rpc}")
-    
-    try:
-        response = requests.get(url_rpc, headers=HEADERS, timeout=10)
-        response.raise_for_status()
-        data = response.json()
-        items = json.loads(data.get('result', '[]'))
-    except Exception as e:
-        print(f"[SCRAPER] Erreur RPC : {e}")
-        return []
-
+    # On essaie toutes les combinaisons Hash x UUID jusqu'à ce qu'on ait des résultats
+    for rpc_hash in hashes_to_try:
+        for sid in step_ids:
+            payload_raw = [["__skrao", 1], {"brand": 2, "parentStep": 3}, "franceinter", sid]
+            payload_b64 = base64.b64encode(json.dumps(payload_raw, separators=(',', ':')).encode()).decode()
+            url_rpc = f'https://www.radiofrance.fr/_app/remote/{rpc_hash}/loadChroniclesGrid?payload={payload_b64}'
+            
+            try:
+                response = requests.get(url_rpc, headers=HEADERS, timeout=10)
+                if response.status_code == 200:
+                    data = response.json()
+                    res_json = json.loads(data.get('result', '[]'))
+                    if res_json and isinstance(res_json[0], list) and len(res_json[0]) > 0:
+                        items = res_json
+                        break # Succès !
+                else:
+                    last_error = f"{response.status_code} {response.reason}"
+            except Exception as e:
+                last_error = str(e)
+        if items: break
+            
     if not items or not isinstance(items[0], list):
+        if last_error:
+            print(f"[SCRAPER] Erreur RPC (après plusieurs essais) : {last_error}")
         return []
 
     start_indices = items[0]
@@ -87,7 +161,6 @@ def fetch_chroniques_from_rpc(date_str=None):
         return t
 
     for start_idx in start_indices:
-        # Heure
         time_str = "??h??"
         for offset in range(1, 15):
             idx = start_idx + offset
@@ -97,9 +170,7 @@ def fetch_chroniques_from_rpc(date_str=None):
                     time_str = val
                     break
         
-        # Titre
         block_title = ""
-        # Priorité aux titres de titleProps
         for offset in range(1, 12):
             idx = start_idx + offset
             if idx < len(items):
@@ -122,14 +193,13 @@ def fetch_chroniques_from_rpc(date_str=None):
 
         if block_title:
             title_clean = block_title.strip()
-            # Nettoyage journaux
             if "journal de 0" in title_clean.lower():
                 title_clean = re.sub(r'[Ll]e journal de 0(\d)h[0-9]+.*', r'Le journal de \1h', title_clean)
             elif "journal de " in title_clean.lower():
                 title_clean = re.sub(r'[Ll]e journal de (\d+)h[0-9]+.*', r'Le journal de \1h', title_clean)
 
             if title_clean not in seen:
-                chroniques_ordered.append({"time": time_str, "title": title_clean})
+                chroniques_ordered.append({"time": time_str.replace('h', ':'), "title": title_clean})
                 seen.add(title_clean)
 
     return chroniques_ordered
@@ -138,18 +208,8 @@ def get_chroniques(date_str=None):
     return fetch_chroniques_from_rpc(date_str)
 
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--date", help="Date au format YYYY-MM-DD")
-    args = parser.parse_args()
-    
-    chroniques = get_chroniques(args.date)
-    if chroniques:
-        print("\n" + "="*50)
-        print(f" CHRONIQUES DU {args.date if args.date else 'JOUR'} (Ordre de passage)")
-        print("="*50)
-        for c in chroniques:
-            print(f"{c['time']} | {c['title']}")
-        print("="*50 + "\n")
-    else:
-        print("Aucune chronique récupérée.")
+    import sys
+    date_to_fetch = sys.argv[1] if len(sys.argv) > 1 else None
+    res = get_chroniques(date_to_fetch)
+    for c in res:
+        print(f"{c['time']} | {c['title']}")

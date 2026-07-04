@@ -21,12 +21,15 @@ def main():
     
     args = parser.parse_args()
 
+    if not args.date:
+        args.date = datetime.now().strftime("%Y-%m-%d")
+
     if not os.path.exists(args.audio_path):
         print(f"[ERREUR] Le fichier {args.audio_path} n'existe pas.")
         sys.exit(1)
 
     # 1. Chargement de la grille des programmes
-    print(f"\n[1/4] Récupération de la grille France Inter ({args.date if args.date else 'aujourd\'hui'})...")
+    print(f"\n[1/4] Récupération de la grille France Inter ({args.date})...")
     chroniques_data = get_chroniques(args.date)
     if not chroniques_data:
         print("[ALERTE] Aucune chronique récupérée, utilisation d'une liste par défaut.")
@@ -35,6 +38,11 @@ def main():
             {"time": "08h00", "title": "Le journal de 8h"},
             {"time": "08h20", "title": "L'invité de 8h20"}
         ]
+    
+    print(f"--- {len(chroniques_data)} chroniques trouvées pour le {args.date} ---")
+    for c in chroniques_data:
+        print(f"  - {c['time']} : {c['title']}")
+    print("-" * 30)
     
     # 2. Préparation de l'audio
     print(f"\n[2/4] Préparation de l'audio...")
@@ -90,6 +98,7 @@ def main():
         with open(args.output, "w", encoding="utf-8") as f:
             json.dump({
                 "file": args.audio_path,
+                "date": args.date,
                 "speed": args.speed,
                 "start_time": args.start_time,
                 "detections": detections
