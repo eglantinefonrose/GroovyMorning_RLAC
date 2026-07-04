@@ -13,13 +13,13 @@ HEADERS = {
     'Content-Type': 'application/json',
 }
 
-def get_matinale_step_id():
+def get_matinale_step_id(date_str=None):
     """
-    Récupère dynamiquement l'ID du segment 'Matinale' pour aujourd'hui
+    Récupère dynamiquement l'ID du segment 'Matinale' pour une date donnée
     en interrogeant la grille des programmes via RPC.
     """
-    # Aujourd'hui au format YYYY-MM-DD
-    today = "2026-07-03" # Dans le contexte de simulation
+    # Date au format YYYY-MM-DD
+    today = date_str if date_str else datetime.now().strftime("%Y-%m-%d")
     
     # Construction du payload pour loadProgramGrid
     # [["__skrao",1],{"brand":2,"date":3},"franceinter","YYYY-MM-DD"]
@@ -45,18 +45,16 @@ def get_matinale_step_id():
                     if 0 <= idx < len(items):
                         val = items[idx]
                         if isinstance(val, str) and re.match(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', val):
-                            # On vérifie si c'est bien l'ID du step (souvent suivi ou précédé par l'heure)
-                            # Pour la matinale, on cherche l'ID qui n'est PAS l'ID du concept
                             return val
     except Exception as e:
         print(f"[SCRAPER] Erreur lors de la recherche de l'ID matinale : {e}")
     
-    # Fallback sur l'ID fourni par l'utilisateur (Juillet 02)
+    # Fallback
     return "4d701356-e8ea-40fc-b4e8-030bbd23ddce"
 
-def fetch_chroniques_from_rpc():
+def fetch_chroniques_from_rpc(date_str=None):
     """Récupère et parse les chroniques via l'appel RPC complet."""
-    step_id = get_matinale_step_id()
+    step_id = get_matinale_step_id(date_str)
     
     # Payload : [["__skrao",1],{"brand":2,"parentStep":3},"franceinter","STEP_ID"]
     payload_raw = [["__skrao", 1], {"brand": 2, "parentStep": 3}, "franceinter", step_id]
@@ -136,14 +134,19 @@ def fetch_chroniques_from_rpc():
 
     return chroniques_ordered
 
-def get_chroniques():
-    return fetch_chroniques_from_rpc()
+def get_chroniques(date_str=None):
+    return fetch_chroniques_from_rpc(date_str)
 
 if __name__ == "__main__":
-    chroniques = get_chroniques()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--date", help="Date au format YYYY-MM-DD")
+    args = parser.parse_args()
+    
+    chroniques = get_chroniques(args.date)
     if chroniques:
         print("\n" + "="*50)
-        print(f" CHRONIQUES DU JOUR (Ordre de passage)")
+        print(f" CHRONIQUES DU {args.date if args.date else 'JOUR'} (Ordre de passage)")
         print("="*50)
         for c in chroniques:
             print(f"{c['time']} | {c['title']}")

@@ -3,12 +3,14 @@ import argparse
 import json
 import sys
 import numpy as np
+import torch
 from pathlib import Path
+from tqdm import tqdm
 
 # Ajout du dossier courant au path pour les imports locaux
 sys.path.append(os.getcwd())
-from predict import predict_chroniques
-from utils import load_timecodes
+from train import RadioChroniqueClassifier, HybridSequenceClassifier
+from utils import load_transcription, load_timecodes
 
 def calculate_iou(range1, range2):
     start1, end1 = range1
@@ -17,54 +19,98 @@ def calculate_iou(range1, range2):
     union = (end1 - start1) + (end2 - start2) - intersection
     return intersection / union if union > 0 else 0.0
 
-def evaluate_quality(base_model_path, hybrid_model_path, srt_path, tc_path):
-    if not os.path.exists(base_model_path):
-        print(f"Erreur : Le modèle de base '{base_model_path}' n'existe pas.")
-        return
-    if not os.path.exists(hybrid_model_path):
-        print(f"Erreur : Le modèle hybride '{hybrid_model_path}' n'existe pas.")
-        return
-    if not os.path.exists(srt_path):
-        print(f"Erreur : La transcription '{srt_path}' n'existe pas.")
-        return
-    if not os.path.exists(tc_path):
-        print(f"Erreur : Les timecodes '{tc_path}' n'existent pas.")
-        return
-
-    print(f"--- Évaluation de Qualité (40/60) pour l'approche Hybride ---")
+def simulate_live_inference(base_model_path, hybrid_model_path, srt_path):
+    """
+    Simule une détection en direct hybride.
+    """
+    base_extractor = RadioChroniqueClassifier.load_model(base_model_path)
+    hybrid_model = HybridSequenceClassifier.load(hybrid_model_path)
+    hybrid_model.device = torch.device('cpu')
+    hybrid_model.model.to(torch.device('cpu'))
     
-    # 1. Prédire
-    print(f"Analyse de {srt_path}...")
-    # On utilise la fonction de prédiction existante du projet
-    # On met gt_file=None pour éviter d'utiliser leur calcul de score interne
-    final_chroniques, _ = predict_chroniques(base_model_path, hybrid_model_path, srt_path, gt_file=None)
-    pred_intervals = final_chroniques
+    segments = load_transcription(srt_path)
+    print(f"Simulation live sur {len(segments)} segments...")
+    
+    seq_len = hybrid_model.seq_len
+    all_preds = np.zeros(len(segments), dtype=int)
+    all_probs = np.zeros(len(segments))
+    
+    # Simulation du flux : à chaque segment i, on regarde la fenêtre [i-seq_len+1, i]
+    hybrid_model.model.eval()
+    with torch.no_grad():
+        for i in range(len(segments)):
+            # Fenêtre glissante finissant à i
+            start_idx = max(0, i - seq_len + 1)
+            end_idx = i + 1
+            window_segments = segments[start_idx:end_idx]
+            
+            # Préparation des features pour cette fenêtre uniquement
+            X_window = base_extractor.prepare_features(window_segments, training=False)
+            
+            # Padding si nécessaire pour atteindre seq_len
+            if len(X_window) < seq_len:
+                padding = np.zeros((seq_len - len(X_window), X_window.shape[1]))
+                X_window = np.vstack([padding, X_window])
+                
+            X_tensor = torch.FloatTensor(X_window).unsqueeze(0).to(hybrid_model.device)
+            
+            # Décodage CRF
+            preds = hybrid_model.model.decode(X_tensor)[0]
+            # Probabilités
+            emissions = hybrid_model.model.emissions(X_tensor)
+            probs = torch.softmax(emissions, dim=2)[0, :, 1].cpu().numpy()
+            
+            # On ne garde que la décision pour l'élément actuel (le dernier de la fenêtre)
+            all_preds[i] = preds[-1]
+            all_probs[i] = probs[-1]
 
-    print(f"\n📺 Chroniques détectées par le modèle :")
-    print("-" * 60)
-    print(f"{'Index':<5} | {'Début (s)':<10} | {'Fin (s)':<10}")
-    print("-" * 60)
-    for i, (start, end) in enumerate(pred_intervals, 1):
-        print(f"{i:<5} | {start:<10.1f} | {end:<10.1f}")
-    print("-" * 60)
+    detected_chronicles = []
+    current = None
+    for i, label in enumerate(all_preds):
+        if label > 0:
+            if current is None:
+                current = {'start': segments[i]['start'], 'end': segments[i]['end'], 'conf': all_probs[i]}
+            else:
+                current['end'] = segments[i]['end']
+                current['conf'] = max(current['conf'], all_probs[i])
+        else:
+            if current:
+                if current['end'] - current['start'] >= 5.0:
+                    detected_chronicles.append(current)
+                current = None
+                
+    if current and current['end'] - current['start'] >= 5.0:
+        detected_chronicles.append(current)
+        
+    return [(c['start'], c['end']) for c in detected_chronicles]
 
-    # 2. Charger la vérité terrain
+def evaluate_quality(base_model, hybrid_model, srt_path, tc_path, live_sim=True):
+    if not os.path.exists(base_model) or not os.path.exists(hybrid_model):
+        print(f"Erreur : Modèles introuvables.")
+        return
+    if not os.path.exists(srt_path) or not os.path.exists(tc_path):
+        print(f"Erreur : Fichiers SRT ou GT introuvables.")
+        return
+
+    mode_str = "LIVE SIMULÉ" if live_sim else "BATCH"
+    print(f"--- Évaluation de Qualité ({mode_str}) pour Hybride ---")
+    
+    if live_sim:
+        pred_intervals = simulate_live_inference(base_model, hybrid_model, srt_path)
+    else:
+        from predict import predict_chroniques
+        pred_intervals, _ = predict_chroniques(base_model, hybrid_model, srt_path)
+
+    print(f"\n📺 Chroniques détectées : {len(pred_intervals)}")
+    
     gt_intervals = load_timecodes(tc_path)
-    print(f"\n✅ Vérité Terrain (Ground Truth) chargée : {len(gt_intervals)} chroniques attendues.")
-    
-    # 3. Calculer les métriques et afficher la comparaison
-    print(f"\n🔍 Comparaison détaillée :")
-    print("-" * 80)
-    print(f"{'GT Index':<10} | {'GT Intervalle':<20} | {'Match Pred':<15} | {'IoU':<6} | {'Status'}")
-    print("-" * 80)
-
     n_gt = len(gt_intervals)
     n_pred = len(pred_intervals)
-    
     chronicle_scores = []
     pred_used = set()
     max_offset_tolerance = 60.0
 
+    print(f"\n🔍 Comparaison détaillée :")
     for i, gt in enumerate(gt_intervals, 1):
         best_iou = 0
         best_p_idx = -1
@@ -75,29 +121,18 @@ def evaluate_quality(base_model_path, hybrid_model_path, srt_path, tc_path):
                 best_iou = iou
                 best_p_idx = p_idx
         
-        gt_str = f"{gt[0]:.1f}s - {gt[1]:.1f}s"
         if best_p_idx != -1 and best_iou > 0:
             pred_used.add(best_p_idx)
             p = pred_intervals[best_p_idx]
             offset = (abs(p[0] - gt[0]) + abs(p[1] - gt[1])) / 2
+            latency = max(0, p[0] - gt[0])
             ch_score = max(0.0, 1.0 - (offset / max_offset_tolerance))
             chronicle_scores.append(ch_score)
-            
-            p_str = f"{p[0]:.1f}s - {p[1]:.1f}s"
-            print(f"{i:<10} | {gt_str:<20} | {p_str:<15} | {best_iou:<6.2f} | ✅ OK")
+            print(f"GT {i}: {gt[0]:.1f}s -> OK (Latence: {latency:.1f}s, IoU: {best_iou:.2f})")
         else:
             chronicle_scores.append(0.0)
-            print(f"{i:<10} | {gt_str:<20} | {'-'*15:<15} | {0.0:<6.2f} | ❌ MISS")
+            print(f"GT {i}: {gt[0]:.1f}s -> MISS")
 
-    # Signaler les prédictions en trop (Faux Positifs)
-    for p_idx, p in enumerate(pred_intervals):
-        if p_idx not in pred_used:
-            p_str = f"{p[0]:.1f}s - {p[1]:.1f}s"
-            print(f"{'EXTRA':<10} | {'-'*20:<20} | {p_str:<15} | {'-':<6} | ⚠️ FP")
-
-    print("-" * 80)
-
-    # Calcul des scores finaux (Standardisés)
     cardinality_score = max(0.0, 1.0 - abs(n_gt - n_pred) / n_gt) if n_gt > 0 else (1.0 if n_pred == 0 else 0.0)
     alignment_score = np.mean(chronicle_scores) if chronicle_scores else 0.0
     global_score = (cardinality_score * 0.4) + (alignment_score * 0.6)
@@ -105,18 +140,47 @@ def evaluate_quality(base_model_path, hybrid_model_path, srt_path, tc_path):
     print("\n" + "="*40)
     print(f"📊 NOTE DE QUALITÉ FINALE : {global_score*100:.1f}/100")
     print("="*40)
-    print(f"- Modèle Hybride : {hybrid_model_path}")
-    print(f"- Chroniques : {n_pred} détectées / {n_gt} attendues")
-    print(f"- La Cardinalité (40%) : {cardinality_score*100:.1f}%")
-    print(f"- L'Alignement Temporel (60%) : {alignment_score*100:.1f}%")
-    print("="*40)
+
+def simulate_live_inference_on_segments(base_model_path, hybrid_model_path, segments):
+    base_extractor = RadioChroniqueClassifier.load_model(base_model_path)
+    hybrid_model = HybridSequenceClassifier.load(hybrid_model_path)
+    hybrid_model.device = torch.device('cpu')
+    hybrid_model.model.to(torch.device('cpu'))
+    
+    seq_len = hybrid_model.seq_len
+    all_preds = np.zeros(len(segments), dtype=int)
+    
+    with torch.no_grad():
+        for i in range(len(segments)):
+            start_idx = max(0, i - seq_len + 1)
+            window_segments = segments[start_idx:i+1]
+            X_window = base_extractor.prepare_features(window_segments, training=False)
+            if len(X_window) < seq_len:
+                padding = np.zeros((seq_len - len(X_window), X_window.shape[1]))
+                X_window = np.vstack([padding, X_window])
+            X_tensor = torch.FloatTensor(X_window).unsqueeze(0)
+            preds = hybrid_model.model.decode(X_tensor)[0]
+            all_preds[i] = preds[-1]
+
+    # Regroupement
+    intervals = []
+    curr = None
+    for i, label in enumerate(all_preds):
+        if label > 0:
+            if curr is None: curr = [segments[i]['start'], segments[i]['end']]
+            else: curr[1] = segments[i]['end']
+        elif curr:
+            if curr[1] - curr[0] >= 5.0: intervals.append(tuple(curr))
+            curr = None
+    return intervals
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Évalue la qualité de détection pour le modèle Hybride.")
-    parser.add_argument("--base", default="models/radio_chronique_hybrid_base.pkl", help="Modèle de base (.pkl)")
-    parser.add_argument("--hybrid", default="models/radio_chronique_hybrid_hybrid.pt", help="Modèle hybride (.pt)")
-    parser.add_argument("--srt", required=True, help="Chemin vers la transcription SRT")
-    parser.add_argument("--gt", required=True, help="Chemin vers le ground truth (timecodes)")
+    parser = argparse.ArgumentParser(description="Évalue la qualité en simulation live.")
+    parser.add_argument("--base", default="models/radio_chronique_hybrid_base.pkl")
+    parser.add_argument("--hybrid", default="models/radio_chronique_hybrid_hybrid.pt")
+    parser.add_argument("--audio", required=True)
+    parser.add_argument("--gt", required=True)
+    parser.add_argument("--no-live", action="store_true")
     
     args = parser.parse_args()
-    evaluate_quality(args.base, args.hybrid, args.srt, args.gt)
+    evaluate_quality(args.base, args.hybrid, args.audio, args.gt, live_sim=not args.no_live)
