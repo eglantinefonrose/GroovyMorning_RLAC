@@ -1,105 +1,120 @@
 import os
 import argparse
 import torch
-import pandas as pd
-import glob
+import numpy as np
+import sys
 from transformers import CamembertTokenizer, CamembertForSequenceClassification
 from src.utils import load_transcription, load_timecodes
 from src.evaluation import evaluate_chronicles
 
-def find_file_robustly(original_path):
-    """Cherche le fichier récursivement dans @assets avec tolérance."""
-    if os.path.exists(original_path):
-        return original_path
-    filename = os.path.basename(original_path)
-    alt_filename = filename.replace("transcription_chronique", "timecode_chronique").replace("timecode_chronique", "transcription_chronique")
-    for depth in ["./", "../", "../../", "../../../", "../../../../"]:
-        assets_dir = os.path.join(depth, "@assets")
-        if os.path.exists(assets_dir):
-            for fname in [filename, alt_filename]:
-                matches = glob.glob(os.path.join(assets_dir, "**", fname), recursive=True)
-                if matches: return matches[0]
-    return original_path
+def calculate_iou(range1, range2):
+    start1, end1 = range1
+    start2, end2 = range2
+    intersection = max(0, min(end1, end2) - max(start1, start2))
+    union = (end1 - start1) + (end2 - start2) - intersection
+    return intersection / union if union > 0 else 0.0
 
-def evaluate_quality(model_path, srt_path, tc_path):
+def simulate_live_inference(model_path, srt_path, threshold=0.5):
+    """
+    Simule une détection en direct avec Transformer.
+    """
+    tokenizer = CamembertTokenizer.from_pretrained(model_path)
+    model = CamembertForSequenceClassification.from_pretrained(model_path)
+    model.eval()
+    device = torch.device("cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu"))
+    model.to(device)
+
+    segments = load_transcription(srt_path)
+    print(f"Simulation live sur {len(segments)} segments...")
+    
+    all_probs = []
+    window_size = 2 # Context passé uniquement pour le live
+    
+    with torch.no_grad():
+        for i in range(len(segments)):
+            # En live strict, on n'a que le passé
+            start_idx = max(0, i - window_size)
+            context_texts = [segments[j]['text'] for j in range(start_idx, i + 1)]
+            context_str = " [SEP] ".join(context_texts)
+            
+            encodings = tokenizer(
+                context_str,
+                padding=True,
+                truncation=True,
+                max_length=256,
+                return_tensors="pt"
+            ).to(device)
+            
+            outputs = model(**encodings)
+            prob = torch.softmax(outputs.logits, dim=1)[:, 1].item()
+            all_probs.append(prob)
+
+    detected_chronicles = []
+    current = None
+    for i, p in enumerate(all_probs):
+        if p >= threshold:
+            if current is None:
+                current = {'start': segments[i]['start'], 'end': segments[i]['end'], 'conf': p}
+            else:
+                current['end'] = segments[i]['end']
+                current['conf'] = max(current['conf'], p)
+        else:
+            if current:
+                if current['end'] - current['start'] >= 5.0:
+                    detected_chronicles.append(current)
+                current = None
+                
+    if current and current['end'] - current['start'] >= 5.0:
+        detected_chronicles.append(current)
+        
+    return detected_chronicles
+
+def evaluate_quality(model_path, audio_path, tc_path, live_sim=True):
     if not os.path.exists(model_path):
-        print(f"Erreur : Le modèle '{model_path}' n'existe pas.")
+        print(f"Erreur : Modèle non trouvé.")
         return
 
-    srt_path = find_file_robustly(srt_path)
-    tc_path = find_file_robustly(tc_path)
+    from detect import transcribe_audio
+    print(f"Transcription de {audio_path}...")
+    segments = transcribe_audio(audio_path)
 
-    print(f"--- Évaluation de Qualité (40/60) pour {model_path} ---")
+    mode_str = "LIVE SIMULÉ" if live_sim else "BATCH"
+    print(f"--- Évaluation de Qualité ({mode_str}) pour Transformer ---")
     
-    # 1. Prédire (Réimplémentation légère pour flexibilité)
-    import predict as pred_mod
-    original_path = pred_mod.MODEL_PATH
-    pred_mod.MODEL_PATH = model_path
-    try:
-        predicted_chronicles = pred_mod.predict(srt_path)
-    finally:
-        pred_mod.MODEL_PATH = original_path
+    if live_sim:
+        from detect import predict_chroniques
+        predicted_chronicles = predict_chroniques(model_path, segments)
+    else:
+        # Mode batch (similaire mais peut traiter plus de contexte si besoin)
+        from detect import predict_chroniques
+        predicted_chronicles = predict_chroniques(model_path, segments)
+# 3. Calculer les métriques
+print(f"\n🔍 Comparaison détaillée :")
+pred_used = set()
+for i, gt in enumerate(ground_truth, 1):
+    best_iou = 0
+    best_p = None
+    for p in predicted_chronicles:
+        iou = calculate_iou((p['start'], p['end']), gt)
+        if iou > best_iou:
+            best_iou = iou
+            best_p = p
 
-    if predicted_chronicles is None: predicted_chronicles = []
+    if best_p:
+        latency = max(0, best_p['start'] - gt[0])
+        print(f"GT {i}: {gt[0]:.1f}s -> OK (Latence: {latency:.1f}s)")
+    else:
+        print(f"GT {i}: {gt[0]:.1f}s -> MISS")
 
-    print(f"\n📺 Chroniques détectées par le modèle :")
-    print("-" * 60)
-    print(f"{'Index':<5} | {'Début (s)':<10} | {'Fin (s)':<10}")
-    print("-" * 60)
-    for i, p in enumerate(predicted_chronicles, 1):
-        print(f"{i:<5} | {p['start']:<10.1f} | {p['end']:<10.1f}")
-    print("-" * 60)
+metrics = evaluate_chronicles(predicted_chronicles, ground_truth)
+print(f"\n📊 NOTE FINALE : {(metrics['cardinality_score']*0.4 + metrics['alignment_score']*0.6)*100:.1f}/100")
 
-    # 2. Charger la vérité terrain
-    ground_truth = load_timecodes(tc_path)
-    print(f"\n✅ Vérité Terrain (Ground Truth) chargée : {len(ground_truth)} chroniques attendues.")
-    
-    # 3. Calculer les métriques
-    metrics = evaluate_chronicles(predicted_chronicles, ground_truth)
-    
-    print(f"\n🔍 Comparaison détaillée :")
-    print("-" * 80)
-    print(f"{'GT Index':<10} | {'GT Intervalle':<20} | {'Match Pred':<15} | {'IoU':<6} | {'Status'}")
-    print("-" * 80)
-
-    pred_used = set()
-    for detail in metrics['details']:
-        gt_idx = detail['gt_idx']
-        gt = ground_truth[gt_idx]
-        gt_str = f"{gt[0]:.1f}s - {gt[1]:.1f}s"
-        
-        if detail['pred_idx'] is not None:
-            p_idx = detail['pred_idx']
-            pred_used.add(p_idx)
-            p = predicted_chronicles[p_idx]
-            p_str = f"{p['start']:.1f}s - {p['end']:.1f}s"
-            print(f"{gt_idx+1:<10} | {gt_str:<20} | {p_str:<15} | {detail['iou']:<6.2f} | ✅ OK")
-        else:
-            print(f"{gt_idx+1:<10} | {gt_str:<20} | {'-'*15:<15} | {0.0:<6.2f} | ❌ MISS")
-
-    # Signaler les prédictions en trop (Faux Positifs)
-    for i, p in enumerate(predicted_chronicles):
-        if i not in pred_used:
-            p_str = f"{p['start']:.1f}s - {p['end']:.1f}s"
-            print(f"{'EXTRA':<10} | {'-'*20:<20} | {p_str:<15} | {'-':<6} | ⚠️ FP")
-    
-    print("-" * 80)
-
-    card_score = metrics['cardinality_score'] * 100
-    align_score = metrics['alignment_score'] * 100
-    global_score = (card_score * 0.4) + (align_score * 0.6)
-
-    print("\n" + "="*40)
-    print(f"📊 NOTE DE QUALITÉ FINALE : {global_score:.1f}/100")
-    print("="*40)
-    print(f"- La Cardinalité (40%) : {card_score:.1f}%")
-    print(f"- L'Alignement Temporel (60%) : {align_score:.1f}%")
-    print("="*40)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("model_path")
-    parser.add_argument("srt_path")
-    parser.add_argument("tc_path")
+    parser.add_argument("--model", default="models/camembert_chronicle")
+    parser.add_argument("--audio", required=True)
+    parser.add_argument("--gt", required=True)
+    parser.add_argument("--no-live", action="store_true")
     args = parser.parse_args()
-    evaluate_quality(args.model_path, args.srt_path, args.tc_path)
+    evaluate_quality(args.model, args.audio, args.gt, live_sim=not args.no_live)
