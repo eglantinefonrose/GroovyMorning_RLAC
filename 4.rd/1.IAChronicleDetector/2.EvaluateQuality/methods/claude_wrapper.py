@@ -4,7 +4,9 @@ import json
 
 # Configuration des chemins
 METHOD_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../0.IAChronicleDetection/9.ClaudeChronicleDetector"))
+DEEPSEEK_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../0.IAChronicleDetection/10.DeepSeekChronicleDetector"))
 sys.path.append(METHOD_DIR)
+sys.path.append(DEEPSEEK_DIR)
 
 try:
     from detect import transcribe_audio, analyze_with_claude
@@ -19,12 +21,20 @@ class Wrapper:
         """
         Implémentation pour Claude.
         """
-        segments = transcribe_audio(audio_path)
+        print(f"[WHISPER] Transcription de {audio_path} en cours...")
+        
+        try:
+            from transcriber import Transcriber
+            ts = Transcriber()
+            segments_gen = ts.transcribe_stream(audio_path)
+        except:
+            print("[INFO] Utilisation de la transcription standard (bloquante)...")
+            segments_gen = transcribe_audio(audio_path)
         
         history = []
         detections = []
         
-        for seg in segments:
+        for seg in segments_gen:
             # Affichage de la phrase en cours
             print(f"[{seg['start']:>7.2f}s] {seg['text']}")
             

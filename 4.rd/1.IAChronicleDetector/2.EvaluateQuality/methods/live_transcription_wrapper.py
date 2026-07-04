@@ -4,7 +4,9 @@ import json
 
 # Configuration des chemins
 METHOD_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../0.IAChronicleDetection/6.LiveTranscriptionStartAndEndDetection"))
+DEEPSEEK_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../0.IAChronicleDetection/10.DeepSeekChronicleDetector"))
 sys.path.append(METHOD_DIR)
+sys.path.append(DEEPSEEK_DIR)
 
 try:
     from detect import transcribe_audio
@@ -25,11 +27,26 @@ class Wrapper:
             print(f"Error: Model not found at {self.model_path}")
             return []
 
-        segments = transcribe_audio(audio_path)
+        # Pour rendre ça "live", on va utiliser Whisper en mode générateur si possible
+        # Sinon on prévient l'utilisateur
+        print(f"[WHISPER] Transcription de {audio_path} en cours...")
+        
+        # On essaie d'utiliser le transcripteur de DeepSeek s'il est dispo car il est déjà en mode stream
+        try:
+            from transcriber import Transcriber
+            ts = Transcriber()
+            segments_gen = ts.transcribe_stream(audio_path)
+        except:
+            # Fallback sur la méthode standard qui est bloquante
+            print("[INFO] Utilisation de la transcription standard (bloquante pendant la génération)...")
+            segments_gen = transcribe_audio(audio_path)
+
+        print(f"[INFO] Chargement du modèle CamemBERT depuis {self.model_path}...")
         detector = LiveChronicleDetector(model_path=self.model_path, threshold=self.threshold)
         
+        print("[INFO] Début de l'analyse live...")
         detections = []
-        for seg in segments:
+        for seg in segments_gen:
             # Affichage de la phrase en cours
             print(f"[{seg['start']:>7.2f}s] {seg['text']}")
             

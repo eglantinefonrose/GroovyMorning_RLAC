@@ -166,6 +166,9 @@ def main():
     all_results = {}
 
     for method_name in methods_to_run:
+        # Nettoyage du nom de la méthode (remplace - par _)
+        method_name = method_name.replace("-", "_")
+        
         print(f"\n--- Running Evaluation for Method: {method_name} ---")
         # 1. Load Method Wrapper
         try:
