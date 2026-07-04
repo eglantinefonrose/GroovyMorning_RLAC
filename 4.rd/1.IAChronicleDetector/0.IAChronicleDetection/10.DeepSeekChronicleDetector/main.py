@@ -122,15 +122,31 @@ def call_deepseek_live(sentence, context_buffer):
     }
     
     try:
-        response = requests.post(url, headers=headers, json=data)
+        response = requests.post(url, headers=headers, json=data, timeout=30)
         if response.status_code != 200:
             print(f"\n[ERREUR API] Status {response.status_code}: {response.text}")
             return {"detecte": False}
             
         result = response.json()
-        content = result["choices"][0]["message"]["content"].strip()
+        if not result.get("choices"):
+            print(f"\n[ERREUR] Aucune réponse (choices vide) : {result}")
+            return {"detecte": False}
+            
+        content_str = result["choices"][0]["message"]["content"].strip()
         
-        return json.loads(content)
+        # Nettoyage si le modèle renvoie du markdown
+        if content_str.startswith("```"):
+            lines = content_str.split("\n")
+            if lines[0].startswith("```"):
+                content_str = "\n".join(lines[1:-1]) if lines[-1].startswith("```") else "\n".join(lines[1:])
+            if content_str.startswith("json"):
+                content_str = content_str[4:].strip()
+
+        if not content_str:
+            print("\n[ERREUR] Le contenu de la réponse est vide.")
+            return {"detecte": False}
+            
+        return json.loads(content_str)
     except Exception as e:
         print(f"\n[ERREUR] {e}")
         return {"detecte": False}
