@@ -11,18 +11,28 @@ logger.add(sys.stderr, level="INFO")
 
 from src.pipeline import ChroniclePipeline
 
+import time
+
 class FilePipeline(ChroniclePipeline):
     def __init__(self, config_path, source):
         super().__init__(config_path, source)
         self.detections = []
 
-    def run_on_file(self):
+    def run_on_file(self, acceleration=0.0):
         self.streamer.start()
         current_offset = 0.0
         chunk_duration = self.config['audio']['chunk_duration']
         
+        t0 = time.time()
         try:
             for chunk in self.streamer.get_chunks():
+                if acceleration > 0:
+                    target_time = current_offset / acceleration
+                    elapsed = time.time() - t0
+                    sleep_time = target_time - elapsed
+                    if sleep_time > 0:
+                        time.sleep(sleep_time)
+
                 # 1. Fingerprint check
                 fp = self.store.generate_fingerprint(chunk)
                 if fp:

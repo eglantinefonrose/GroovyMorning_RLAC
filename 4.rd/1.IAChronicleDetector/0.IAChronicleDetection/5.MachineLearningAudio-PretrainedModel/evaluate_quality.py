@@ -15,7 +15,7 @@ def hms_to_seconds(hms):
         return int(parts[0]) * 3600 + int(parts[1]) * 60 + float(parts[2])
     return float(hms)
 
-def evaluate_quality(model_type, audio_path, tc_path, threshold=0.4, live_sim=True):
+def evaluate_quality(model_type, audio_path, tc_path, threshold=0.4, live_sim=True, acceleration=1.0):
     # En réalité, predict fait déjà du sliding window, 
     # donc "live_sim" consiste ici à appeler predict avec les bons paramètres.
     
@@ -26,7 +26,8 @@ def evaluate_quality(model_type, audio_path, tc_path, threshold=0.4, live_sim=Tr
         model_type=model_type,
         threshold=threshold,
         window_size=10.0 if live_sim else 30.0,
-        overlap=5.0 if live_sim else 0.0
+        overlap=5.0 if live_sim else 0.0,
+        acceleration=acceleration if live_sim else 0.0
     )
     
     pred_intervals = []
@@ -62,5 +63,6 @@ if __name__ == "__main__":
     parser.add_argument("--model", default="ast")
     parser.add_argument("--audio", required=True)
     parser.add_argument("--gt", required=True)
+    parser.add_argument("--acceleration", type=float, default=1.0)
     args = parser.parse_args()
-    evaluate_quality(args.model, args.audio, args.gt)
+    evaluate_quality(args.model, args.audio, args.gt, acceleration=args.acceleration)

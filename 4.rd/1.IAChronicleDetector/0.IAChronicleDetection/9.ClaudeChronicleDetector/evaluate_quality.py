@@ -5,7 +5,9 @@ import os
 from pathlib import Path
 from detect import transcribe_audio, analyze_with_claude
 
-def evaluate_quality(audio_path, gt_path):
+import time
+
+def evaluate_quality(audio_path, gt_path, acceleration=1.0):
     if not os.path.exists(audio_path):
         print(f"Erreur: Audio non trouvé {audio_path}")
         return
@@ -16,8 +18,16 @@ def evaluate_quality(audio_path, gt_path):
     history = []
     detections = []
     
+    t0 = time.time()
     print(f"Traitement de {len(segments)} segments...", file=sys.stderr)
     for seg in segments:
+        if acceleration > 0:
+            target_time = seg['start'] / acceleration
+            elapsed = time.time() - t0
+            sleep_time = target_time - elapsed
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+
         res_raw = analyze_with_claude(seg['text'], history)
         try:
             res = json.loads(res_raw)
@@ -62,5 +72,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--audio", required=True)
     parser.add_argument("--gt", required=True)
+    parser.add_argument("--acceleration", type=float, default=1.0, help="Vitesse d'accélération (ex: 5.0)")
     args = parser.parse_args()
-    evaluate_quality(args.audio, args.gt)
+    evaluate_quality(args.audio, args.gt, acceleration=args.acceleration)

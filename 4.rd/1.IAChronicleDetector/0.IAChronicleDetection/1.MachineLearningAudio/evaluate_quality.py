@@ -18,7 +18,7 @@ def calculate_iou(range1, range2):
     union = (end1 - start1) + (end2 - start2) - intersection
     return intersection / union if union > 0 else 0.0
 
-def simulate_live_inference(model_path, audio_path, threshold=0.89, segment_duration=3.0, step=2.0):
+def simulate_live_inference(model_path, audio_path, threshold=0.89, segment_duration=3.0, step=2.0, acceleration=None):
     """
     Simule une détection en direct en traitant l'audio par morceaux.
     """
@@ -29,12 +29,21 @@ def simulate_live_inference(model_path, audio_path, threshold=0.89, segment_dura
     duration = len(audio) / sr
     
     print(f"Simulation live : {duration:.1f}s d'audio, pas de {step}s")
+    if acceleration:
+        print(f"Accélération : {acceleration}x")
+        start_wall_time = time.time()
     
     detected_chronicles = []
     current_chronicle = None
     
     # Simulation du flux
     for start_t in np.arange(0, duration - segment_duration, step):
+        if acceleration and acceleration > 0:
+            target_wall_time = start_t / acceleration
+            elapsed = time.time() - start_wall_time
+            if target_wall_time > elapsed:
+                time.sleep(target_wall_time - elapsed)
+
         # Extraction du segment actuel (fenêtre glissante sans voir le futur)
         start_sample = int(start_t * sr)
         end_sample = int((start_t + segment_duration) * sr)
@@ -61,7 +70,7 @@ def simulate_live_inference(model_path, audio_path, threshold=0.89, segment_dura
         
     return detected_chronicles
 
-def evaluate_quality(model_path, audio_path, tc_path, threshold=0.89, live_sim=True):
+def evaluate_quality(model_path, audio_path, tc_path, threshold=0.89, live_sim=True, acceleration=None):
     if not os.path.exists(model_path):
         print(f"Erreur : Le modèle '{model_path}' n'existe pas.")
         return
@@ -77,7 +86,7 @@ def evaluate_quality(model_path, audio_path, tc_path, threshold=0.89, live_sim=T
     
     # 1. Prédire
     if live_sim:
-        segments = simulate_live_inference(model_path, audio_path, threshold=threshold)
+        segments = simulate_live_inference(model_path, audio_path, threshold=threshold, acceleration=acceleration)
     else:
         classifier = ChronicleClassifier()
         classifier.load_model(model_path)
@@ -159,6 +168,7 @@ if __name__ == "__main__":
     parser.add_argument("--gt", required=True, help="Chemin vers le fichier de vérité terrain (timecodes)")
     parser.add_argument("--threshold", type=float, default=0.89, help="Seuil de détection")
     parser.add_argument("--no-live", action="store_true", help="Désactiver la simulation live")
+    parser.add_argument("--acceleration", type=float, default=None, help="Facteur d'accélération pour la simulation live")
     
     args = parser.parse_args()
-    evaluate_quality(args.model, args.audio, args.gt, args.threshold, live_sim=not args.no_live)
+    evaluate_quality(args.model, args.audio, args.gt, args.threshold, live_sim=not args.no_live, acceleration=args.acceleration)

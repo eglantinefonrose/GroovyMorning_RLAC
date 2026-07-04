@@ -2,6 +2,7 @@ import os
 import argparse
 import json
 import sys
+import time
 import numpy as np
 from pathlib import Path
 from tqdm import tqdm
@@ -77,7 +78,7 @@ def simulate_live_inference(model_path, srt_path, threshold=0.5):
         
     return [(c['start'], c['end']) for c in detected_chronicles]
 
-def evaluate_quality(model_path, audio_path, tc_path, live_sim=True):
+def evaluate_quality(model_path, audio_path, tc_path, live_sim=True, acceleration=None):
     if not os.path.exists(model_path):
         print(f"Erreur : Le modèle '{model_path}' n'existe pas.")
         return
@@ -97,6 +98,9 @@ def evaluate_quality(model_path, audio_path, tc_path, live_sim=True):
     
     mode_str = "LIVE SIMULÉ" if live_sim else "BATCH"
     print(f"--- Évaluation de Qualité ({mode_str}) pour RF ---")
+    if acceleration:
+        print(f"Accélération : {acceleration}x")
+        start_wall_time = time.time()
     
     if live_sim:
         # On adapte simulate_live_inference pour prendre des segments
@@ -108,6 +112,13 @@ def evaluate_quality(model_path, audio_path, tc_path, live_sim=True):
         pred_intervals = []
         current = None
         for i, p in enumerate(smoothed_probs):
+            if acceleration and acceleration > 0:
+                T = segments[i]['start']
+                target_wall_time = T / acceleration
+                elapsed = time.time() - start_wall_time
+                if target_wall_time > elapsed:
+                    time.sleep(target_wall_time - elapsed)
+
             if p >= 0.5:
                 if current is None: current = [segments[i]['start'], segments[i]['end']]
                 else: current[1] = segments[i]['end']
@@ -177,6 +188,7 @@ if __name__ == "__main__":
     parser.add_argument("--srt", required=True)
     parser.add_argument("--gt", required=True)
     parser.add_argument("--no-live", action="store_true")
+    parser.add_argument("--acceleration", type=float, default=None, help="Acceleration factor for live simulation")
     
     args = parser.parse_args()
-    evaluate_quality(args.model, args.srt, args.gt, live_sim=not args.no_live)
+    evaluate_quality(args.model, args.srt, args.gt, live_sim=not args.no_live, acceleration=args.acceleration)

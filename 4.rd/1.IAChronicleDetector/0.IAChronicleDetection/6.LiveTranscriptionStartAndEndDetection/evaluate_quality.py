@@ -8,14 +8,25 @@ from inference_live_sim import LiveChronicleDetector
 from inference import clean_srt_content
 import re
 
-def evaluate_quality_live(model_path, audio_path, gt_path, threshold=0.8):
+import time
+
+def evaluate_quality_live(model_path, audio_path, gt_path, threshold=0.8, acceleration=1.0):
     from detect import transcribe_audio
     print(f"Transcription de {audio_path}...")
     segments = transcribe_audio(audio_path)
     
     detector = LiveChronicleDetector(model_path=model_path, threshold=threshold)
     detections = []
+    
+    t0 = time.time()
     for seg in segments:
+        if acceleration > 0:
+            target_time = seg['start'] / acceleration
+            elapsed = time.time() - t0
+            sleep_time = target_time - elapsed
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+
         res = detector.process_new_sentence(seg['text'])
         if res:
             res['start'] = seg['start']
@@ -48,5 +59,6 @@ if __name__ == "__main__":
     parser.add_argument("--model", default="./camembert_chronicle_start_v4")
     parser.add_argument("--audio", required=True)
     parser.add_argument("--gt", required=True)
+    parser.add_argument("--acceleration", type=float, default=1.0)
     args = parser.parse_args()
-    evaluate_quality_live(args.model, args.audio, args.gt)
+    evaluate_quality_live(args.model, args.audio, args.gt, acceleration=args.acceleration)
