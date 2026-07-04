@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 from detect import FilePipeline
 
-def evaluate_quality(audio_path, gt_path, config_path="config/default.yaml"):
+def evaluate_quality(audio_path, gt_path, config_path="config/default.yaml", acceleration=1.0):
     if not os.path.exists(audio_path):
         print(f"Erreur: Audio non trouvé {audio_path}")
         return
@@ -13,7 +13,7 @@ def evaluate_quality(audio_path, gt_path, config_path="config/default.yaml"):
     print(f"--- Évaluation Pipeline Multi-Approche pour {audio_path} ---")
     
     pipeline = FilePipeline(config_path, audio_path)
-    detections = pipeline.run_on_file()
+    detections = pipeline.run_on_file(acceleration=acceleration)
     
     print(f"\n📊 Résultats : {len(detections)} chroniques détectées.")
     
@@ -45,5 +45,6 @@ if __name__ == "__main__":
     parser.add_argument("--audio", required=True)
     parser.add_argument("--gt", required=True)
     parser.add_argument("--config", default="config/default.yaml")
+    parser.add_argument("--acceleration", type=float, default=1.0)
     args = parser.parse_args()
-    evaluate_quality(args.audio, args.gt, args.config)
+    evaluate_quality(args.audio, args.gt, args.config, acceleration=args.acceleration)

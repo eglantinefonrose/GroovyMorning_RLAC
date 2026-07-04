@@ -2,6 +2,7 @@ import os
 import argparse
 import json
 import sys
+import time
 import numpy as np
 import torch
 from pathlib import Path
@@ -19,7 +20,7 @@ def calculate_iou(range1, range2):
     union = (end1 - start1) + (end2 - start2) - intersection
     return intersection / union if union > 0 else 0.0
 
-def simulate_live_inference(base_model_path, hybrid_model_path, srt_path):
+def simulate_live_inference(base_model_path, hybrid_model_path, srt_path, acceleration=None):
     """
     Simule une détection en direct hybride.
     """
@@ -30,6 +31,9 @@ def simulate_live_inference(base_model_path, hybrid_model_path, srt_path):
     
     segments = load_transcription(srt_path)
     print(f"Simulation live sur {len(segments)} segments...")
+    if acceleration:
+        print(f"Accélération : {acceleration}x")
+        start_wall_time = time.time()
     
     seq_len = hybrid_model.seq_len
     all_preds = np.zeros(len(segments), dtype=int)
@@ -39,6 +43,13 @@ def simulate_live_inference(base_model_path, hybrid_model_path, srt_path):
     hybrid_model.model.eval()
     with torch.no_grad():
         for i in range(len(segments)):
+            if acceleration and acceleration > 0:
+                T = segments[i]['start']
+                target_wall_time = T / acceleration
+                elapsed = time.time() - start_wall_time
+                if target_wall_time > elapsed:
+                    time.sleep(target_wall_time - elapsed)
+
             # Fenêtre glissante finissant à i
             start_idx = max(0, i - seq_len + 1)
             end_idx = i + 1
@@ -84,7 +95,7 @@ def simulate_live_inference(base_model_path, hybrid_model_path, srt_path):
         
     return [(c['start'], c['end']) for c in detected_chronicles]
 
-def evaluate_quality(base_model, hybrid_model, srt_path, tc_path, live_sim=True):
+def evaluate_quality(base_model, hybrid_model, srt_path, tc_path, live_sim=True, acceleration=None):
     if not os.path.exists(base_model) or not os.path.exists(hybrid_model):
         print(f"Erreur : Modèles introuvables.")
         return
@@ -96,7 +107,7 @@ def evaluate_quality(base_model, hybrid_model, srt_path, tc_path, live_sim=True)
     print(f"--- Évaluation de Qualité ({mode_str}) pour Hybride ---")
     
     if live_sim:
-        pred_intervals = simulate_live_inference(base_model, hybrid_model, srt_path)
+        pred_intervals = simulate_live_inference(base_model, hybrid_model, srt_path, acceleration=acceleration)
     else:
         from predict import predict_chroniques
         pred_intervals, _ = predict_chroniques(base_model, hybrid_model, srt_path)
@@ -181,6 +192,7 @@ if __name__ == "__main__":
     parser.add_argument("--audio", required=True)
     parser.add_argument("--gt", required=True)
     parser.add_argument("--no-live", action="store_true")
+    parser.add_argument("--acceleration", type=float, default=None, help="Acceleration factor for live simulation")
     
     args = parser.parse_args()
-    evaluate_quality(args.base, args.hybrid, args.audio, args.gt, live_sim=not args.no_live)
+    evaluate_quality(args.base, args.hybrid, args.audio, args.gt, live_sim=not args.no_live, acceleration=args.acceleration)
