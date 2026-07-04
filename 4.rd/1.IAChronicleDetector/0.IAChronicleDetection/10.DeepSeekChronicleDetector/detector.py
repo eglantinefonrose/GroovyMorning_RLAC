@@ -94,14 +94,47 @@ Format de réponse attendu :
         }
         
         try:
-            response = requests.post(url, headers=headers, json=data)
+            response = requests.post(url, headers=headers, json=data, timeout=30)
             if response.status_code != 200:
                 print(f"\n[ERREUR API] Status {response.status_code}: {response.text}")
                 return {"detecte": False}
+            
+            if not response.text.strip():
+                print(f"\n[ERREUR DETECTEUR] Réponse vide reçue de l'API (Status {response.status_code})")
+                return {"detecte": False}
                 
-            result = response.json()
+            try:
+                result = response.json()
+            except Exception as je:
+                print(f"\n[ERREUR DETECTEUR] JSON invalide (formatage API) : {je}")
+                print(f"Brut : {response.text}")
+                return {"detecte": False}
+
+            if not result.get("choices"):
+                print(f"\n[ERREUR DETECTEUR] Aucune réponse (choices vide) : {result}")
+                return {"detecte": False}
+                
             content_str = result["choices"][0]["message"]["content"].strip()
-            content = json.loads(content_str)
+            
+            # Nettoyage si le modèle renvoie du markdown malgré le format JSON
+            if content_str.startswith("```"):
+                # On essaie d'extraire le contenu entre les backticks
+                lines = content_str.split("\n")
+                if lines[0].startswith("```"):
+                    content_str = "\n".join(lines[1:-1]) if lines[-1].startswith("```") else "\n".join(lines[1:])
+                if content_str.startswith("json"):
+                    content_str = content_str[4:].strip()
+
+            if not content_str:
+                print("\n[ERREUR DETECTEUR] Le contenu de la réponse est vide.")
+                return {"detecte": False}
+
+            try:
+                content = json.loads(content_str)
+            except json.JSONDecodeError as je:
+                print(f"\n[ERREUR DETECTEUR] JSON invalide dans le contenu : {je}")
+                print(f"Brut : {content_str}")
+                return {"detecte": False}
             
             # Si détecté, on met à jour la dernière chronique pour éviter les doublons
             if content.get("detecte"):
