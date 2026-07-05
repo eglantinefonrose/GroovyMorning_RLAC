@@ -34,6 +34,11 @@ services:
     volumes:
       - ./2.RLAC-IAChronicleSegmenter/data:/app/data
       - ./2.RLAC-IAChronicleSegmenter/assets:/app/assets
+    env_file:
+      - .env
+    environment:
+      - JAVA_API_URL=http://java-backend:8000
+      - SIMU=${SIMU:-false}
     restart: unless-stopped
     networks:
       - rlac-network

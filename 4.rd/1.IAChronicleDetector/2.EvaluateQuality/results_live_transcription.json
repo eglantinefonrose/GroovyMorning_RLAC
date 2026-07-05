@@ -1,0 +1,1817 @@
+{
+  "matches": [],
+  "false_positives": [
+    {
+      "label": "chronique",
+      "start": 62.0,
+      "end": 64.0,
+      "detected_at": 62.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 86.0,
+      "end": 87.0,
+      "detected_at": 86.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 99.0,
+      "end": 100.0,
+      "detected_at": 99.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 113.0,
+      "end": 114.0,
+      "detected_at": 113.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 123.0,
+      "end": 124.0,
+      "detected_at": 123.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 134.0,
+      "end": 136.0,
+      "detected_at": 134.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 149.0,
+      "end": 151.0,
+      "detected_at": 149.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 160.0,
+      "end": 162.0,
+      "detected_at": 160.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 175.0,
+      "end": 176.0,
+      "detected_at": 175.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 183.0,
+      "end": 185.0,
+      "detected_at": 183.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 193.0,
+      "end": 194.0,
+      "detected_at": 193.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 199.0,
+      "end": 200.0,
+      "detected_at": 199.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 205.0,
+      "end": 207.0,
+      "detected_at": 205.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 213.0,
+      "end": 214.0,
+      "detected_at": 213.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 220.0,
+      "end": 221.0,
+      "detected_at": 220.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 226.0,
+      "end": 227.0,
+      "detected_at": 226.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 235.0,
+      "end": 236.0,
+      "detected_at": 235.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 242.0,
+      "end": 243.0,
+      "detected_at": 242.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 249.0,
+      "end": 250.0,
+      "detected_at": 249.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 258.0,
+      "end": 260.0,
+      "detected_at": 258.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 267.0,
+      "end": 268.0,
+      "detected_at": 267.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 273.0,
+      "end": 274.0,
+      "detected_at": 273.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 280.0,
+      "end": 282.0,
+      "detected_at": 280.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 287.0,
+      "end": 288.0,
+      "detected_at": 287.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 294.0,
+      "end": 295.0,
+      "detected_at": 294.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 302.0,
+      "end": 303.0,
+      "detected_at": 302.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 310.0,
+      "end": 311.0,
+      "detected_at": 310.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 318.0,
+      "end": 319.0,
+      "detected_at": 318.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 325.0,
+      "end": 326.0,
+      "detected_at": 325.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 332.0,
+      "end": 333.0,
+      "detected_at": 332.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 339.0,
+      "end": 340.0,
+      "detected_at": 339.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 345.0,
+      "end": 347.0,
+      "detected_at": 345.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 354.0,
+      "end": 355.0,
+      "detected_at": 354.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 365.0,
+      "end": 368.0,
+      "detected_at": 365.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 378.0,
+      "end": 379.0,
+      "detected_at": 378.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 389.0,
+      "end": 390.0,
+      "detected_at": 389.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 396.0,
+      "end": 397.0,
+      "detected_at": 396.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 406.0,
+      "end": 407.0,
+      "detected_at": 406.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 417.0,
+      "end": 419.0,
+      "detected_at": 417.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 433.0,
+      "end": 435.0,
+      "detected_at": 433.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 444.0,
+      "end": 446.0,
+      "detected_at": 444.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 520.0,
+      "end": 522.0,
+      "detected_at": 520.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 569.0,
+      "end": 571.0,
+      "detected_at": 569.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 700.0,
+      "end": 702.0,
+      "detected_at": 700.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 999.0,
+      "end": 1002.0,
+      "detected_at": 999.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1039.0,
+      "end": 1041.0,
+      "detected_at": 1039.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1121.0,
+      "end": 1123.0,
+      "detected_at": 1121.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1344.0,
+      "end": 1348.0,
+      "detected_at": 1344.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1483.0,
+      "end": 1484.0,
+      "detected_at": 1483.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1523.0,
+      "end": 1525.0,
+      "detected_at": 1523.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1559.0,
+      "end": 1561.0,
+      "detected_at": 1559.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1570.0,
+      "end": 1572.0,
+      "detected_at": 1570.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1581.0,
+      "end": 1582.0,
+      "detected_at": 1581.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1601.0,
+      "end": 1604.0,
+      "detected_at": 1601.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1617.0,
+      "end": 1618.0,
+      "detected_at": 1617.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1634.0,
+      "end": 1635.0,
+      "detected_at": 1634.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1647.0,
+      "end": 1648.0,
+      "detected_at": 1647.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1678.0,
+      "end": 1680.0,
+      "detected_at": 1678.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1725.0,
+      "end": 1726.0,
+      "detected_at": 1725.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1740.0,
+      "end": 1741.0,
+      "detected_at": 1740.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1748.0,
+      "end": 1749.0,
+      "detected_at": 1748.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1756.0,
+      "end": 1757.0,
+      "detected_at": 1756.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1763.0,
+      "end": 1764.0,
+      "detected_at": 1763.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1789.0,
+      "end": 1790.0,
+      "detected_at": 1789.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1808.0,
+      "end": 1810.0,
+      "detected_at": 1808.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1819.0,
+      "end": 1821.0,
+      "detected_at": 1819.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1829.0,
+      "end": 1831.0,
+      "detected_at": 1829.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1895.0,
+      "end": 1897.0,
+      "detected_at": 1895.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1918.0,
+      "end": 1920.0,
+      "detected_at": 1918.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1943.0,
+      "end": 1945.0,
+      "detected_at": 1943.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1960.0,
+      "end": 1961.0,
+      "detected_at": 1960.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 1974.0,
+      "end": 1975.0,
+      "detected_at": 1974.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2005.0,
+      "end": 2006.0,
+      "detected_at": 2005.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2037.0,
+      "end": 2039.0,
+      "detected_at": 2037.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2147.0,
+      "end": 2149.0,
+      "detected_at": 2147.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2185.0,
+      "end": 2186.0,
+      "detected_at": 2185.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2196.0,
+      "end": 2197.0,
+      "detected_at": 2196.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2205.0,
+      "end": 2206.0,
+      "detected_at": 2205.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2217.0,
+      "end": 2218.0,
+      "detected_at": 2217.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2227.0,
+      "end": 2228.0,
+      "detected_at": 2227.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2240.0,
+      "end": 2241.0,
+      "detected_at": 2240.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2254.0,
+      "end": 2255.0,
+      "detected_at": 2254.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2264.0,
+      "end": 2266.0,
+      "detected_at": 2264.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2278.0,
+      "end": 2280.0,
+      "detected_at": 2278.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2290.0,
+      "end": 2291.0,
+      "detected_at": 2290.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2308.0,
+      "end": 2310.0,
+      "detected_at": 2308.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2316.0,
+      "end": 2317.0,
+      "detected_at": 2316.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2327.0,
+      "end": 2328.0,
+      "detected_at": 2327.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2360.0,
+      "end": 2362.0,
+      "detected_at": 2360.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2371.0,
+      "end": 2372.0,
+      "detected_at": 2371.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2378.0,
+      "end": 2380.0,
+      "detected_at": 2378.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2389.0,
+      "end": 2390.0,
+      "detected_at": 2389.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2397.0,
+      "end": 2398.0,
+      "detected_at": 2397.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2407.0,
+      "end": 2409.0,
+      "detected_at": 2407.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2423.0,
+      "end": 2424.0,
+      "detected_at": 2423.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2439.0,
+      "end": 2441.0,
+      "detected_at": 2439.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2453.0,
+      "end": 2455.0,
+      "detected_at": 2453.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2474.0,
+      "end": 2475.0,
+      "detected_at": 2474.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2497.0,
+      "end": 2498.0,
+      "detected_at": 2497.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2509.0,
+      "end": 2510.0,
+      "detected_at": 2509.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2526.0,
+      "end": 2527.0,
+      "detected_at": 2526.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2538.0,
+      "end": 2539.0,
+      "detected_at": 2538.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2550.0,
+      "end": 2552.0,
+      "detected_at": 2550.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2561.0,
+      "end": 2563.0,
+      "detected_at": 2561.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2573.0,
+      "end": 2574.0,
+      "detected_at": 2573.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2598.0,
+      "end": 2599.0,
+      "detected_at": 2598.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2612.0,
+      "end": 2613.0,
+      "detected_at": 2612.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2620.0,
+      "end": 2622.0,
+      "detected_at": 2620.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2631.0,
+      "end": 2632.0,
+      "detected_at": 2631.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2647.0,
+      "end": 2648.0,
+      "detected_at": 2647.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2658.0,
+      "end": 2659.0,
+      "detected_at": 2658.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2666.0,
+      "end": 2668.0,
+      "detected_at": 2666.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2679.0,
+      "end": 2680.0,
+      "detected_at": 2679.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2692.0,
+      "end": 2695.0,
+      "detected_at": 2692.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2710.0,
+      "end": 2712.0,
+      "detected_at": 2710.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2727.0,
+      "end": 2728.0,
+      "detected_at": 2727.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2752.0,
+      "end": 2753.0,
+      "detected_at": 2752.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2772.0,
+      "end": 2774.0,
+      "detected_at": 2772.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2784.0,
+      "end": 2785.0,
+      "detected_at": 2784.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2826.0,
+      "end": 2827.0,
+      "detected_at": 2826.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2888.0,
+      "end": 2890.0,
+      "detected_at": 2888.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 2929.0,
+      "end": 2931.0,
+      "detected_at": 2929.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3032.0,
+      "end": 3034.0,
+      "detected_at": 3032.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3053.0,
+      "end": 3056.0,
+      "detected_at": 3053.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3091.0,
+      "end": 3092.0,
+      "detected_at": 3091.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3099.0,
+      "end": 3100.0,
+      "detected_at": 3099.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3108.0,
+      "end": 3109.0,
+      "detected_at": 3108.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3117.0,
+      "end": 3119.0,
+      "detected_at": 3117.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3129.0,
+      "end": 3130.0,
+      "detected_at": 3129.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3138.0,
+      "end": 3140.0,
+      "detected_at": 3138.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3148.0,
+      "end": 3149.0,
+      "detected_at": 3148.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3162.0,
+      "end": 3163.0,
+      "detected_at": 3162.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3179.0,
+      "end": 3180.0,
+      "detected_at": 3179.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3187.0,
+      "end": 3188.0,
+      "detected_at": 3187.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3195.0,
+      "end": 3196.0,
+      "detected_at": 3195.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3204.0,
+      "end": 3207.0,
+      "detected_at": 3204.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3224.0,
+      "end": 3226.0,
+      "detected_at": 3224.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3233.0,
+      "end": 3234.0,
+      "detected_at": 3233.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3240.0,
+      "end": 3241.0,
+      "detected_at": 3240.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3248.0,
+      "end": 3251.0,
+      "detected_at": 3248.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3264.0,
+      "end": 3265.0,
+      "detected_at": 3264.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3276.0,
+      "end": 3277.0,
+      "detected_at": 3276.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3296.0,
+      "end": 3297.0,
+      "detected_at": 3296.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3326.0,
+      "end": 3329.0,
+      "detected_at": 3326.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3366.0,
+      "end": 3367.0,
+      "detected_at": 3366.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3378.0,
+      "end": 3379.0,
+      "detected_at": 3378.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3398.0,
+      "end": 3399.0,
+      "detected_at": 3398.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3412.0,
+      "end": 3413.0,
+      "detected_at": 3412.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3423.0,
+      "end": 3424.0,
+      "detected_at": 3423.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3429.0,
+      "end": 3431.0,
+      "detected_at": 3429.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3442.0,
+      "end": 3443.0,
+      "detected_at": 3442.0,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3509.2000000000003,
+      "end": 3512.52,
+      "detected_at": 3509.2000000000003,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3612.84,
+      "end": 3614.4,
+      "detected_at": 3612.84,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 3766.16,
+      "end": 3767.84,
+      "detected_at": 3766.16,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4133.88,
+      "end": 4135.52,
+      "detected_at": 4133.88,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4147.839999999999,
+      "end": 4149.839999999999,
+      "detected_at": 4147.839999999999,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4217.04,
+      "end": 4218.88,
+      "detected_at": 4217.04,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4229.08,
+      "end": 4230.280000000001,
+      "detected_at": 4229.08,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4252.8,
+      "end": 4254.36,
+      "detected_at": 4252.8,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4276.52,
+      "end": 4277.84,
+      "detected_at": 4276.52,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4287.96,
+      "end": 4290.08,
+      "detected_at": 4287.96,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4299.8,
+      "end": 4301.2,
+      "detected_at": 4299.8,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4309.2,
+      "end": 4310.72,
+      "detected_at": 4309.2,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4335.48,
+      "end": 4336.84,
+      "detected_at": 4335.48,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4429.799999999999,
+      "end": 4431.84,
+      "detected_at": 4429.799999999999,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4446.88,
+      "end": 4449.360000000001,
+      "detected_at": 4446.88,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4466.68,
+      "end": 4468.4,
+      "detected_at": 4466.68,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4500.92,
+      "end": 4502.64,
+      "detected_at": 4500.92,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4531.24,
+      "end": 4533.24,
+      "detected_at": 4531.24,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4544.96,
+      "end": 4547.08,
+      "detected_at": 4544.96,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4595.16,
+      "end": 4595.88,
+      "detected_at": 4595.16,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4678.76,
+      "end": 4679.76,
+      "detected_at": 4678.76,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4714.5599999999995,
+      "end": 4716.5599999999995,
+      "detected_at": 4714.5599999999995,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4736.96,
+      "end": 4737.96,
+      "detected_at": 4736.96,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4763.36,
+      "end": 4764.36,
+      "detected_at": 4763.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4777.36,
+      "end": 4778.36,
+      "detected_at": 4777.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4787.36,
+      "end": 4788.36,
+      "detected_at": 4787.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4801.36,
+      "end": 4803.36,
+      "detected_at": 4801.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 4814.36,
+      "end": 4816.36,
+      "detected_at": 4814.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5068.36,
+      "end": 5069.36,
+      "detected_at": 5068.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5092.36,
+      "end": 5093.36,
+      "detected_at": 5092.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5171.36,
+      "end": 5173.36,
+      "detected_at": 5171.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5195.36,
+      "end": 5197.36,
+      "detected_at": 5195.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5249.36,
+      "end": 5250.36,
+      "detected_at": 5249.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5271.36,
+      "end": 5272.36,
+      "detected_at": 5271.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5317.36,
+      "end": 5319.36,
+      "detected_at": 5317.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5400.36,
+      "end": 5402.36,
+      "detected_at": 5400.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5429.36,
+      "end": 5431.36,
+      "detected_at": 5429.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5453.36,
+      "end": 5455.36,
+      "detected_at": 5453.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5869.36,
+      "end": 5870.36,
+      "detected_at": 5869.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5888.36,
+      "end": 5890.36,
+      "detected_at": 5888.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5905.36,
+      "end": 5906.36,
+      "detected_at": 5905.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5929.36,
+      "end": 5930.36,
+      "detected_at": 5929.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5945.36,
+      "end": 5946.36,
+      "detected_at": 5945.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5963.36,
+      "end": 5964.36,
+      "detected_at": 5963.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5976.36,
+      "end": 5978.36,
+      "detected_at": 5976.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 5986.36,
+      "end": 5987.36,
+      "detected_at": 5986.36,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6174.360000000001,
+      "end": 6176.360000000001,
+      "detected_at": 6174.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6225.360000000001,
+      "end": 6226.360000000001,
+      "detected_at": 6225.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6264.360000000001,
+      "end": 6265.360000000001,
+      "detected_at": 6264.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6273.360000000001,
+      "end": 6274.360000000001,
+      "detected_at": 6273.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6311.360000000001,
+      "end": 6312.360000000001,
+      "detected_at": 6311.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6320.360000000001,
+      "end": 6322.360000000001,
+      "detected_at": 6320.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6337.360000000001,
+      "end": 6339.360000000001,
+      "detected_at": 6337.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6351.360000000001,
+      "end": 6352.360000000001,
+      "detected_at": 6351.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6376.360000000001,
+      "end": 6378.360000000001,
+      "detected_at": 6376.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6391.360000000001,
+      "end": 6392.360000000001,
+      "detected_at": 6391.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6404.360000000001,
+      "end": 6406.360000000001,
+      "detected_at": 6404.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6415.360000000001,
+      "end": 6416.360000000001,
+      "detected_at": 6415.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6422.360000000001,
+      "end": 6424.360000000001,
+      "detected_at": 6422.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6435.360000000001,
+      "end": 6437.360000000001,
+      "detected_at": 6435.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6446.360000000001,
+      "end": 6448.360000000001,
+      "detected_at": 6446.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6456.360000000001,
+      "end": 6457.360000000001,
+      "detected_at": 6456.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6467.360000000001,
+      "end": 6469.360000000001,
+      "detected_at": 6467.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6481.360000000001,
+      "end": 6482.360000000001,
+      "detected_at": 6481.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6517.360000000001,
+      "end": 6518.360000000001,
+      "detected_at": 6517.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6529.360000000001,
+      "end": 6531.360000000001,
+      "detected_at": 6529.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6556.360000000001,
+      "end": 6557.360000000001,
+      "detected_at": 6556.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6567.360000000001,
+      "end": 6568.360000000001,
+      "detected_at": 6567.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6612.360000000001,
+      "end": 6614.360000000001,
+      "detected_at": 6612.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6644.360000000001,
+      "end": 6645.360000000001,
+      "detected_at": 6644.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6669.360000000001,
+      "end": 6671.360000000001,
+      "detected_at": 6669.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6696.360000000001,
+      "end": 6698.360000000001,
+      "detected_at": 6696.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6783.360000000001,
+      "end": 6785.360000000001,
+      "detected_at": 6783.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6808.360000000001,
+      "end": 6809.360000000001,
+      "detected_at": 6808.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6823.360000000001,
+      "end": 6825.360000000001,
+      "detected_at": 6823.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6834.360000000001,
+      "end": 6835.360000000001,
+      "detected_at": 6834.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6843.360000000001,
+      "end": 6844.360000000001,
+      "detected_at": 6843.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6868.360000000001,
+      "end": 6870.360000000001,
+      "detected_at": 6868.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6885.360000000001,
+      "end": 6886.360000000001,
+      "detected_at": 6885.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6895.360000000001,
+      "end": 6897.360000000001,
+      "detected_at": 6895.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6912.360000000001,
+      "end": 6913.360000000001,
+      "detected_at": 6912.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6934.360000000001,
+      "end": 6936.360000000001,
+      "detected_at": 6934.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6975.360000000001,
+      "end": 6976.360000000001,
+      "detected_at": 6975.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 6998.360000000001,
+      "end": 7000.360000000001,
+      "detected_at": 6998.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 7020.360000000001,
+      "end": 7022.360000000001,
+      "detected_at": 7020.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 7031.360000000001,
+      "end": 7032.360000000001,
+      "detected_at": 7031.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 7060.360000000001,
+      "end": 7061.360000000001,
+      "detected_at": 7060.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 7090.360000000001,
+      "end": 7091.360000000001,
+      "detected_at": 7090.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 7098.360000000001,
+      "end": 7100.360000000001,
+      "detected_at": 7098.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 7108.360000000001,
+      "end": 7109.360000000001,
+      "detected_at": 7108.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 7154.360000000001,
+      "end": 7156.360000000001,
+      "detected_at": 7154.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 7168.360000000001,
+      "end": 7169.360000000001,
+      "detected_at": 7168.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 7176.360000000001,
+      "end": 7177.360000000001,
+      "detected_at": 7176.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 7247.360000000001,
+      "end": 7249.360000000001,
+      "detected_at": 7247.360000000001,
+      "confidence": 0.8
+    },
+    {
+      "label": "chronique",
+      "start": 7256.360000000001,
+      "end": 7258.360000000001,
+      "detected_at": 7256.360000000001,
+      "confidence": 0.8
+    }
+  ],
+  "missed_chronicles": [
+    {
+      "label": "00.le-journal-de-7h.m4a",
+      "start": 8.347,
+      "end": 797.147
+    },
+    {
+      "label": "01.les-80.m4a",
+      "start": 797.304,
+      "end": 894.904
+    },
+    {
+      "label": "02.le-grand-reportage-de-france-inter.m4a",
+      "start": 950.053,
+      "end": 1182.653
+    },
+    {
+      "label": "03.l-edito-medias.m4a",
+      "start": 1182.768,
+      "end": 1341.768
+    },
+    {
+      "label": "04.musicaline.m4a",
+      "start": 1343.0,
+      "end": 1582.0
+    },
+    {
+      "label": "05.le-journal-de-7h30.m4a",
+      "start": 1764.111,
+      "end": 2497.511
+    },
+    {
+      "label": "06.l-edito-politique.m4a",
+      "start": 2537.104,
+      "end": 2720.504
+    },
+    {
+      "label": "07.l-edito-eco.m4a",
+      "start": 2729.845,
+      "end": 2887.445
+    },
+    {
+      "label": "08.l-invite-de-7h50.m4a",
+      "start": 2887.368,
+      "end": 3503.768
+    },
+    {
+      "label": "09.le-billet-de-bertrand-chameroy.m4a",
+      "start": 3505.669,
+      "end": 3639.869
+    },
+    {
+      "label": "10.le-journal-de-8h.m4a",
+      "start": 3648.337,
+      "end": 4780.537
+    },
+    {
+      "label": "11.geopolitique.m4a",
+      "start": 4780.64,
+      "end": 5001.84
+    },
+    {
+      "label": "12.l-invite-de-8h20-le-grand-entretien.m4a",
+      "start": 5069.432,
+      "end": 6409.032
+    },
+    {
+      "label": "13.dans-l-oeil-de.m4a",
+      "start": 6465.312,
+      "end": 6809.712
+    },
+    {
+      "label": "14.un-monde-nouveau.m4a",
+      "start": 6809.629,
+      "end": 6994.829
+    },
+    {
+      "label": "15.le-billet-de-mosimann.m4a",
+      "start": 6994.949,
+      "end": 7250.749
+    }
+  ],
+  "metrics": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1_score": 0.0,
+    "avg_latency": 0.0,
+    "avg_iou": 0.0,
+    "overall_score": 0.0
+  }
+}

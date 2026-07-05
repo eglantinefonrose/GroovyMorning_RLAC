@@ -14,8 +14,9 @@ def calculate_iou(pred_start, pred_end, gt_start, gt_end):
     return intersection / union if union > 0 else 0.0
 
 class Evaluator:
-    def __init__(self, iou_threshold=0.5):
+    def __init__(self, iou_threshold=0.5, label_agnostic=False):
         self.iou_threshold = iou_threshold
+        self.label_agnostic = label_agnostic
 
     def evaluate(self, predictions, ground_truth):
         """
@@ -46,6 +47,10 @@ class Evaluator:
             
             for i, gt in enumerate(ground_truth):
                 if i in matched_gt_indices:
+                    continue
+                
+                # Check label matching unless label_agnostic is True
+                if not self.label_agnostic and pred.get('label') != gt.get('label'):
                     continue
                 
                 iou = calculate_iou(pred['start'], pred['end'], gt['start'], gt['end'])

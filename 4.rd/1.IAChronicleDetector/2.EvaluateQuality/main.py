@@ -130,11 +130,36 @@ def list_available_methods():
         for m in sorted(methods):
             print(f" - {m}")
 
+def print_report(method_name, results):
+    print("\n" + "="*40)
+    print(f" EVALUATION REPORT: {method_name} ")
+    print("="*40)
+    metrics = results["metrics"]
+    print(f"Precision:    {metrics['precision']:.2f}")
+    print(f"Recall:       {metrics['recall']:.2f}")
+    print(f"F1-Score:     {metrics['f1_score']:.2f}")
+    print(f"Avg Latency:  {metrics['avg_latency']:.2f}s")
+    print(f"Avg IoU:      {metrics['avg_iou']:.2f}")
+    print(f"OVERALL SCORE: {metrics['overall_score']:.2f}/100")
+    print("="*40)
+
+def print_comparison_summary(all_results):
+    print("\n" + "!"*40)
+    print(" COMPARISON SUMMARY ")
+    print("!"*40)
+    print(f"{'Method':<15} | {'Score':<6} | {'F1':<6} | {'Latency':<8}")
+    print("-" * 45)
+    for name, res in all_results.items():
+        m = res["metrics"]
+        print(f"{name:<15} | {m['overall_score']:>6.2f} | {m['f1_score']:>6.2f} | {m['avg_latency']:>7.2f}s")
+    print("-" * 45)
+
 def main():
     parser = argparse.ArgumentParser(description="Unified Evaluation Framework")
     parser.add_argument("--audio", help="Path to audio file")
     parser.add_argument("--method", help="Method name (e.g., deepseek)")
-    parser.add_argument("--gt", help="Ground Truth file (JSON)")
+    parser.add_argument("--gt", help="Ground Truth file (JSON/TXT)")
+    parser.add_argument("--results", help="Path to a pre-existing results JSON file to evaluate")
     parser.add_argument("--buffer", type=int, default=5, help="Buffer size in seconds")
     parser.add_argument("--methods", nargs="*", help="List all available methods or run multiple methods")
     
@@ -144,7 +169,57 @@ def main():
         list_available_methods()
         return
 
-    # Determine which methods to run
+    # 1. Load Ground Truth (required for evaluation)
+    if not args.gt:
+        parser.error("--gt is required to run evaluation.")
+    gt_data = load_ground_truth(args.gt)
+    print(f"Loaded {len(gt_data)} chronicles from ground truth.")
+
+    # 2. Mode d'évaluation de résultats pré-existants
+    if args.results:
+        if not args.method:
+            parser.error("--method is required when using --results to identify the method in the matrix.")
+        
+        print(f"\n--- Evaluating Pre-existing Results for Method: {args.method} ---")
+        try:
+            with open(args.results, 'r', encoding='utf-8') as f:
+                res_data = json.load(f)
+            
+            # Extraction des détections (supporte le format deepseek ou une liste brute)
+            if isinstance(res_data, dict) and "detections" in res_data:
+                detections = res_data["detections"]
+            elif isinstance(res_data, list):
+                detections = res_data
+            else:
+                print("Error: Results file format not recognized (expected list or dict with 'detections').")
+                return
+
+            # Évaluation
+            is_label_agnostic = (args.method == "live_transcription")
+            evaluator = Evaluator(label_agnostic=is_label_agnostic)
+            results = evaluator.evaluate(detections, gt_data)
+            
+            # Report
+            print_report(args.method, results)
+            
+            # Update Matrix
+            if args.audio:
+                update_evaluation_matrix(args.method, args.audio, results["metrics"]['overall_score'])
+            else:
+                print("Warning: --audio not provided, evaluation matrix not updated.")
+                
+            # Save results
+            output_file = f"evaluated_{args.method}.json"
+            with open(output_file, "w", encoding="utf-8") as f:
+                json.dump(results, f, indent=2, ensure_ascii=False)
+            print(f"Detailed evaluation saved to {output_file}")
+            return
+            
+        except Exception as e:
+            print(f"Error evaluating results file: {e}")
+            return
+
+    # Determine which methods to run (Standard Simulation Mode)
     methods_to_run = []
     if args.methods:
         methods_to_run = args.methods
@@ -153,15 +228,11 @@ def main():
 
     if not methods_to_run:
         if args.methods is None: # --methods not used at all
-             parser.error("You must specify at least one method via --method or --methods.")
-        return # already handled above
+             parser.error("You must specify at least one method via --method or --methods, or use --results.")
+        return
 
-    if not args.audio or not args.gt:
-        parser.error("--audio and --gt are required to run evaluation.")
-
-    # 2. Load Ground Truth
-    gt_data = load_ground_truth(args.gt)
-    print(f"Loaded {len(gt_data)} chronicles from ground truth.")
+    if not args.audio:
+        parser.error("--audio is required for simulation mode.")
 
     all_results = {}
 
@@ -185,22 +256,14 @@ def main():
         print(f"Detection finished. {len(detections)} items detected.")
 
         # 4. Evaluate
-        evaluator = Evaluator()
+        # Mode label_agnostic pour live_transcription (pas de noms de chroniques)
+        is_label_agnostic = (method_name == "live_transcription")
+        evaluator = Evaluator(label_agnostic=is_label_agnostic)
         results = evaluator.evaluate(detections, gt_data)
         all_results[method_name] = results
 
         # 5. Report
-        print("\n" + "="*40)
-        print(f" EVALUATION REPORT: {method_name} ")
-        print("="*40)
-        metrics = results["metrics"]
-        print(f"Precision:    {metrics['precision']:.2f}")
-        print(f"Recall:       {metrics['recall']:.2f}")
-        print(f"F1-Score:     {metrics['f1_score']:.2f}")
-        print(f"Avg Latency:  {metrics['avg_latency']:.2f}s")
-        print(f"Avg IoU:      {metrics['avg_iou']:.2f}")
-        print(f"OVERALL SCORE: {metrics['overall_score']:.2f}/100")
-        print("="*40)
+        print_report(method_name, results)
         
         # Save results
         output_file = f"results_{method_name}.json"
@@ -209,18 +272,10 @@ def main():
         print(f"Detailed results saved to {output_file}")
 
         # 6. Matrix Update
-        update_evaluation_matrix(method_name, args.audio, metrics['overall_score'])
+        update_evaluation_matrix(method_name, args.audio, results["metrics"]['overall_score'])
 
     if len(methods_to_run) > 1:
-        print("\n" + "!"*40)
-        print(" COMPARISON SUMMARY ")
-        print("!"*40)
-        print(f"{'Method':<15} | {'Score':<6} | {'F1':<6} | {'Latency':<8}")
-        print("-" * 45)
-        for name, res in all_results.items():
-            m = res["metrics"]
-            print(f"{name:<15} | {m['overall_score']:>6.2f} | {m['f1_score']:>6.2f} | {m['avg_latency']:>7.2f}s")
-        print("-" * 45)
+        print_comparison_summary(all_results)
 
 if __name__ == "__main__":
     main()
