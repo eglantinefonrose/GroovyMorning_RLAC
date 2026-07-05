@@ -74,3 +74,5 @@ Pour l'utiliser, assurez-vous d'être connecté à votre compte WandB (`wandb lo
 Le format détecté et utilisé pour le parsing est le suivant :
 `[HH:MM:SS:mmm] - [HH:MM:SS:mmm] Nom_de_la_chronique.mp3`
 Le script extrait les deux timecodes (début et fin) et utilise le reste de la ligne comme label (en retirant les extensions `.mp3` ou `.m4a`).
+
+python evaluate_quality.py --audio "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/@assets/3.modelEvaluationData/france-inter/audio/27-05-2026.m4a" --model ast --acceleration 5.0

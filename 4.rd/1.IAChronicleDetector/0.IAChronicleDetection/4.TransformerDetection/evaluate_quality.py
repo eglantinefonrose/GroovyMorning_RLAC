@@ -4,7 +4,8 @@ import torch
 import numpy as np
 import sys
 import time
-from transformers import CamembertTokenizer, CamembertForSequenceClassification
+import json
+from transformers import CamembertTokenizer, CamembertForSequenceClassification, pipeline
 from src.utils import load_transcription, load_timecodes
 from src.evaluation import evaluate_chronicles
 
@@ -15,124 +16,198 @@ def calculate_iou(range1, range2):
     union = (end1 - start1) + (end2 - start2) - intersection
     return intersection / union if union > 0 else 0.0
 
-def simulate_live_inference(model_path, srt_path, threshold=0.5, acceleration=None):
+def save_results_json(detected_chronicles, output_path):
+    """Sauvegarde les résultats au format JSON demandé."""
+    formatted_results = []
+    for c in detected_chronicles:
+        formatted_results.append({
+            "label": "chronique", # Label générique ou basé sur le contenu si possible
+            "start": round(c['start'], 2),
+            "end": round(c['end'], 2),
+            "detected_at": round(c['detected_at'], 2),
+            "confidence": round(c['conf'], 3)
+        })
+    
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(formatted_results, f, indent=2, ensure_ascii=False)
+    print(f"\n✅ Résultats sauvegardés dans : {output_path}")
+
+def evaluate_quality_live_kyutai(model_path, audio_path, tc_path=None, threshold=0.5, acceleration=None, output_json=None):
     """
-    Simule une détection en direct avec Transformer.
+    Évaluation avec transcription en live via Kyutai STT et détection en live via Camembert.
     """
+    if not os.path.exists(model_path):
+        print(f"Erreur : Modèle chronicle non trouvé à {model_path}")
+        return
+
+    # 1. Chargement de Kyutai STT
+    print(f"Chargement du modèle Kyutai STT (kyutai/stt-1b-en_fr-trfs)...")
+    device = "cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu")
+    
+    try:
+        stt_pipe = pipeline(
+            "automatic-speech-recognition",
+            model="kyutai/stt-1b-en_fr-trfs",
+            torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
+            device=device,
+        )
+    except Exception as e:
+        print(f"Erreur lors du chargement de Kyutai STT : {e}")
+        return
+
+    # 2. Chargement du Classifier Chronicle (Camembert)
     tokenizer = CamembertTokenizer.from_pretrained(model_path)
     model = CamembertForSequenceClassification.from_pretrained(model_path)
     model.eval()
-    device = torch.device("cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu"))
     model.to(device)
 
-    segments = load_transcription(srt_path)
-    print(f"Simulation live sur {len(segments)} segments...")
-    if acceleration:
-        print(f"Accélération : {acceleration}x")
-        start_wall_time = time.time()
+    print(f"\n--- DÉBUT DÉTECTION LIVE (Kyutai STT + Camembert) ---")
     
-    all_probs = []
-    window_size = 2 # Context passé uniquement pour le live
-    
-    with torch.no_grad():
-        for i in range(len(segments)):
-            if acceleration and acceleration > 0:
-                T = segments[i]['start']
-                target_wall_time = T / acceleration
-                elapsed = time.time() - start_wall_time
-                if target_wall_time > elapsed:
-                    time.sleep(target_wall_time - elapsed)
+    # 3. Traitement streaming
+    result = stt_pipe(audio_path, chunk_length_s=10, stride_length_s=2, return_timestamps=True)
+    chunks = result.get('chunks', [])
 
-            # En live strict, on n'a que le passé
-            start_idx = max(0, i - window_size)
-            context_texts = [segments[j]['text'] for j in range(start_idx, i + 1)]
-            context_str = " [SEP] ".join(context_texts)
-            
-            encodings = tokenizer(
-                context_str,
-                padding=True,
-                truncation=True,
-                max_length=256,
-                return_tensors="pt"
-            ).to(device)
-            
+    segments_history = []
+    detected_chronicles = []
+    current_chronicle = None
+    window_size = 2
+    
+    start_sim_time = time.time()
+    
+    for chunk in chunks:
+        text = chunk['text'].strip()
+        if not text: continue
+        
+        ts = chunk['timestamp']
+        s_start, s_end = ts[0], ts[1]
+
+        # Simulation de l'écoulement du temps
+        if acceleration and acceleration > 0:
+            target_wall_time = s_end / acceleration
+            elapsed = time.time() - start_sim_time
+            if target_wall_time > elapsed:
+                time.sleep(target_wall_time - elapsed)
+
+        segments_history.append({'start': s_start, 'end': s_end, 'text': text})
+        
+        # Inférence Camembert (contexte passé uniquement)
+        start_idx = max(0, len(segments_history) - 1 - window_size)
+        context_str = " [SEP] ".join([segments_history[j]['text'] for j in range(start_idx, len(segments_history))])
+        
+        encodings = tokenizer(context_str, padding=True, truncation=True, max_length=256, return_tensors="pt").to(device)
+        with torch.no_grad():
             outputs = model(**encodings)
             prob = torch.softmax(outputs.logits, dim=1)[:, 1].item()
-            all_probs.append(prob)
 
-    detected_chronicles = []
-    current = None
-    for i, p in enumerate(all_probs):
-        if p >= threshold:
-            if current is None:
-                current = {'start': segments[i]['start'], 'end': segments[i]['end'], 'conf': p}
+        # Logique de détection
+        if prob >= threshold:
+            if current_chronicle is None:
+                current_chronicle = {'start': s_start, 'end': s_end, 'conf': prob}
             else:
-                current['end'] = segments[i]['end']
-                current['conf'] = max(current['conf'], p)
+                current_chronicle['end'] = s_end
+                current_chronicle['conf'] = max(current_chronicle['conf'], prob)
         else:
-            if current:
-                if current['end'] - current['start'] >= 5.0:
-                    detected_chronicles.append(current)
-                current = None
-                
-    if current and current['end'] - current['start'] >= 5.0:
-        detected_chronicles.append(current)
+            if current_chronicle:
+                if current_chronicle['end'] - current_chronicle['start'] >= 5.0:
+                    # On note le moment où la chronique est validée (fin de la détection)
+                    current_chronicle['detected_at'] = s_end
+                    detected_chronicles.append(current_chronicle)
+                    print(f"✨ Chronique détectée ! [{current_chronicle['start']:.1f}s - {current_chronicle['end']:.1f}s] à {s_end:.1f}s")
+                current_chronicle = None
         
-    return detected_chronicles
+        status = "🔴 [CHRONIQUE]" if prob >= threshold else "           "
+        print(f"[{s_start:6.1f}s - {s_end:6.1f}s] {status} | Prob: {prob:.2f} | {text[:50]}...")
 
-def evaluate_quality(model_path, audio_path, tc_path, live_sim=True, acceleration=None):
-    if not os.path.exists(model_path):
-        print(f"Erreur : Modèle non trouvé.")
-        return
+    if current_chronicle and current_chronicle['end'] - current_chronicle['start'] >= 5.0:
+        current_chronicle['detected_at'] = chunks[-1]['timestamp'][1]
+        detected_chronicles.append(current_chronicle)
 
-    # For this script, audio_path seems to be used as srt_path in evaluate_quality context if passed as --audio
-    # but transcribe_audio is called.
-    from detect import transcribe_audio
-    print(f"Transcription de {audio_path}...")
+    # Sauvegarde JSON
+    if output_json:
+        save_results_json(detected_chronicles, output_json)
+
+    # 4. Évaluation si GT fourni
+    if tc_path and os.path.exists(tc_path):
+        ground_truth = load_timecodes(tc_path)
+        print(f"\n🔍 Résultats vs Ground Truth ({len(ground_truth)} attendues) :")
+        for i, gt in enumerate(ground_truth, 1):
+            best_iou = 0
+            for p in detected_chronicles:
+                iou = calculate_iou((p['start'], p['end']), gt)
+                best_iou = max(best_iou, iou)
+            res = "OK" if best_iou > 0.1 else "MISS"
+            print(f"  Chronique GT {i} ({gt[0]:.1f}s) : {res} (Max IOU: {best_iou:.2f})")
+
+        metrics = evaluate_chronicles(detected_chronicles, ground_truth)
+        final_score = (metrics['cardinality_score']*0.4 + metrics['alignment_score']*0.6)*100
+        print(f"\n📊 NOTE FINALE QUALITÉ : {final_score:.1f}/100")
+
+def evaluate_quality_whisper(model_path, audio_path, tc_path=None, live_sim=True, acceleration=None, output_json=None):
+    """Ancienne méthode Whisper avec support JSON et option GT."""
+    from detect import transcribe_audio, predict_chroniques
+    print(f"Transcription complète avec Whisper...")
     segments = transcribe_audio(audio_path)
-
-    mode_str = "LIVE SIMULÉ" if live_sim else "BATCH"
-    print(f"--- Évaluation de Qualité ({mode_str}) pour Transformer ---")
     
     if live_sim:
-        # Instead of calling predict_chroniques which might not have acceleration,
-        # we can use our simulate_live_inference or implement it here.
-        # But wait, predict_chroniques is what was there.
-        # Let's use our simulate_live_inference if we want to support acceleration.
-        predicted_chronicles = simulate_live_inference(model_path, audio_path, acceleration=acceleration)
+        tokenizer = CamembertTokenizer.from_pretrained(model_path)
+        model = CamembertForSequenceClassification.from_pretrained(model_path)
+        model.eval()
+        device = torch.device("cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu"))
+        model.to(device)
+        
+        all_probs = []
+        window_size = 2
+        for i in range(len(segments)):
+            start_idx = max(0, i - window_size)
+            context_str = " [SEP] ".join([segments[j]['text'] for j in range(start_idx, i + 1)])
+            encodings = tokenizer(context_str, padding=True, truncation=True, max_length=256, return_tensors="pt").to(device)
+            with torch.no_grad():
+                outputs = model(**encodings)
+                all_probs.append(torch.softmax(outputs.logits, dim=1)[:, 1].item())
+        
+        predicted_chronicles = []
+        current = None
+        for i, p in enumerate(all_probs):
+            if p >= 0.5:
+                if current is None: current = {'start': segments[i]['start'], 'end': segments[i]['end'], 'conf': p}
+                else: current['end'] = segments[i]['end']; current['conf'] = max(current['conf'], p)
+            else:
+                if current:
+                    if current['end'] - current['start'] >= 5.0:
+                        current['detected_at'] = segments[i]['end']
+                        predicted_chronicles.append(current)
+                    current = None
+        if current:
+            current['detected_at'] = segments[-1]['end']
+            predicted_chronicles.append(current)
     else:
-        from detect import predict_chroniques
         predicted_chronicles = predict_chroniques(model_path, segments)
-
-    # 3. Calculer les métriques
-    ground_truth = load_timecodes(tc_path)
-    print(f"\n🔍 Comparaison détaillée :")
-    pred_used = set()
-    for i, gt in enumerate(ground_truth, 1):
-        best_iou = 0
-        best_p = None
         for p in predicted_chronicles:
-            iou = calculate_iou((p['start'], p['end']), gt)
-            if iou > best_iou:
-                best_iou = iou
-                best_p = p
+            p['detected_at'] = p['end'] # Par défaut en batch
+            p['conf'] = p.get('confidence', 0.5)
 
-        if best_p:
-            latency = max(0, best_p['start'] - gt[0])
-            print(f"GT {i}: {gt[0]:.1f}s -> OK (Latence: {latency:.1f}s)")
-        else:
-            print(f"GT {i}: {gt[0]:.1f}s -> MISS")
+    if output_json:
+        save_results_json(predicted_chronicles, output_json)
 
-    metrics = evaluate_chronicles(predicted_chronicles, ground_truth)
-    print(f"\n📊 NOTE FINALE : {(metrics['cardinality_score']*0.4 + metrics['alignment_score']*0.6)*100:.1f}/100")
-
+    if tc_path and os.path.exists(tc_path):
+        ground_truth = load_timecodes(tc_path)
+        metrics = evaluate_chronicles(predicted_chronicles, ground_truth)
+        final_score = (metrics['cardinality_score']*0.4 + metrics['alignment_score']*0.6)*100
+        print(f"\n📊 NOTE FINALE QUALITÉ (Whisper) : {final_score:.1f}/100")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Détection de chroniques en live")
     parser.add_argument("--model", default="models/camembert_chronicle")
     parser.add_argument("--audio", required=True)
-    parser.add_argument("--gt", required=True)
+    parser.add_argument("--gt", default=None, help="Fichier de ground truth (optionnel)")
+    parser.add_argument("--kyutai", action="store_true")
     parser.add_argument("--no-live", action="store_true")
-    parser.add_argument("--acceleration", type=float, default=None, help="Acceleration factor for live simulation")
+    parser.add_argument("--acceleration", type=float, default=None)
+    parser.add_argument("--threshold", type=float, default=0.5)
+    parser.add_argument("--output", default="results_detection.json", help="Chemin du fichier JSON de sortie")
     args = parser.parse_args()
-    evaluate_quality(args.model, args.audio, args.gt, live_sim=not args.no_live, acceleration=args.acceleration)
+    
+    if args.kyutai:
+        evaluate_quality_live_kyutai(args.model, args.audio, args.gt, threshold=args.threshold, acceleration=args.acceleration, output_json=args.output)
+    else:
+        evaluate_quality_whisper(args.model, args.audio, args.gt, live_sim=not args.no_live, acceleration=args.acceleration, output_json=args.output)
