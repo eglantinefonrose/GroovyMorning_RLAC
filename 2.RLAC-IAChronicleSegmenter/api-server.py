@@ -64,7 +64,7 @@ def run_segmenter():
     print(f"[{datetime.now()}] Lancement du segmenter (Mode SIMU: {os.environ.get('SIMU', 'false')}, Date: {target_date})...")
 
     # Tuer l'ancien segmenter s'il tourne
-    subprocess.run(["pkill", "-f", "live_radio_segmenter.py"], stderr=subprocess.DEVNULL)
+    stop_segmenter()
 
     # Lancer le nouveau segmenter (dans le dossier src/)
     # On s'assure de passer l'environnement actuel (contenant SIMU=true)
@@ -74,6 +74,11 @@ def run_segmenter():
     )
 
     print(f"[{datetime.now()}] Segmenter lancé avec PID: {segmenter_process.pid}")
+
+def stop_segmenter():
+    """Arrête le segmenter s'il est en cours d'exécution"""
+    print(f"[{datetime.now()}] Arrêt du segmenter...")
+    subprocess.run(["pkill", "-f", "live_radio_segmenter.py"], stderr=subprocess.DEVNULL)
 
 def scheduler_loop():
     """Boucle infinie pour exécuter les tâches planifiées"""
@@ -87,11 +92,14 @@ def update_scheduler(hour, minute):
     schedule.clear()
     time_str = f"{int(hour):02d}:{int(minute):02d}"
     schedule.every().day.at(time_str).do(run_segmenter)
+    # On garde l'arrêt à 09:10 même si on change l'heure de début
+    schedule.every().day.at("09:10").do(stop_segmenter)
     print(f"⏰ [Scheduler] Prochain segmenter programmé à {time_str}")
 
 # Initialisation du scheduler
-# Par défaut à 09:30 comme dans l'ancien scheduler.py
-schedule.every().day.at("09:30").do(run_segmenter)
+# Lancement à 06:58 et arrêt à 09:10
+schedule.every().day.at("06:58").do(run_segmenter)
+schedule.every().day.at("09:10").do(stop_segmenter)
 
 # Lancement du thread scheduler
 threading.Thread(target=scheduler_loop, daemon=True).start()

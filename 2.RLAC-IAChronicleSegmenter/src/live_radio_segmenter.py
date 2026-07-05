@@ -378,6 +378,7 @@ class UnifiedLiveSegmenter:
         threading.Thread(target=self.transcription_worker, daemon=True).start()
         
         source = None
+        self.process = None # Processus ffmpeg pour le live
         try:
             if simu:
                 print(f"📁 Mode SIMULATION : écoute sur {self.pipe_path}")
@@ -385,15 +386,29 @@ class UnifiedLiveSegmenter:
                     os.mkfifo(self.pipe_path)
                 source = open(self.pipe_path, 'rb')
             else:
-                print("🎤 Mode LIVE : écoute sur le flux radio")
-                # Ici on pourrait ajouter le support d'URL stream
-                return
+                print("🎤 Mode LIVE : écoute sur le flux radio France Inter")
+                stream_url = "https://stream.radiofrance.fr/franceinter/franceinter_hifi.m3u8"
+                cmd = [
+                    'ffmpeg',
+                    '-i', stream_url,
+                    '-f', 's16le',
+                    '-ac', '1',
+                    '-ar', str(self.sample_rate),
+                    '-loglevel', 'error',
+                    '-'
+                ]
+                self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                source = self.process.stdout
 
             while self.running:
                 raw_data = source.read(self.chunk_size * 2)
                 if not raw_data:
-                    time.sleep(0.01)
-                    continue
+                    if simu:
+                        time.sleep(0.01)
+                        continue
+                    else:
+                        print("⚠️ Fin du flux live ou erreur ffmpeg.")
+                        break
                 
                 chunk = np.frombuffer(raw_data, dtype=np.int16).astype(np.float32) / 32768.0
                 if len(chunk) > 0:
@@ -405,9 +420,15 @@ class UnifiedLiveSegmenter:
             print(f"\n❌ Erreur pendant l'exécution : {e}")
         finally: 
             self.running = False
-            if hasattr(self, 'process'):
+            if self.process:
+                print("🧹 Arrêt du processus ffmpeg...")
                 self.process.terminate()
-            if source and hasattr(source, 'close'):
+                try:
+                    self.process.wait(timeout=2)
+                except subprocess.TimeoutExpired:
+                    self.process.kill()
+            
+            if source and hasattr(source, 'close') and simu: # On ne ferme stdout que si c'est un fichier
                 source.close()
             
             if self.last_chronicle_name:
