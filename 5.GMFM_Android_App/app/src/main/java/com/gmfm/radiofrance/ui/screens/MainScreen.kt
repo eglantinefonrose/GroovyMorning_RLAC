@@ -67,9 +67,19 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     var isPlayerOpen by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+    var showOnboarding by remember { mutableStateOf(false) }
+    var hasShownOnboardingThisSession by remember { mutableStateOf(false) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+
+    val isLoadingData by viewModel.isLoading.collectAsState()
+
+    LaunchedEffect(chronicles, isLoadingData) {
+        if (!isLoadingData && chronicles.isEmpty() && !hasShownOnboardingThisSession) {
+            showOnboarding = true
+            hasShownOnboardingThisSession = true
+        }
+    }
 
     BackHandler(enabled = isPlayerOpen) {
         isPlayerOpen = false
@@ -237,8 +247,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                     ) 
                 }
                 composable(Screen.Live.route) { 
-                    val isLoadingData by viewModel.isLoading.collectAsState()
-                    
                     LiveView(
                         chronicles = chronicles,
                         isLoading = isLoadingData,
@@ -377,6 +385,10 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                     }
                 }
             )
+        }
+
+        if (showOnboarding) {
+            OnboardingCarousel(onDismiss = { showOnboarding = false })
         }
 
         // Full Screen Player

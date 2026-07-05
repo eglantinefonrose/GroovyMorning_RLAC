@@ -113,8 +113,8 @@ class MainViewModel @Inject constructor(
                 Log.i("GMFM_Data", "🌐 Appel API Chroniques: $chroniclesUrl")
                 
                 val response = apiService.getUserChronicles(chroniclesUrl)
-                _chronicles.value = response
-                Log.i("GMFM_Data", "✅ ${response.size} chroniques récupérées")
+                _chronicles.value = response.filter { (it.startTime ?: -1) >= 0 }
+                Log.i("GMFM_Data", "✅ ${_chronicles.value.size} chroniques filtrées (enregistrables) récupérées")
                 
             } catch (e: Exception) {
                 Log.e("GMFM_Data", "Error fetching data: ${e.message}", e)

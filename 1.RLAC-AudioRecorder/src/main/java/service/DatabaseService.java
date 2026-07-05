@@ -200,7 +200,7 @@ public class DatabaseService {
         } catch (SQLException e) {
             logger.error("Erreur lors de la récupération de la config pour l'utilisateur {}", userId, e);
         }
-        return new UserConfig(10, 10); // Default values
+        return new UserConfig(7, 0); // Default values to 07:00
     }
 
     public static class UserConfig {
