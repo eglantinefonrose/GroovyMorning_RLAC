@@ -1,5 +1,5 @@
 """
-Détection de début de chroniques en flux simulé via DeepSeek avec Validation.
+Détection de début de chroniques en flux réel ou simulé via DeepSeek avec Validation.
 """
 
 import os
@@ -8,7 +8,9 @@ import re
 import time
 import sys
 import argparse
+import signal
 import requests
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 # Charger les variables d'environnement
@@ -26,83 +28,125 @@ if not DEEPSEEK_API_KEY:
     print("[ERREUR] La variable d'environnement DEEPSEEK_API_KEY n'est pas définie.")
     sys.exit(1)
 
-def get_sentences_from_audio(audio_path, provider="whisper", model_size="base"):
-    """Transcrit l'audio et retourne une liste de phrases."""
-    print(f"Transcription de l'audio ({provider}) : {audio_path}...")
-    transcriber = Transcriber(provider=provider, model_size=model_size)
-    sentences = []
-    for segment in transcriber.transcribe_stream(audio_path):
-        text = segment["text"].strip()
-        if text:
-            sentences.append(text)
-    return sentences
+# Global for signal handling
+ALL_DETECTIONS = []
+OUTPUT_JSON = "detections_live_deepseek.json"
+LOG_FILE = "session_log.txt"
+
+def signal_handler(sig, frame):
+    print("\n[INFO] Interruption reçue. Sauvegarde des résultats...")
+    save_results()
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+
+def save_results():
+    if ALL_DETECTIONS:
+        output_data = {
+            "detections": [
+                {
+                    "label": d["chronique"],
+                    "start": d["start"],
+                    "end": d["detected_at"], 
+                    "detected_at": d["detected_at"],
+                    "confidence": 0.9,
+                    "wall_time": d["wall_time"],
+                    "reasoning": d.get("reasoning")
+                } for d in ALL_DETECTIONS
+            ],
+            "metrics": {
+                "total_detected": len(ALL_DETECTIONS)
+            }
+        }
+        with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
+            json.dump(output_data, f, ensure_ascii=False, indent=2)
+        print(f"[OK] Résultats détaillés sauvegardés dans {OUTPUT_JSON}")
+    else:
+        print("[INFO] Aucune détection à sauvegarder.")
 
 def get_sentences_from_file(file_path):
-    """Lit le fichier texte et retourne une liste de phrases."""
+    """Lit le fichier texte et retourne un générateur de phrases."""
     print(f"Lecture du fichier texte : {file_path}")
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             full_text = f.read()
     except FileNotFoundError:
         print(f"Erreur : le fichier {file_path} est introuvable.")
-        return []
+        return
     
-    # Découpage simple en phrases
     sentences = re.split(r'(?<=[.!?])\s+', full_text)
-    return [s.strip() for s in sentences if s.strip()]
+    for s in sentences:
+        if s.strip():
+            yield {"text": s.strip(), "start": 0} # Pas de timestamp pour le texte simple
 
-def simulate_stream(sentences, detector, validator, start_time="07:00"):
-    """Simule l'arrivée des phrases une par une."""
-    if not sentences:
-        print("Aucune phrase à traiter.")
-        return []
-    
-    print(f"Simulation lancée : {len(sentences)} phrases à traiter.")
+def process_stream(segment_gen, detector, validator, start_time="07:00", is_audio=True):
+    """Traite les segments de transcription un par un."""
     print("-" * 100)
     print(f"{'HEURE':<8} | {'CHRONIQUE':<25} | {'ÉCART':<8} | {'STATUT'}")
     print("-" * 100)
     
-    detections = []
-    # Pour la simulation, on simule une progression de 5 secondes par phrase.
-    simulated_seconds = 0
+    with open(LOG_FILE, "w", encoding="utf-8") as log_f:
+        simulated_seconds = 0
+        phrase_count = 0
 
-    for i, current_sentence in enumerate(sentences):
-        result = detector.analyze_sentence(current_sentence)
-        simulated_seconds += 5 # Estimation
-        
-        if result.get("detecte"):
-            chronique_name = result.get("chronique")
+        for segment in segment_gen:
+            phrase_count += 1
+            current_sentence = segment["text"]
             
-            # Validation via la grille
-            is_valid, status, wall_time, diff_str = validator.validate(
-                chronique_name, 
-                simulated_seconds, 
-                start_time
-            )
+            # Affichage en temps réel de la phrase
+            # On utilise \r pour écraser la ligne si c'est du live ? Non, on veut garder l'historique.
+            print(f"> {current_sentence}")
+            log_f.write(f"Traitement phrase {phrase_count}: {current_sentence}\n")
+            log_f.flush()
+
+            # Analyse via DeepSeek
+            result = detector.analyze_sentence(current_sentence)
             
-            print(f"{wall_time:<8} | {chronique_name[:25]:<25} | {diff_str:<8} | {status}")
+            # Si c'est de l'audio, on utilise le timestamp réel, sinon on estime
+            if is_audio and "start" in segment and segment["start"] is not None:
+                simulated_seconds = segment["start"]
+            else:
+                simulated_seconds += 5 # Estimation pour le texte
             
-            if is_valid:
-                detections.append({
-                    "index": i,
-                    "wall_time": wall_time,
-                    "chronique": chronique_name,
-                    "simulated_seconds": simulated_seconds,
-                    "result": result
-                })
+            if result.get("detecte"):
+                chronique_name = result.get("chronique")
+                reasoning = result.get("raisonnement") or result.get("reasoning")
+                
+                # Validation via la grille
+                is_valid, status, wall_time, diff_str = validator.validate(
+                    chronique_name, 
+                    simulated_seconds, 
+                    start_time
+                )
+                
+                msg = f"[DÉTECTION] 🔔 {chronique_name} | {status} | {wall_time} ({diff_str})"
+                print(f"\033[92m{msg}\033[0m") # En vert
+                log_f.write(f"{msg}\nReasoning: {reasoning}\n")
+                log_f.flush()
+                
+                if is_valid:
+                    ALL_DETECTIONS.append({
+                        "wall_time": wall_time,
+                        "chronique": chronique_name,
+                        "start": segment.get("start", simulated_seconds),
+                        "detected_at": segment.get("end", simulated_seconds + 5.0),
+                        "reasoning": reasoning
+                    })
             
-    print(f"\nFin de la simulation. {len(detections)} chroniques validées.")
-    return detections
+    print(f"\nFin du flux. {len(ALL_DETECTIONS)} chroniques validées.")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Détection de chroniques (Simulation ou Audio)")
-    parser.add_argument("--audio", help="Chemin vers un fichier audio à transcrire et analyser")
-    parser.add_argument("--file", default="full_show_transcription.txt", help="Fichier texte de transcription (par défaut: full_show_transcription.txt)")
-    parser.add_argument("--provider", default="whisper", choices=["whisper", "kyutai", "kyutai_mlx"], help="Fournisseur de transcription (whisper, kyutai ou kyutai_mlx)")
-    parser.add_argument("--model", default="base", help="Modèle Whisper (si --audio est utilisé)")
+    parser = argparse.ArgumentParser(description="Détection de chroniques Live ou Simulation")
+    parser.add_argument("--audio", help="Chemin vers un fichier audio (ou '-' pour stdin)")
+    parser.add_argument("--file", help="Fichier texte de transcription")
+    parser.add_argument("--provider", default="kyutai", choices=["whisper", "kyutai", "kyutai_mlx", "kyutai_stt"], help="Fournisseur de transcription")
+    parser.add_argument("--model", default="base", help="Modèle Whisper")
     parser.add_argument("--start-time", default="07:00", help="Heure de début de l'émission (ex: 07:00)")
+    parser.add_argument("--output", default="detections_live_deepseek.json", help="Fichier JSON de sortie")
+    parser.add_argument("--language", default="fr", help="Langue de transcription (ex: fr, en)")
     
     args = parser.parse_args()
+    OUTPUT_JSON = args.output
 
     # 1. Chargement dynamique des chroniques
     print("Chargement dynamique des chroniques France Inter...")
@@ -116,35 +160,40 @@ if __name__ == "__main__":
             {"time": "08h20", "title": "L'invité de 8h20"}
         ]
 
-    # 2. Acquisition des phrases
-    if args.audio:
-        sentences = get_sentences_from_audio(args.audio, args.provider, args.model)
-    else:
-        sentences = get_sentences_from_file(args.file)
-
-    # 3. Initialisation des composants et simulation
+    # 2. Initialisation des composants
     detector = ChronicleDetector(CHRONIQUES_DATA)
     validator = ChronicleValidator(CHRONIQUES_DATA)
 
-    all_detections = simulate_stream(sentences, detector, validator, args.start_time)
-    
-    if all_detections:
-        output_data = {
-            "detections": [
-                {
-                    "label": d["chronique"],
-                    "start": d["simulated_seconds"],
-                    "end": d["simulated_seconds"] + 5.0, # Estimation
-                    "detected_at": d["simulated_seconds"],
-                    "confidence": 0.9,
-                    "wall_time": d["wall_time"],
-                    "reasoning": d["result"].get("reasoning") or d["result"].get("raisonnement")
-                } for d in all_detections
-            ],
-            "metrics": {
-                "total_detected": len(all_detections)
-            }
-        }
-        with open("detections_live_deepseek.json", "w", encoding="utf-8") as f:
-            json.dump(output_data, f, ensure_ascii=False, indent=2)
-        print(f"Résultats détaillés sauvegardés dans detections_live_deepseek.json")
+    # 3. Acquisition et traitement
+    try:
+        if args.audio:
+            transcriber = Transcriber(provider=args.provider, model_size=args.model)
+            segment_gen = transcriber.transcribe_stream(args.audio, language=args.language)
+            process_stream(segment_gen, detector, validator, args.start_time, is_audio=True)
+        elif args.file:
+            segment_gen = get_sentences_from_file(args.file)
+            process_stream(segment_gen, detector, validator, args.start_time, is_audio=False)
+        else:
+            # Par défaut, si rien n'est spécifié, on prend full_show_transcription.txt si il existe
+            if os.path.exists("full_show_transcription.txt"):
+                print("Utilisation par défaut de full_show_transcription.txt")
+                segment_gen = get_sentences_from_file("full_show_transcription.txt")
+                process_stream(segment_gen, detector, validator, args.start_time, is_audio=False)
+            else:
+                parser.print_help()
+                sys.exit(1)
+    except KeyboardInterrupt:
+        pass # Géré par le signal handler
+    finally:
+        save_results()
+        
+        # Optionnel: Lancer check_schedule.py sur le log généré ?
+        # Si l'utilisateur le souhaite, on pourrait faire un appel subprocess ici.
+        # Mais le validator fait déjà le gros du boulot.
+        print("\n--- Analyse de cohérence finale ---")
+        from check_schedule import compare_with_schedule, parse_deepseek_output
+        with open(LOG_FILE, "r", encoding="utf-8") as f:
+            content = f.read()
+        detections_to_check = parse_deepseek_output(content)
+        if detections_to_check:
+            compare_with_schedule(detections_to_check)

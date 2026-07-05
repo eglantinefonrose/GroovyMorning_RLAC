@@ -66,12 +66,12 @@ class FilePipeline(ChroniclePipeline):
                 
                 decision = self.fusion.fuse(scores, offset=current_offset)
                 
-                if decision["is_detected"]:
+                if decision["new_detection"]:
                     self.detections.append({
                         "start": round(current_offset, 2),
                         "end": round(current_offset + chunk_duration, 2),
-                        "label": "chronique",
-                        "confidence": round(decision["combined_score"], 3),
+                        "label": semantic_result.get("topic") or "chronique",
+                        "confidence": round(decision["total_score"], 3),
                         "method": "fusion"
                     })
                 

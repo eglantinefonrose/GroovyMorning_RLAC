@@ -6,25 +6,59 @@ import numpy as np
 from pathlib import Path
 
 class Transcriber:
-    def __init__(self, model_size="base", device="cpu", compute_type="int8", provider="whisper"):
+    def __init__(self, model_size="base", device=None, compute_type="int8", provider="whisper"):
         """
         Initialise le modèle de transcription.
-        provider: "whisper", "kyutai" (Rust binary), or "kyutai_mlx" (Mac native)
+        provider: "whisper", "kyutai" (Rust binary), "kyutai_mlx" (Mac native), or "kyutai_stt" (Transformers)
         """
         self.provider = provider
         self.model_size = model_size
         
+        # Détection automatique du device
+        if device is None:
+            if sys.platform == "darwin":
+                device = "mps"
+            elif provider == "whisper" and compute_type == "int8":
+                device = "cpu" # faster-whisper default for int8
+            else:
+                import torch
+                device = "cuda" if torch.cuda.is_available() else "cpu"
+        
+        self.device = device
+
         if provider == "whisper":
             from faster_whisper import WhisperModel
             print(f"[WHISPER] Chargement du modèle '{model_size}' sur {device} ({compute_type})...")
-            self.model = WhisperModel(model_size, device=device, compute_type=compute_type)
+            # whisper needs 'cpu' if no cuda
+            whisper_device = "cpu" if device not in ["cuda"] else device
+            self.model = WhisperModel(model_size, device=whisper_device, compute_type=compute_type)
         elif provider == "kyutai":
             print(f"[KYUTAI] Initialisation du transcripteur Kyutai STT (Rust)...")
-            # Le binaire kyutai-stt-rs sera appelé via subprocess
             self.binary_path = self._find_kyutai_binary()
         elif provider == "kyutai_mlx":
             print(f"[KYUTAI_MLX] Initialisation du transcripteur Kyutai STT (MLX)...")
             self._init_kyutai_mlx()
+        elif provider == "kyutai_stt":
+            print(f"[KYUTAI_STT] Initialisation du modèle kyutai/stt-1b-en_fr (Transformers)...")
+            self._init_kyutai_stt()
+
+    def _init_kyutai_stt(self):
+        try:
+            import torch
+            from transformers import KyutaiSpeechToTextProcessor, KyutaiSpeechToTextForConditionalGeneration
+            
+            model_id = "kyutai/stt-1b-en_fr-trfs"
+            print(f"[KYUTAI_STT] Chargement du modèle {model_id} sur {self.device}...")
+            
+            self.processor = KyutaiSpeechToTextProcessor.from_pretrained(model_id)
+            self.model = KyutaiSpeechToTextForConditionalGeneration.from_pretrained(
+                model_id, 
+                torch_dtype=torch.float16 if self.device != "cpu" else torch.float32
+            ).to(self.device)
+            print("[KYUTAI_STT] Initialisation réussie.")
+        except Exception as e:
+            print(f"[KYUTAI_STT] Erreur d'initialisation : {e}")
+            raise
 
     def _init_kyutai_mlx(self):
         try:
@@ -78,13 +112,13 @@ class Transcriber:
                 return str(p)
         return "kyutai-stt-rs" # Espérer qu'il soit dans le PATH
 
-    def transcribe_stream(self, audio_path):
+    def transcribe_stream(self, audio_path, language="fr"):
         """
         Générateur qui transcrit le fichier audio et renvoie les segments.
         """
         if self.provider == "whisper":
-            print(f"[WHISPER] Début de la transcription : {audio_path}")
-            segments, info = self.model.transcribe(audio_path, beam_size=5, language="fr")
+            print(f"[WHISPER] Début de la transcription ({language}) : {audio_path}")
+            segments, info = self.model.transcribe(audio_path, beam_size=5, language=language)
             for segment in segments:
                 yield {
                     "start": segment.start,
@@ -95,6 +129,59 @@ class Transcriber:
             yield from self._transcribe_kyutai(audio_path)
         elif self.provider == "kyutai_mlx":
             yield from self._transcribe_kyutai_mlx(audio_path)
+        elif self.provider == "kyutai_stt":
+            yield from self._transcribe_kyutai_stt(audio_path)
+
+    def _transcribe_kyutai_stt(self, audio_path):
+        """Transcription via Transformers (stt-1b-en_fr)."""
+        import torch
+        import librosa
+        print(f"[KYUTAI_STT] Début de la transcription : {audio_path}")
+        
+        # Audio must be 24kHz
+        audio, _ = librosa.load(audio_path, sr=24000)
+        
+        # Chunk processing to simulate stream if it's a long file
+        chunk_size = 24000 * 30 # 30 seconds chunks
+        for i in range(0, len(audio), chunk_size):
+            chunk = audio[i:i + chunk_size]
+            if len(chunk) == 0:
+                continue
+            
+            # Utilisation explicite de audio= pour garantir que le processeur capture les données
+            inputs = self.processor(audio=chunk, sampling_rate=24000, return_tensors="pt").to(self.device)
+            
+            # Extraction de la clé input_values qui est vitale pour Kyutai STT
+            input_values = inputs.get("input_values")
+            if input_values is None:
+                # Fallback sur input_features si nécessaire
+                input_values = inputs.get("input_features")
+            
+            if input_values is None:
+                print(f"[ERREUR] Le processeur n'a pas généré de données audio (Clés: {list(inputs.keys())})")
+                continue
+
+            gen_kwargs = {
+                "input_values": input_values,
+                "max_new_tokens": 128, # Limite pour éviter les boucles infinies sur de petits chunks
+            }
+            
+            # Ajout du masque de padding s'il existe
+            mask = inputs.get("attention_mask") or inputs.get("padding_mask")
+            if mask is not None:
+                gen_kwargs["attention_mask"] = mask
+
+            with torch.no_grad():
+                output_tokens = self.model.generate(**gen_kwargs)
+            
+            transcription = self.processor.batch_decode(output_tokens, skip_special_tokens=True)[0]
+            
+            if transcription.strip():
+                yield {
+                    "start": i / 24000,
+                    "end": min((i + chunk_size) / 24000, len(audio) / 24000),
+                    "text": transcription.strip()
+                }
 
     def _transcribe_kyutai_mlx(self, audio_path):
         import sphn
@@ -155,11 +242,23 @@ class Transcriber:
         """
         Lance le binaire Kyutai et parse la sortie en temps réel.
         """
-        print(f"[KYUTAI] Début de la transcription : {audio_path}")
-        cmd = [self.binary_path, audio_path, "--timestamps", "--vad", "--cpu"]
+        # Support pour stdin via '-' ou '/dev/stdin'
+        input_path = audio_path
+        if input_path == "-":
+            input_path = "/dev/stdin"
+            
+        print(f"[KYUTAI] Début de la transcription : {input_path}")
+        cmd = [self.binary_path, input_path, "--timestamps", "--vad", "--cpu"]
         
         try:
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            # Si on lit depuis stdin, on s'assure que le processus enfant peut lire le stdin du parent
+            process = subprocess.Popen(
+                cmd, 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE, 
+                stdin=sys.stdin if input_path == "/dev/stdin" else None,
+                text=True
+            )
             
             current_segment = {"text": "", "start": None, "end": None}
             SILENCE_THRESHOLD = 0.8

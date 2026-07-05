@@ -10,7 +10,7 @@ stt:
   language: "fr"
 
 semantic:
-  ollama_model: "llama3.2:3b"
+  ollama_model: "mistral"
   prompt_path: "config/semantic_prompt.txt"
 
 fusion:

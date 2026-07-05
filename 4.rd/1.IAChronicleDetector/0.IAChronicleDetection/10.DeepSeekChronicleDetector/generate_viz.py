@@ -3,7 +3,7 @@ import os
 
 # Configuration des chemins
 TRANSCRIPT_FILE = "full_show_transcription.txt"
-DETECTIONS_FILE = "detections_live_deepseek.json"
+DETECTIONS_FILE = "detections_output/detections_live_deepseek.json"
 OUTPUT_HTML = "viz.html"
 
 def generate_viz():

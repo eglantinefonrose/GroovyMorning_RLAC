@@ -1,0 +1,248 @@
+Traitement phrase 1: France Inter. France Inter, il est 7h. La
+[DÉTECTION] 🔔 Le journal de 7h du week-end | VALIDÉ | 07:00 (+0 min)
+Reasoning: L'animateur annonce l'heure qu'il est (7h), ce qui correspond au début du journal de 7h du week-end. Pas de futur, lancement immédiat.
+Traitement phrase 2: Paris, des habitants profitent de l'ouverture exceptionnelle des parcs tard le soir. Des conditions de travail compliquées, voire insupportables pour certaines professions. Mais en cas de forte chaleur
+Traitement phrase 3: Garros, les blessures à répétition ont malmené sa préparation. La grande matinale est lancée, je salue officiellement Benjamin Duhamel, bonjour. Bonjour
+Traitement phrase 4: prononcer son éventuelle candidature à l'élection présidentielle, son livre pourtant est déjà un programme, Raphaël Glucksmann sera notre invité dans le grand entretien.
+Traitement phrase 5: Le dôme de chaleur a déjà tué 7 personnes en France. Un changement climatique difficile à vivre pour les villes. À commencer par la capitale où bon nombre de parisiens ont
+Traitement phrase 6: les refuges. Je suis plus heureux là que dans un appartement seul, à me battre contre ma transpiration. Repousser le plus longtemps possible la suée
+Traitement phrase 7: avec des magnifiques canards. Il fait beaucoup plus frais qu'en plein milieu du centre-ville avec le béton et l'asphalte. Heureusement qu'on a des parcs végétalisés. Il est 2
+Traitement phrase 8: les chaleurs augmentent comme ça, c'est top. Et tout comme Serge, ils reviendront sans doute tant que cette vague de chaleur ne se sera pas évanouie. Erwan Chassin des jardins municipaux ouverts jusqu'à mi
+Traitement phrase 9: n'est pas suffisant. Alors que dit le Code du Travail ? Un salarié peut-il refuser de travailler et les mondes réponses avec Mariam El-Kurdi ? Un salarié n'a pas le droit de refuser
+Traitement phrase 10: télétravail. En tout cas, le code du travail ne l'indique pas. Quant aux employeurs, ils ont des obligations en cas de forte chaleur. Un décret datant de juillet 202
+Traitement phrase 11: et requis. S'il n'y a pas de fontaine sur le lieu de travail, il faut fournir au minimum 3 litres d'eau par travailleur et par jour. Maria Melcurdie, d'après le
+Traitement phrase 12: le local du club de foot du quartier Mistral. Leurs identités n'étaient pas encore clairement établies hier soir. Le ou les tireurs ont pris la fuite à bord de leur voiture. Et puis à
+Traitement phrase 13: un centime par litre avec un plafond de 100 euros. Cette aide concerne les travailleurs modestes qui utilisent leurs véhicules personnels à des fins professionnelles, y compris pour les trajet
+Traitement phrase 14: La discussion hier a viré au débat de sourds, Marie Pochon, députée écologiste. Avant les mesures de destruction, les mesures d'effarouchement peuvent également être efficaces. Elles sont le sujet de nombreuses
+Traitement phrase 15: que cet amendement veut dire, madame la députée Marie Pochon, c'est que vous ne voulez pas de tir l'étau. Vous avez choisi d'ignorer le besoin,
+Traitement phrase 16: les débats ne sont pas encore clos, mais ils indiquent très clairement une fracture idéologique entre une gauche écologiste et une droite pragmatique qui va du centre au RN.
+Traitement phrase 17: Cisjordanie, le village de Khan à la Marre, menacé d'éradication. Un village de Cisjordanie, encerré entre les colonies israéliennes où les 15
+Traitement phrase 18: Ramis n'a jamais quitté sa communauté de Khan Al-Amar depuis les années 60. Je suis né ici en 1966. C'était avant l'occup
+Traitement phrase 19: lisait pour nous. Aujourd'hui, les colons attaquent toutes les communautés palestiniennes et c'est pour ça qu'il est peut-être trop tard. Depuis quelques jours, les derniers militants
+Traitement phrase 20: coalition comme l'opposition soutiennent la même idéologie du suprémacisme juif et le régime d'apartheid israélien. Le principal
+Traitement phrase 21: Thierry Genèse, a été battu hier au premier tour en 2-7 par la 24ème mondiale. La russe Kalinskaya, 6-2-6-2. Elle n'a pas abordé, il faut dire, ce Roland Garros dans
+Traitement phrase 22: de tronqué par des blessures à répétition qui l'ont écarté des cours durant six mois. Loïs Boisson n'a repris la compétition qu'au mois d'avril, ne gagnant en tout et pour tout qu'un seul match. Alors
+Traitement phrase 23: suffit pas toujours dans le sens où j'aurais aimé que ça se passe pas comme ça, mais c'est la seule chose qui me raccroche aujourd'hui au fait de revenir sur le cours, c'est juste le fait que j'aime jouer au tennis.
+Traitement phrase 24: pour finir Laurence, le lancement d'une nouvelle pièce, le Louis d'or des temps modernes. La monnaie de Paris, l'institution qui fabrique les pièces de monnaie pour l'Etat français, a lancé
+Traitement phrase 25: Joachim Jiménez, le graveur général des monnaies et l'auteur du dessin sur lequel il a longtemps hésité. On avait l'eau coque, on avait le génie, on avait
+Traitement phrase 26: directeur général. L'or est ce qu'on appelle une valeur refuge, c'est-à-dire que c'est une valeur dans laquelle on investit quand on a des incertitudes sur l'avenir, quand le monde va pas très
+Traitement phrase 27: s'intéresse en elle-même sera alors conservée dans les coffres de la monnaie de Paris. Sophie Berada, alors la commercialisation de ces Mariannes et de ces Imariannes a démarré hier
+Traitement phrase 28: magazine Epsilon qui fête ses 5 ans, une aventure singulière dans une presse scientifique en crise. Ses fondateurs à l'époque ont quitté Science et Vie en estimant que leur indépendance
+Traitement phrase 29: scientifique qu'on ne se posait pas il y a cinq ans. À quoi rêvent les méduses ? Et si on n'avait rien compris à la transmission de la grippe ? De quoi parle Lésia entre
+Traitement phrase 30: ce mixte. Leur fibre musculaire, leur poids, l'utilisation des graisses, les rend plus endurantes. Et comme les records et les performances des hommes vont bientôt stagner, il est
+Traitement phrase 31: et Cyril Lacarrière. On parle de quoi dans l'édito-média ce matin ? Eh bien je vous parle des bons résultats de l'équipe sur le numérique, mais c'est une exception dans la presse française. L'équipe Le Jour
+Traitement phrase 32: Les fruits et les légumes frais bio, on les mange à toutes les sauces. À l'apéro, en salade, en flan, en brochette ou encore en smoothie quand on a fini toutes les brochettes
+Traitement phrase 33: ce matin, confronté comme bien des communes à la fermeture de son église, arrêté pris le mois dernier, car le bâtiment du 19e siècle menace de s'
+Traitement phrase 34: en compagnie de monsieur le maire David Quentin.
+Traitement phrase 35: et l'église. Donc l'église, c'est un peu notre phare du bourg où on se retrouve tous. La première nuit, je n'ai pas trop dormi après avoir visité l'intérieur de la charpente. En plus, je
+Traitement phrase 36: face au cœur, vous allez avoir la statue de Saint-Pierre, la statue de Saint-Paul-Aurélien, c'est le saint patron de notre église. L'association a donc lancé des
+Traitement phrase 37: d'avoir des points de repères et de contribuer au bien commun. Ça donne du sens à son don. Sauver l'église, c'est contribuer
+Traitement phrase 38: les mariages, il faudrait qu'on trouve des lieux plus grands ou alors peut-être s'il fait beau, parce qu'il fait beau quand même de temps à autre. On pourra utiliser ces chapelles pour les mariages, pour les baptêm
+Traitement phrase 39: de ces bâtiments. Beaucoup d'édifices ne sont pas forcément fréquentés par les gens, mais cette mémoire-là, elle a une nécessité de perdurer. L'idée, c'est vraiment quand même de
+Traitement phrase 40: France. Celle d'Ouessant en appelle aussi au roi Charles III d'Angleterre, c'est son aïeule, la reine Victoria, qui lui avait offert son clochet en 1897.
+Traitement phrase 41: vient l'équipe a franchi la barre des 300 000 abonnés numériques. Dans une époque où on parle plus souvent de fuite des lecteurs et de transformation qui tourne mal, c'est une bonne nouvelle, on la salue. Et
+Traitement phrase 42: du temps long. C'est devenu une plateforme avec des séries documentaires, de l'enquête au long cours et des podcasts aussi. Et puis l'équipe tire aussi profit d'offres d'abonnements couplés par exemple avec la plateforme
+Traitement phrase 43: les victoires du PSG. Est-ce que ça veut dire plus globalement que le marché de l'information payante se porte bien ? Eh bien, c'est paradoxal, Florence. D'un côté, le marché grossit, il y a environ 3
+Traitement phrase 44: France. C'est non pas envie de payer pour de l'info. La note de la Fondation Jean Jaurès révèle que seulement 11% acceptent de payer pour s'informer en ligne. Et plus inquiétant encore que ce niveau très bas,
+Traitement phrase 45: celles et ceux qui peuvent et qui veulent se payer une information de qualité, une information vérifiée et de l'autre les 89% de la population qui sont condamnées ou se condamnent tout seul
+Traitement phrase 46: Aline à Fanoukoé, Bonjia aujourd'hui, avec The Other Side, le dernier album de Séoul George,
+Traitement phrase 47: Les pieds dans le sable chaud, avec le chanteur-compositeur et acteur, c'est Georges qui s'est imposé avec une voix profonde, marquée par quelques classiques.
+[DÉTECTION] 🔔 Rencontre avec un tube | REJETÉ (TROP TÔT) | 07:23 (-92 min)
+Reasoning: La phrase introduit un artiste et son album ('The Other Side', 'Séoul George') avec une description. Cela ressemble au lancement de la chronique 'Rencontre avec un tube' qui présente des tubes. Aucune annonce future, le segment commence immédiatement.
+Traitement phrase 48: aujourd'hui, c'est où Georges présente une véritable œuvre d'artisanat musical, façonnée avec patience, amour, enregistrée par étapes, The
+Traitement phrase 49: Entre jazz et beau samova, bento de maillot, vent de mai, signé Marcio Borges en 1978, rendu célèbre par Ellis Regina et Lo
+Traitement phrase 50: every time you are around, Gary move me. Quand le légendaire producteur Mark
+Traitement phrase 51: de la Musica Popular Brasileira façon Tom Jobim et Joao Gilberto.
+Traitement phrase 52: quand il arrive, c'est le Fuego.
+Traitement phrase 53: la première voix qu'on entend de l'enfance, en fait c'est Beck, l'américain Beck est fan de musique brésilienne et avec ses Georges ils reprennent Riverman, du regretté Nick Drake,
+Traitement phrase 54: du comportement alimentaire chez les ados et les jeunes adultes. Questions et témoignages au 01 45 24 7000. Grand bien vous fasse. C'est tous les
+Traitement phrase 55: d'entreprise, profitez de moins 30% pendant un an. Orange est là. Open Pro avec engagement 24 mois. Remise réservée aux créateurs d'entreprise de moins de 24 mois en
+Traitement phrase 56: Et ces jours se ressemblent. Oui, avec certainement quand même un pic de chaleur pour aujourd'hui, sous ce soleil de plomb, sur la majeure partie du pays. On a toujours 13 départements en vigilance orange
+Traitement phrase 57: épouse à Beauvais, 14 à Albi, 16 à Lille, vous vous êtes réveillé avec 19 à Paris, mais il fait encore 22 à Dinard et même 24 à Cagnano, et cet après-midi, le mercure sera
+Traitement phrase 58: possible avec des orages, des rafales de vent et même de la grêle. Et à noter aussi des risques d'ondées sur les crêtes alpines et pyrénéennes. Merci
+Traitement phrase 59: L'édito économique ? L'encadrement des loyers, c'est peut-être ou peut-être pas fini dans six mois, c'est l'occasion d'un bilan, ça tombe bien, un rapport vient d'être publié. A
+Traitement phrase 60: L'heure du journal de Kevin Dufrèche, bonjour. Bonjour Florence, bonjour à tous. À la une, Kevin, le début d'un des rendez-vous les plus importants de l'année pour les musulmans.
+[DÉTECTION] 🔔 Le journal de 9h | REJETÉ (TROP TÔT) | 07:29 (-90 min)
+Reasoning: La phrase 'L'heure du journal de Kevin Dufrèche' annonce le début immédiat du journal, correspondant à 'Le journal de 9h' dans la liste des chroniques.
+Traitement phrase 61: plan de connexion internet après trois mois de coupures. Et la gauche social-démocrate sceptique face aux premières propositions de Raphaël Glucksmann pour la présidentielle.
+Traitement phrase 62: Grande Mosquée est à l'arrêt. Mathilde Vinceneux, en attendant, il faut donc bricoler. C'est dans la cité de la Busserine que se dresse l'une des plus grandes mosquées de Marseille. Elle peut
+Traitement phrase 63: de prier dans les stades. Sauf que c'est un aménagement de fortune. Sur les stades, il n'y a pas d'abri, il n'y a pas de source d'eau pour qu'on puisse se rafraîchir et que les enfants aussi soient à l'ombre. Il manque en fait
+Traitement phrase 64: président du conseil départemental du culte musulman. On pensait pouvoir compter sur les pouvoirs publics pour nous aider, mais hélas, aujourd'hui nous faisons
+Traitement phrase 65: pleine canicule, 13 départements de l'ouest en vigilance orange, les Français en sueur jusqu'à la fin de la semaine, nous dit Météo France. Surtout ceux qui travaillent
+Traitement phrase 66: des pieds de basilic un à un à la main. Chaleur écrasante. C'est ma troisième semaine que je fais ça. Une première pour Morgane, 36 ans, ancienne
+Traitement phrase 67: Et puis voilà, on fait des petites pauses à des moments et ça permet de ne pas prendre des coups de chaud, des insolations, etc. Les pauses sont plus
+Traitement phrase 68: Déjà, démanche un peu plus longue, parce que moi, je préfère être couverte du rayonnement du soleil. Une chemise assez ample pour que ça respire, le chapeau. On n'hésite pas à aller s'hydrat
+Traitement phrase 69: mais le Kurdi hier l'indicateur thermique national, c'est-à-dire la moyenne des températures mesurées sur la journée a atteint 24,8 degrés en France hexagonale,
+Traitement phrase 70: la campagne présidentielle. Raphaël Glucksmann va-t-il y participer, sera-t-il finalement candidat ? On lui posera la question tout à l'heure puisqu'il sera l'invité du grand
+Traitement phrase 71: de Paris, parler à ceux que la gauche a perdu, la France des pavillons, classe moyenne qui travaille sans s'en sortir, aux nostalgiques qui ne se retrouvent plus dans notre époque, écrit-il, et plus clairement encore
+Traitement phrase 72: les jeunes, obligatoire et une convention citoyenne sur l'immigration. Deux objets, macroniste. Rien à voir, balaye l'entourage du futur candidat qui se justifie. Emmanuel Macron n'
+Traitement phrase 73: garçon et une fille âgée de 16 et 15 ans en garde à vue. Ils ont avoué avoir étranglé la victime pour une banale histoire de matériel de pêche volée. 31 morts hier au Liban
+Traitement phrase 74: un peu plus de trois mois, soit depuis le début de la guerre avec les États-Unis et Israël, la dictature a restauré partiellement l'accès à Internet. Décision du président
+Traitement phrase 75: s'attachait comme un révélateur des rapports de force au sein du pouvoir. Analyse Kavé Salamatian, enseignant à l'université Savoie-Montblanc, il est
+Traitement phrase 76: ça montre que les réformateurs reprennent du poil de la bête. Le camp des réformateurs chercherait à normaliser la situation dans la perspective d'un accord
+Traitement phrase 77: si elle devait durer, permettra de voir qui des deux camps conservateurs ou réformateurs aura pris le dessus sur l'autre. Valérie Krova, au Sénégal, à peine démi
+Traitement phrase 78: Certains choisissent l'exil, notamment en France. Timur Osturk, vous avez recueilli le témoignage de ces jeunes Sénégalais. Leurs voix ont été modifiées. Quand sa famille découvre
+Traitement phrase 79: something them some things they may have abandoned Ici, Abu Bakr
+Traitement phrase 80: les réseaux homosexuels comme un bouc émissaire et d'autoriser tout le monde à les pourchasser, à les insulter, à les critiquer, à les frapper. Les homosexuels
+Traitement phrase 81: connaître le gagnant ou la gagnante du prix du livre inter 2026. En attendant, on continue de vous présenter les auteurs en lice. Ce matin, Jérôme Ferrari
+Traitement phrase 82: du narrateur qui enseigne donc, comme je l'ai fait moi-même dans le lycée français d'Abou Dhabi, et qui se trouve confronté à un type de misère
+Traitement phrase 83: effectivement obscène et à laquelle on ne peut pas faire grand chose. Alors, je ne suis pas aussi pessimiste que mon orateur, moi. Je continue à croire aux vertus humaines et notamment à la puissance de l'empathie. Mais
+Traitement phrase 84: après l'envahissement du terrain par des supporters. Lors de la dernière journée de Ligue. Merci Kevin Dufrèche. La politique et l'économie à suivre avec Patrick Cohen et Dominique Seux.
+Traitement phrase 85: les véhicules, et bien je vais parler des trains, des vélos, des camions de pompiers et comment ça se passe vraiment dans un camion poubelle. Mini vulgaire, un podcast
+Traitement phrase 86: le moment nous vient du Vatican. Il est signé Léon XIV et dans une époque en manque de repères, il est réconfortant de voir une autorité morale aussi éminente produire un texte d'une telle ampleur et entrer dans le débat
+Traitement phrase 87: vaincu qu'il s'agit là du sujet le plus important du moment qui touche à tous les aspects de l'existence humaine et déterminera le futur de notre humanité. Magnifica humanitas, c'est
+Traitement phrase 88: réflexion dont on n'épuisera pas toute la profondeur dans une chronique de 3 minutes. Je vais simplement évoquer 3 des thèmes qui m'ont marqué à la lecture, la guerre, l'information, la culture.
+Traitement phrase 89: la notion de guerre juste, invoquée par le vice-président américain et catholique Jade Evans, et appelle à ne pas rester neutre face au bombardement de civils. Le pape
+Traitement phrase 90: ces journalistes passionnés par la vérité, qui ont joué un rôle fondamental dans la mise en lumière d'injustices et d'abus au sein de l'église. La culture enfin, Patrick, pourquoi
+Traitement phrase 91: Glee, la revue Le Grand Continent a mise en ligne le texte intégral de Magnifica Humanitas, à compléter avec le très bon livre que vient de publier Gilles Babinet, l'ex-co-président du Conseil
+Traitement phrase 92: Dominique, ce question, est-ce que l'encadrement des loyers dans les grandes villes est une mesure efficace ? Bon alors je vais être très franc, on ne le sait pas de manière définitive parce que c'est évidemment
+Traitement phrase 93: facile à vendre. Les loyers sont trop élevés, interdisant leur de monter et hop, le tour est joué. Du simple bon sens, mesdames et messieurs. Vous savez, on raffole toujours des
+Traitement phrase 94: villes qui ont choisi l'encadrement. Résultat, les loyers dans les villes encadrées sont 2 à 4% plus bas que dans les autres. Bon, disons-
+Traitement phrase 95: privés. Des dizaines d'études dans le monde entier, ce qu'on appelle la littérature économique, disent exactement la même chose. Pourquoi ? Parce que des propriétaires bailleurs ren
+Traitement phrase 96: qu'il y a les économistes ne sont pas du tout ambiguës, l'investissement locatif n'est pas assez rentable en France. Evidemment, ça surprend et ça choque d'entendre ça, mais les
+Traitement phrase 97: va être discuté parce que la loi autorise un encadrement des loyers, doit être renouvelé ou pas avant novembre. Merci Dominique, à demain.
+Traitement phrase 98: de savoir, il faut lire cette enquête. Événement, main basse sur le Louvre aux éditions Flammarion, publiée par nos invités, Jean-Michel Descujy, c'est Nicolas Charles Torand, bonjour. Bonjour. Et merci
+Traitement phrase 99: sont rentrés dans l'histoire par la fenêtre. En fait, il y a une sorte de décalage stupéfiant entre des profils assez ordinaires et un casse du Louvre qui, là, pour le coup, est tout à
+Traitement phrase 100: eh bien ce sont des potes de cités, comme on dit, ils ont grandi ensemble, ils ont même fréquenté quasi le même bac à sable, ils se connaissent depuis 2
+Traitement phrase 101: et bien ce n'est plus réservé aux spécialistes, on voit que maintenant ce sont des voyous ordinaires qui peuvent s'en prendre aux musées qui sont
+Traitement phrase 102: Ils font beaucoup d'erreurs. Ils font beaucoup d'erreurs. En fait, oui, c'est comme disait Jean-Michel, ces quatre potes qui, en fait, quand on découvre le casse,
+Traitement phrase 103: chevronnée. En revanche, on découvre qu'ils ont très bien préparé le coup. Et donc là, on se dit, c'est quand même bizarre, c'est des braqueurs du dimanche, mais ils sont très pro. Et
+Traitement phrase 104: les deux, Abdoulaye, Doudou, Crossbitume, qui apparaît à la lecture de ce livre comme le chef présumé, le cerveau en quelque sorte. En fait, on n'en sait rien.
+Traitement phrase 105: YouTube s'est inauguré en 2005, donc c'est un pionnier, c'est un des premiers influenceurs de France en fait, et sur sa bécane, il fait le tour de Paris en roue arrière sur
+Traitement phrase 106: les rappeurs parlent de lui dans les chansons. C'est un mec flamboyant. Jean-Michel Décuvis, la vraie valeur ajoutée de votre livre, c'est qu'on est littéralement au cœur des
+Traitement phrase 107: place que vous perdrez personne ne croit et surtout pas les enquêteurs, il faut dire qu'au départ, il chic, comme on dit dans le jargon policier, il ment. Ça veut dire mentir. Au début, il ment et puis à la
+Traitement phrase 108: lui a proposé le marché et qu'effectivement, il ne savait même pas qu'il allait au Louvre, il ne savait même pas ce qu'il allait braquer. Donc
+Traitement phrase 109: quart au quartier, j'ai dit qu'on nous avait forcés, que je ne savais même pas que c'était lui. C'est là que tout le monde a une entente entre les deux suspects. Nicolas Charles-Torrent, sur
+Traitement phrase 110: ils ont même épluché l'application de rencontre sur laquelle le dernier suspect a arrêté à passer la journée, la veille du braquage. Il passe la journée sur une appli de rencontre. Et
+Traitement phrase 111: pas de commanditaire, ce qui est aussi formidable dans l'enquête, c'est que dans votre livre, c'est qu'on suit minute par minute l'enquête, la façon dont les filatures sont menées, dont les balises sont
+Traitement phrase 112: de nos camions nacelles. J'ai envie de monter sur le balcon. Et il y a deux scooters. Et puis quand les flics font le film de la fuite par caméra de
+Traitement phrase 113: l'équipe se sépare en deux, il y en a deux qui prennent les scooters, qui remontent à Aubervilliers par les petites routes de l'Est parisien, et ce fameux berlingot qui n'apparaissait pas au départ,
+Traitement phrase 114: là, on voit sur les caméras de surveillance le diadème de génie. Et donc ça, c'est les deux premiers qui viennent d'arriver. Ceux qui sont dans le berlingo ne sont pas encore là. Et quand ils arriv
+Traitement phrase 115: l'hypothèse, il faut dire, ça crée une sorte de folie dans le studio. Est-ce que le plus probable est qu'il soit encore en France ? En Belgique, peut-être ? Les quatre protagonistes le savent, ça c'est sûr.
+Traitement phrase 116: mais qui aujourd'hui tient la corde, c'est que les bijoux sont partis à l'étranger, mais il y a une filière d'écoulement de diamants et que
+Traitement phrase 117: quand ça passe, 15 ans c'est beaucoup. Et donc là, ils essayent de dealer, ok, on vous dit où sont les bijoux, mais il faudrait dire la peine. Et donc ils ont demandé des auditions pour ça. Donc hier, aujourd'hui, et notamment une
+Traitement phrase 118: Leroy, deux des auteurs du livre sur les coulisses du Caisse du Louvre, sont donc dans notre studio. Oui, Jean-Michel, Nicolas Charles, bonjour, désolé de vous le dire, mais vous n'êtes pas les premiers cette année à consacrer un ouvr
+Traitement phrase 119: Davos s'est léger pour tenir 224 pages, vous auriez pu en gratter un fascicule à la limite, mais bon, vous publiez donc main basse sur le Louvre, les secrets du cas, titre sobre,
+Traitement phrase 120: Après le rapport de la commission d'enquête de l'Assemblée nationale sur la sûreté des musées, sorti le 13 mai, voici donc votre livre enquête. Encore six mois et on se retrouve avec une disqueuse édition Doudou, Crosby,
+Traitement phrase 121: charge une disqueuse, 4k avec des gilets jaunes qui utilisent des scooters et un berlingo, ce qui ferait un merveilleux 14ème film pour Quentin Dupieux. Cette année, mais il s'est fait damer le pion par
+Traitement phrase 122: On ne la connaissait pas, je ne la connaissais pas. Vraiment, merci beaucoup Bertrand
+Traitement phrase 123: que la Sarkozy en 2007, les avocats de l'ancien président vont plaider la relax. La carte vire à l'écarlate, les grosses chaleurs s'étendent encore en France,
+Traitement phrase 124: politique à 8h20 Florence. Il ne lui reste plus qu'à se déclarer, Raphaël Glucksmann, invité du grand entretien avec un livre de candidats à la présidenti
+[DÉTECTION] 🔔 L'invité de 8h20 | REJETÉ (TROP TÔT) | 08:01 (-17 min)
+Reasoning: La phrase mentionne 'politique à 8h20' et introduit directement Raphaël Glucksmann comme invité du grand entretien, ce qui correspond au lancement de la chronique 'L'invité de 8h20'.
+Traitement phrase 125: la facture de trop et puis le cinéma c'est mercredi, matin un thriller d'espionnage à la fin de ce journal. C'est ce qui
+Traitement phrase 126: courrier. Que Nicolas Sarkozy avait connaissance de tout ce qu'il faisait. Quelles conséquences cela peut-il avoir sur l'issue de ce procès ? En première instance,
+Traitement phrase 127: concentrique du magistrat Olivier Geron, il lâche que son ancien bras droit a franchi la ligne jaune en s'appuyant sur l'intermédiaire Ziad Taqyeddin. Il laisse même entendre que
+Traitement phrase 128: le numéro 2 libyen. Sur le fond, Sarah, les deux hommes restent d'accord pour nier tout financement illégal. Les quatre avocats de Nicolas Sarkozy vont plaider la
+Traitement phrase 129: première instance pour trois délits. Reste l'association de malfaiteurs. Utilisé pour la première fois dans un dossier politique ou financier, a rappelé hier la d
+Traitement phrase 130: est dans une situation d'urgence sanitaire, juge la ministre de la Santé, mais les températures vont battre de nouveaux records aujourd'hui jusqu'à 39 degrés dans le Lan
+Traitement phrase 131: traversant des pourvues de stores. Le soleil tape directement sur les vitres malgré les volets et les rideaux. Le quotidien est étouffant pour cette aide soignante. C'est un tout en fait. C'est vivre
+Traitement phrase 132: comble ou vire aux mains. Alors c'est une magnifique bouilloire qui fait 37-38 mètres carrés. Mais là on est vraiment juste sous le toit. Il n'y a pas d'isolation en fait dans le caisson au-dessus. Ass
+Traitement phrase 133: volets, ventilation, un système de régulation de la chaleur doit exister dans chaque logement. D'après le Code de santé publique. Le thermomètre devrait dépasser les 34 à Lyon aujourd
+Traitement phrase 134: habitué à un climat continental ou à Marseille. Météo France tient compte non seulement du climat local, mais aussi de la capacité d'adapt
+Traitement phrase 135: Dans information, avec les données de santé publique France, leurs critères sont modulés en fonction de l'impact des dernières canicules sur les entrées à l'hôpital et sur
+Traitement phrase 136: étudiants en journée peuvent avoir un niveau d'alerte différent. 13 départements sont en orange aujourd'hui, principalement à l'ouest de la France, moins habitués, moins adaptés.
+Traitement phrase 137: est ouvert. Mise en place par le gouvernement face à la flambée des prix à la pompe à destination des travailleurs modestes. Moins de 17 000 euros de revenus annuels et de ceux qui roulent beaucoup pour
+Traitement phrase 138: nous ne sommes absolument pas reconnus. Rien n'est fait. Les charges ont explosé. Moi, mon plein, il est passé à 120 euros. Je ne pensais jamais arriver à de tels chiffres. C'est 120
+Traitement phrase 139: ça va, vous êtes des nantis. Donc oui, c'est un sentiment de colère. C'est ça, si vous voulez, j'en peux plus. C'est l'incohérence de nos gouvernants. L'infirmière Fabienne Pallier avec François Guéro
+Traitement phrase 140: assistants parlementaires européens de la France Insoumise. Elle se clôt sans mise en examen. Les juges cherchaient à savoir, comme pour le Rassemblement national, si les assis
+Traitement phrase 141: petite ville, Mande, préfecture de la Lausère. Les sages seront aujourd'hui au tribunal. Ils étaient hier dans un lycée pour parler état de droit,
+Traitement phrase 142: Le Conseil constitutionnel, il ne fait pas de procès d'intention. Nous jugeons sur pièce. Interrogation tous azimuts. Pourquoi n'avoir censuré qu'un seul article de
+Traitement phrase 143: à un moment où le fossé n'a jamais été aussi grand entre le citoyen et les institutions. C'est important que ces rencontres permettent de ne pas laisser perdurer ce qui peut être
+Traitement phrase 144: travail les avocats demandent les sages vont statuer au tribunal sur deux QPC, questions prioritaires de constitutionnalité. Le thème de l'une d'elles, le droit de se taire d'
+Traitement phrase 145: selon la dernière enquête de l'UNAF, l'Union nationale des associations familiales. À quoi s'ajoutent des frais bancaires, parfois exorbitants
+Traitement phrase 146: Ainsi, un quart des établissements bancaires protègent les détenteurs de l'offre client fragile. En tête des bonnes pratiques sur les 101 établissements passés
+Traitement phrase 147: avec le service rendu. L'UNAF estime également que ce système génère pour les banques un chiffre d'affaires de plusieurs centaines de millions d'euros par an. Agnès Soubir
+Traitement phrase 148: adopté hier soir en commission à l'Assemblée. Elle prévoit d'allonger le délai de prescription du délit de non-dénonciation et de graver dans la loi. L'interdiction absolue de toute
+Traitement phrase 149: l'été pour discuter des modalités de renvoi d'Afghans, déboutés du droit d'asile ou en situation irrégulière. Les Suédois sont particulièrement heurtés
+Traitement phrase 150: hanté par ce souvenir. Arrivé en Suède en 2015, ce chrétien issu de la minorité Azara, persécuté en Afghanistan, vit aujourd'hui sans papier et dans la peur d'être
+Traitement phrase 151: Emile Moturon. La Suède est ma maison. D'ici, je peux porter la voix de ceux qui n'en ont pas. Le jeune afghan, devenu activiste, reçoit régulièrement des menaces
+Traitement phrase 152: Israël qui frappe et le Liban sans considération pour le cesser le feu hier, 31 morts, et Gaza ce matin, l'Etat hébreu dit avoir tué le nouveau
+Traitement phrase 153: aliens pour quelques 78 000. Employés, le cinéma, c'est l'endroit où il faut aller aujourd'hui pour se protéger des grosses chaleurs. Et vous serez d'autant plus à
+Traitement phrase 154: J'ai insisté pour qu'on y aille. C'est un univers, une craverrouillée qu'on ne connaît qu'à travers le cinéma et les séries télé. Le monde du renseignement, des cris ici, de manière peu
+Traitement phrase 155: l'émotion, mais offre à la comédienne une nouvelle palette de jeux. Et il y a Idara qui a suivi pour le rôle un entraînement en physique très intense. Il campe un personnage ron
+Traitement phrase 156: Jawi, l'objet du délit, où elle joue le rôle d'une comptatrice.
+Traitement phrase 157: en ce moment, Marie-Pierre, toujours 13 départements en vigilance orange canicule. Et oui, Florence, et à surveiller, d'ailleurs, l'île de France cet après-midi qui pourrait peut-être passer en orange. On a quand même
+Traitement phrase 158: d'Ocroussillon. Alors ce matin, c'est un peu plus contrasté car il fait moins chaud dans le Nord-Est. En revanche, il fait à nouveau 22, par exemple à Dinard, qui est proche du record datant
+Traitement phrase 159: année. On pourra avoir des orages cet après-midi. Oui, sur une frange verticale, Florence, avec la cumulification, on va avoir quelques nuages qui vont bourgeonner de la Normandie au Pays de la Loire à l'O
+Traitement phrase 160: en se rappelant que soleil à la Saint-Bérangère présage d'un bel été et un bel hiver. Merci Marie-Pierre, ça rime aussi, et
+Traitement phrase 161: jamais été réellement respecté dans le sud du Liban. Mais lundi soir, l'armée israélienne a reçu l'ordre de repartir à l'offensive. Hier, tous les
+Traitement phrase 162: c'est l'utilisation redoutable par le Hezbollah de drones à fibre optique. Impossible à brouiller, qui a provoqué cette action. Plusieurs soldats israéliens ont été tués
+Traitement phrase 163: la guerre au Liban. Et de fait, l'administration Trump a donné son feu vert à Israël. Mais pourquoi ce réveil de la guerre maintenant, Pierre ? Une partie de la
+Traitement phrase 164: menace plus directement le nord d'Israël. Le premier ministre israélien ne croit pas une seconde à la possibilité que l'armée libanaise désarme le Hezbollah
+Traitement phrase 165: le Liban dans cette situation ? Il n'y a pas de bonne solution pour le Liban dans ce contexte. Le pays est profondément divisé face au Hezbollah qu'une partie de la
+Traitement phrase 166: de la guerre civile. Le Hezbollah a d'ailleurs menacé ces derniers jours de troubles sérieux pouvant aller jusqu'au renversement du gouvernement en cas d'entente avec Israël.
+Traitement phrase 167: pénalisées par les Américains et les Israéliens, alors que la France fait partie du mécanisme de contrôle du cessez-le-feu et dispose du principal contingent de la finule, la
+Traitement phrase 168: entre 500 000 et 3 millions de personnes sont exécutées par le régime des générales Swarto. Affaires sensibles tous les jours à 15h sur France Inter.
+Traitement phrase 169: Dans le grand entretien ce matin, nous recevons donc un
+Traitement phrase 170: Vous déclinez votre vision de la France, votre rapport à la nation, à l'Europe, vous esquissez les grandes lignes de votre programme économie, immigration,
+Traitement phrase 171: J'ai envie de me battre pour les travailleurs qui ne peinent à boucler leur fin de mois et qui ont le sentiment d'avoir été méprisés, oubliés
+Traitement phrase 172: semblait ma famille politique. J'ai envie d'utiliser ces trois mois pour convaincre la gauche démocrate et républicaine qu'elle peut gagner l'
+Traitement phrase 173: même politique. Parce qu'ils veulent du changement avec les mêmes personnes, ils ne voudront pas cela. Alors sur cet espace politique, simplement pour essayer de comprendre pourquoi vous vous donnez trois mois, qu'est-ce qui peut se passer pendant ces trois
+Traitement phrase 174: je ne suis pas cette bonne personne, ce ne sera pas moi, je suis convaincu que notre espace politique fera face à ses responsabilités, je suis convaincu qu'au-delà de la division
+Traitement phrase 175: J'ai réveillé un espoir chez les Françaises et les Français qui croient encore à la solidarité sociale, à la République, à la démocratie, à l'Europe. Et cet espoir-là, je ne le tra
+Traitement phrase 176: l'exercice des responsabilités. Cela nous oblige, ce que je dis, c'est que nous avons besoin d'un président qui saura faire face aux crises
+Traitement phrase 177: votre souveraineté. À la fois face aux menaces russes et face au dumping social chinois, au dumping industriel chinois, qui ratiboise nos industries,
+Traitement phrase 178: ou d'une femme et d'un peuple. C'est vrai. Mais c'est surtout, surtout, la rencontre de la France avec elle-même. Et ce que je dis dans ce livre, ce que
+Traitement phrase 179: ces élections, comme nous avons perdu toutes les autres. Ce que je vous dis, c'est que le combat qui s'annonce... Raphaël Duchman, on va parler de vos propositions évidemment, mais est-ce que trois mois, c'est pas laisser un boulevard
+Traitement phrase 180: d'Anne Bardella, il n'y a pas rien. Il y a même l'essentiel, il y a la République, il y a des millions de Françaises et de Français qui croient encore dans la démocratie, dans l'Europe, dans la transformation
+Traitement phrase 181: Jean-Luc Mélenchon est aujourd'hui devenu un agent électoral de Jordan Bardella et de Marine Le Pen. Et nous allons proposer une alternative qui va enthousiasmer parce que, je vais vous
+Traitement phrase 182: un désir de retrouver une forme de dignité collective, un désir de retrouver du lien entre nous, un désir de réparer les solidarités qui ont été à ce point mises à mal ces
+Traitement phrase 183: moment-là, il avait disparu, il a été laissé trop longtemps à d'autres forces politiques ? Que celle de la gauche ? Ce que je veux, c'est que la gauche renoue avec son histoire. Et son histoire, c'est
+Traitement phrase 184: une économie, une généalogie, mais une promesse. Il a été fait ce récit français par les révolutionnaires de la nuit du 4 août qui ont
+Traitement phrase 185: plus à gauche depuis trop longtemps. Vous savez, moi, quand j'étais à l'école primaire, j'ai un moment eu un prof, un
+Traitement phrase 186: Et je me suis rendu compte que mon père, à qui je posais la question, ne savait pas plus que moi, mais que lui, ça ne l'inquiétait pas du tout. Et il a commencé à m'expliquer ce que c'était que de
+Traitement phrase 187: et l'ancienne France de la droite et de l'extrême droite, il y a la France, il y a cette promesse qui faisait vibrer des gens, mais à travers le monde entier. Pourquoi la
+Traitement phrase 188: un certain nombre de propositions concrètes que vous faites. L'autre leitmotiv de votre livre, c'est ce que vous appelez un refus originel du macronisme. Sauf qu'il s'avère qu'une note confidentielle rédigée par votre
+Traitement phrase 189: quoi la lapour a fait Glüssmann, c'est cette idée que vous seriez le candidat ou futur candidat des bien-nés, des bien-heureux, vous seriez déconnecté hors sol. Pourquoi est-ce que ça vous colle
+Traitement phrase 190: avait cru au macronisme. J'aurais rejoint le macronisme. Si j'ai refusé leurs avances, leurs propositions depuis le début, depuis avant même qu'ils prennent le pouvoir, c'est parce que, fondamentalement,
+Traitement phrase 191: sont plus pauvres et les riches plus riches dans le pays d'Emmanuel Macron. Et la deuxième raison, c'est l'écologie. J'ai tout de suite compris qu'il n'avait absolument rien compris à l'immense
+Traitement phrase 192: Et en plus, les Français, aujourd'hui, payent le prix des guerres de Donald Trump. Quand ils vont faire leur plein à la pompe. Pourquoi ? Parce que pendant 10 ans, nous avons rat
+Traitement phrase 193: pétrole et de redevenir souveraine et aux Français d'économiser de l'argent quand ils vont faire leur plein, puisqu'ils auront accès à des voitures électriques. Donc moi, ce que je veux faire, c'est l'antithèse de ce qui a
+Traitement phrase 194: toutes ces Françaises qui ont fait d'autres choix et qui aujourd'hui veulent rejoindre l'espace de la gauche démocratique et républicaine. Nous ne sommes pas des videurs de boîtes de nuit. Et il en a marre de ce
+Traitement phrase 195: son insincérité. Et ce qui mine aujourd'hui la démocratie. Alors, parlons un peu d'économie pour voir comprendre où vous vous situez et où est-ce que vous voulez en aller. Les Français,
+Traitement phrase 196: Saint-Pierre, parce que vous aviez hérité. Aujourd'hui, c'est l'inverse. C'est deux tiers votre héritage et un tiers ce que vous avez gagné en travaillant. Nous sommes devenus, nous sommes en passe de devenir une société de
+Traitement phrase 197: Il y a aujourd'hui des impôts qui donc doivent augmenter. Ça nous dit par exemple, prenons un exemple très précis, vous dites il faut faire contribuer davantage les retraités les plus aisés. À partir de combien on est un
+Traitement phrase 198: les cotisations sociales. Taxer les plus hauts patrimoines. Pourquoi ? Parce qu'aujourd'hui, nous sommes dans une situation où les ultrariches
+Traitement phrase 199: contribue le plus à l'effort de redressement du pays. Et ça, c'est une différence essentielle, par exemple, avec le macronisme dont vous parlez. Et donc, je repose ma question. Taxer les retraités aisés, ça veut dire quoi ? À
+Traitement phrase 200: aujourd'hui du statu quo et du contrat social. Et par contre, effectivement, pour la première fois, eh bien, il y a plus de richesses chez les retraités. Et comme on a touché la qu
+Traitement phrase 201: au sujet qui là pour le coup que vous traitez dans le livre avec une position singulière c'est la question de l'immigration vous proposez la mise en place d'une d'une convention citoyenne sur le sujet sur le
+Traitement phrase 202: dans la société française. Et donc ce qu'il faut organiser, au contraire, c'est le débat sur la question migratoire. C'est encadrer un débat pour qu'on puisse confronter les points de vue, qu'on
+Traitement phrase 203: de Mion. Mais c'est intéressant que vous utilisiez le mot de fait que la gauche n'a pas voulu voir parce que j'ai retrouvé une phrase que vous aviez tenue à nos confrères de l'opinion au sujet de ce qui s'était passé à Cologne,
+Traitement phrase 204: dire par là. Parce que moi, je voulais comprendre l'explosion de l'AFD, de ces deux l'extrême droite allemande, et que je voulais à la racine de ce phénomène politique incr
+Traitement phrase 205: syriens sur cette place. Ce n'était pas une question d'accueil des réfugiés, c'était oui, il y avait un problème d'intégration. Et donc moi dans ce livre, ce à quoi je
+Traitement phrase 206: briquier la France sont en crise. Toutes les structures collectives, on a supprimé le service militaire sans jamais se poser la question de le remplacer par quelque chose. Et c'est pour ça que je propose un service civ
+Traitement phrase 207: le métier a tissé de la France. Je veux qu'à nouveau on fabrique de la France. Et la première des raisons, et je veux en parler parce que c'est la source de toutes les crises, la première des raisons, c'est l'abandon de l'école
+Traitement phrase 208: on a 30% de nos écoles qui sont délabrées. On a une école qui reproduit les inégalités sociales alors qu'avant, elle les corrigeait. Et donc vous tombez le combat d'augmenter les professeur
+Traitement phrase 209: Raphaël Glucksmann, ça va être de rassembler la gauche. Allez-y Bernard. Bonjour Bernard. Bonjour Monsieur Glucksmann, bonjour à tous. Nous sommes nombreux à vouloir que ce soient
+Traitement phrase 210: minimes, je le rappelle, des solutions fécondes. Pourquoi ne pas constituer une équipe de gouvernement et laisser les citoyens et citoyennes désigner celui ou celle qui fera le
+Traitement phrase 211: de la France et du monde. Mais par contre, il n'y aura pas, allez, il n'y aura pas un seul candidat de gauche pour une raison très simple, c'est qu'avec Jean-Luc Mélenchon, nous avons des divergences
+Traitement phrase 212: Est-ce qu'il serait sûr que ce ne serait pas un meilleur candidat que vous ? J'ai entendu qu'il se prépare et j'en suis très content. Vous savez pourquoi ? Parce que je pense que tout le monde doit se préparer. Parce que cette élection est fondament
+Traitement phrase 213: transformé là, il faut se faire en sorte qu'elle y ait. Bien compris, Raphaël, tout simplement. Qu'elle soit à nouveau cette promesse de justice à celles et ceux qui ont besoin de la politique pour vivre. Parce qu'ils sont victimes des in
+Traitement phrase 214: C'est pour ça que votre vie de pro mérite Orange Pro. Avec Open Pro Fibre, faites des économies en regroupant vos services internet fixes et mobiles. Et quand vous êtes créateur
+Traitement phrase 215: recevez qui ce matin Sonia ? Le capitaine Nicolas Brault, ancien commandant des troupes de montagne de la Légion étrangère, nouvelle coqueluche des réseaux sociaux, son livre s'intitule
+[DÉTECTION] 🔔 L'invité de 8h20 | VALIDÉ | 08:47 (+28 min)
+Reasoning: La phrase lance directement un entretien en s'adressant à Sonia pour présenter l'invité du jour, ce qui correspond au début de la chronique 'L'invité de 8h20'.
+Traitement phrase 216: membre du conseil scientifique de l'établissement, cette instance risque d'acter un divorce inédit entre le corps professoral de l'institution de la rue Saint-Guillaume et son directeur Louise
+Traitement phrase 217: casiers judiciaires. Suite à une manifestation contre la loi de la députée Renaissance, Caroline Yadan, visant à lutter contre les formes renouvelées de l'antisémitisme. Le directeur ne
+Traitement phrase 218: sur le site du journal et pas que chez les étudiants. Le directeur de Sciences Po contacté, lui, se défend quand vous bloquez un amphithéâtre, vous empêchez les autres de travailler. Il est de mon devoir de prendre les
+Traitement phrase 219: Vidéo au conseil d'administration de la Fondation nationale des sciences politiques pour dénoncer une dérive liée à une minorité agissante et dangereuse à Sciences Po. Après
+Traitement phrase 220: nomomatie dont les évaluations sont d'ailleurs excellentes, nous apprend le monde, veut créer un nouveau pôle dédié aux relations internationales. Quand le CERI, le centre d'étude consacré à ces questions,
+Traitement phrase 221: qui défend cette tradition française. L'approche de Louise Vassier est un retour au temps de Raymond Aron et de son diptyque du soldat et du diplomate, dit-il. On voit a
+Traitement phrase 222: des industriels français de la défense sont invités en même temps à plancher sur un projet de think tank autour des war studies, l'étude des guerres. Et tant pis pour le conflit d
+Traitement phrase 223: collégialité qui réjoue l'université. Nora, on parle aussi d'une affaire de style, de management. Le style, Vassi est autoritaire, vertical, hautain, cassant, lirez-vous dans le monde des
+Traitement phrase 224: mois avant d'être officiellement nommé, mais le très médiatique Hugo Micheron a été désigné professeur associé contre l'avis du conseil scientifique. En attendant, fin avril, le New York
+Traitement phrase 225: d'adaptation de l'école et son rayonnement dans la presse, nous apprend Libération. Mais au sein de l'école, les troupes s'épuisent, plusieurs cas de burn-out ont été recensés selon les salariés et les augmentations ont
+Traitement phrase 226: que 25 nouveaux lycées situés en réseau d'éducation prioritaire, intègrent le dispositif CEP, Convention d'éducation prioritaire. Un dispositif instaur
+Traitement phrase 227: la Mathilde Serrel prend un nom de nouveau ce matin, un monde ou un concert, ça se mérite. Je vais vous raconter l'histoire d'une fausse solution. Sur le d
+Traitement phrase 228: scandale et désarroi. Pour mémoire en France, la file d'attente en ligne pour le concert de Bad Bunny a été prise d'assaut par près de 500 000 connectés. Pour le retour de Céline Di
+Traitement phrase 229: Reserved, qui vient d'être annoncé lors de la journée des investisseurs, avec ce slogan « Vous connaissez chaque chanson, nous vous avons gardé deux billets ». Et on a envie
+Traitement phrase 230: ensuite, pendant une heure, vous aurez donc accès en priorité sans galérer à deux billets réservés pour vous, qu'il n'y a plus qu'à acheter sur l'un des prestataires partenaires de Spotify qui en
+Traitement phrase 231: presque garantie d'être récompensé, slogan numéro 2, vous êtes là pour l'artiste, Spotify est là pour vous. Sauf qu'il est précisé qu'il n'y en aura pas pour
+Traitement phrase 232: son concert, quid de la découverte, et qu'est-ce qui garantit que d'autres hordes de bottes ne viendront pas faire tourner des titres en boucle pour obtenir les fameux tickets réservés ?
+Traitement phrase 233: ou la plateforme. Je pense que vous avez la réponse. Tout à fait, merci Mathilde Serrel. Il est là
+Traitement phrase 234: par WhatsApp vocaux en fois deux, mais est-ce qu'on s'écoute encore vraiment ? Parce qu'au milieu de ce scroll d'infini d'informations, des personnages qu'on finit parfois par fabriquer malgré nous, je crois qu
+Traitement phrase 235: transport. Alors moi je pense, vous savez qu'on devrait avoir tous une carte amie, une espèce de carte virtuelle qu'on pourrait sortir à n'importe quel moment. Alors pas pour avoir des priv
+Traitement phrase 236: comme s'y perdre un ami faisait moins mal que juste une histoire d'amour. Alors que parfois c'est pire. On grandit avec des gens qu'on pensait voir vieillir, et puis un jour la vie les éloigne douce
+Traitement phrase 237: utilisé ma carte amie. Pas pour demander un service, pas pour un déménagement, ni même pour garder un chien. Juste pour vous parler d'un artiste que j'aime énormément. Un artiste qui montra sur la scène de l'Olympia le 17 avril
+Traitement phrase 238: nous tous tire dans l'œil qui refuse de partir, mais les rancœurs ça finit par se dire qu'on m'a lâché sa team, la fame ça attire, et quand tout va mal les faux amis s'attirent,
