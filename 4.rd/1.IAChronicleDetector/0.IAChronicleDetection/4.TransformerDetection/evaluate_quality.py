@@ -5,7 +5,13 @@ import numpy as np
 import sys
 import time
 import json
-from transformers import CamembertTokenizer, CamembertForSequenceClassification, pipeline
+import librosa
+from transformers import (
+    CamembertTokenizer, 
+    CamembertForSequenceClassification, 
+    KyutaiSpeechToTextProcessor, 
+    KyutaiSpeechToTextForConditionalGeneration
+)
 from src.utils import load_transcription, load_timecodes
 from src.evaluation import evaluate_chronicles
 
@@ -21,7 +27,7 @@ def save_results_json(detected_chronicles, output_path):
     formatted_results = []
     for c in detected_chronicles:
         formatted_results.append({
-            "label": "chronique", # Label générique ou basé sur le contenu si possible
+            "label": "chronique",
             "start": round(c['start'], 2),
             "end": round(c['end'], 2),
             "detected_at": round(c['detected_at'], 2),
@@ -34,60 +40,75 @@ def save_results_json(detected_chronicles, output_path):
 
 def evaluate_quality_live_kyutai(model_path, audio_path, tc_path=None, threshold=0.5, acceleration=None, output_json=None):
     """
-    Évaluation avec transcription en live via Kyutai STT et détection en live via Camembert.
+    Évaluation avec transcription en live via Kyutai STT (inférence manuelle) et détection en live via Camembert.
     """
     if not os.path.exists(model_path):
         print(f"Erreur : Modèle chronicle non trouvé à {model_path}")
         return
 
+    device = "cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu")
+    print(f"Utilisation du device : {device}")
+
     # 1. Chargement de Kyutai STT
     print(f"Chargement du modèle Kyutai STT (kyutai/stt-1b-en_fr-trfs)...")
-    device = "cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu")
-    
     try:
-        stt_pipe = pipeline(
-            "automatic-speech-recognition",
-            model="kyutai/stt-1b-en_fr-trfs",
-            torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
-            device=device,
-        )
+        stt_processor = KyutaiSpeechToTextProcessor.from_pretrained("kyutai/stt-1b-en_fr-trfs")
+        stt_model = KyutaiSpeechToTextForConditionalGeneration.from_pretrained(
+            "kyutai/stt-1b-en_fr-trfs",
+            torch_dtype=torch.float16 if device != "cpu" else torch.float32,
+        ).to(device)
     except Exception as e:
         print(f"Erreur lors du chargement de Kyutai STT : {e}")
         return
 
     # 2. Chargement du Classifier Chronicle (Camembert)
+    print(f"Chargement du classifier Camembert depuis {model_path}...")
     tokenizer = CamembertTokenizer.from_pretrained(model_path)
     model = CamembertForSequenceClassification.from_pretrained(model_path)
     model.eval()
     model.to(device)
 
+    # 3. Chargement et découpage de l'audio
+    print(f"Chargement de l'audio : {audio_path} (resampling à 24kHz)...")
+    audio, sr = librosa.load(audio_path, sr=24000)
+    total_duration = len(audio) / sr
+    
+    # On utilise des chunks de 5 secondes pour simuler le live
+    chunk_size_s = 5.0
+    chunk_samples = int(chunk_size_s * sr)
+    
     print(f"\n--- DÉBUT DÉTECTION LIVE (Kyutai STT + Camembert) ---")
     
-    # 3. Traitement streaming
-    result = stt_pipe(audio_path, chunk_length_s=10, stride_length_s=2, return_timestamps=True)
-    chunks = result.get('chunks', [])
-
     segments_history = []
     detected_chronicles = []
     current_chronicle = None
     window_size = 2
     
-    start_sim_time = time.time()
+    start_wall_time = time.time()
     
-    for chunk in chunks:
-        text = chunk['text'].strip()
-        if not text: continue
-        
-        ts = chunk['timestamp']
-        s_start, s_end = ts[0], ts[1]
+    for i in range(0, len(audio), chunk_samples):
+        chunk = audio[i : i + chunk_samples]
+        s_start = i / sr
+        s_end = min((i + chunk_samples) / sr, total_duration)
 
-        # Simulation de l'écoulement du temps
+        # Simulation de l'écoulement du temps réel
         if acceleration and acceleration > 0:
             target_wall_time = s_end / acceleration
-            elapsed = time.time() - start_sim_time
+            elapsed = time.time() - start_wall_time
             if target_wall_time > elapsed:
                 time.sleep(target_wall_time - elapsed)
 
+        # Transcription du chunk
+        inputs = stt_processor(chunk, sampling_rate=sr, return_tensors="pt").to(device)
+        with torch.no_grad():
+            output_tokens = stt_model.generate(**inputs, max_new_tokens=128)
+        text = stt_processor.batch_decode(output_tokens, skip_special_tokens=True)[0].strip()
+        
+        if not text:
+            # Même si pas de texte, on peut loguer le temps
+            continue
+
+        # Stockage du segment
         segments_history.append({'start': s_start, 'end': s_end, 'text': text})
         
         # Inférence Camembert (contexte passé uniquement)
@@ -99,7 +120,7 @@ def evaluate_quality_live_kyutai(model_path, audio_path, tc_path=None, threshold
             outputs = model(**encodings)
             prob = torch.softmax(outputs.logits, dim=1)[:, 1].item()
 
-        # Logique de détection
+        # Logique de détection de segment de chronique
         if prob >= threshold:
             if current_chronicle is None:
                 current_chronicle = {'start': s_start, 'end': s_end, 'conf': prob}
@@ -109,7 +130,6 @@ def evaluate_quality_live_kyutai(model_path, audio_path, tc_path=None, threshold
         else:
             if current_chronicle:
                 if current_chronicle['end'] - current_chronicle['start'] >= 5.0:
-                    # On note le moment où la chronique est validée (fin de la détection)
                     current_chronicle['detected_at'] = s_end
                     detected_chronicles.append(current_chronicle)
                     print(f"✨ Chronique détectée ! [{current_chronicle['start']:.1f}s - {current_chronicle['end']:.1f}s] à {s_end:.1f}s")
@@ -119,7 +139,7 @@ def evaluate_quality_live_kyutai(model_path, audio_path, tc_path=None, threshold
         print(f"[{s_start:6.1f}s - {s_end:6.1f}s] {status} | Prob: {prob:.2f} | {text[:50]}...")
 
     if current_chronicle and current_chronicle['end'] - current_chronicle['start'] >= 5.0:
-        current_chronicle['detected_at'] = chunks[-1]['timestamp'][1]
+        current_chronicle['detected_at'] = total_duration
         detected_chronicles.append(current_chronicle)
 
     # Sauvegarde JSON
@@ -143,7 +163,7 @@ def evaluate_quality_live_kyutai(model_path, audio_path, tc_path=None, threshold
         print(f"\n📊 NOTE FINALE QUALITÉ : {final_score:.1f}/100")
 
 def evaluate_quality_whisper(model_path, audio_path, tc_path=None, live_sim=True, acceleration=None, output_json=None):
-    """Ancienne méthode Whisper avec support JSON et option GT."""
+    """Ancienne méthode Whisper."""
     from detect import transcribe_audio, predict_chroniques
     print(f"Transcription complète avec Whisper...")
     segments = transcribe_audio(audio_path)
@@ -183,7 +203,7 @@ def evaluate_quality_whisper(model_path, audio_path, tc_path=None, live_sim=True
     else:
         predicted_chronicles = predict_chroniques(model_path, segments)
         for p in predicted_chronicles:
-            p['detected_at'] = p['end'] # Par défaut en batch
+            p['detected_at'] = p['end']
             p['conf'] = p.get('confidence', 0.5)
 
     if output_json:
@@ -199,12 +219,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Détection de chroniques en live")
     parser.add_argument("--model", default="models/camembert_chronicle")
     parser.add_argument("--audio", required=True)
-    parser.add_argument("--gt", default=None, help="Fichier de ground truth (optionnel)")
+    parser.add_argument("--gt", default=None)
     parser.add_argument("--kyutai", action="store_true")
     parser.add_argument("--no-live", action="store_true")
     parser.add_argument("--acceleration", type=float, default=None)
     parser.add_argument("--threshold", type=float, default=0.5)
-    parser.add_argument("--output", default="results_detection.json", help="Chemin du fichier JSON de sortie")
+    parser.add_argument("--output", default="results_detection.json")
     args = parser.parse_args()
     
     if args.kyutai:
