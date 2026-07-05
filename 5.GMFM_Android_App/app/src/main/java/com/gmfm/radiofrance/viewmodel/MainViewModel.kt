@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gmfm.radiofrance.api.APIService
+import com.gmfm.radiofrance.data.PreferencesManager
 import com.gmfm.radiofrance.model.Chronicle
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,13 +14,22 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val apiService: APIService
+    private val apiService: APIService,
+    private val preferencesManager: PreferencesManager
 ) : ViewModel() {
 
     init {
         Log.e("GMFM_DEBUG", "------------------------------------------")
         Log.e("GMFM_DEBUG", "🔴 LE VIEWMODEL EST INITIALISÉ")
         Log.e("GMFM_DEBUG", "------------------------------------------")
+    }
+
+    private val _isFirstVisit = MutableStateFlow(preferencesManager.isFirstVisit)
+    val isFirstVisit: StateFlow<Boolean> = _isFirstVisit
+
+    fun setFirstVisitComplete() {
+        preferencesManager.isFirstVisit = false
+        _isFirstVisit.value = false
     }
 
     private val _chronicles = MutableStateFlow<List<Chronicle>>(emptyList())
@@ -98,6 +108,7 @@ class MainViewModel @Inject constructor(
                     Log.i("GMFM_Data", "🌐 Appel API Heure: $baseTimeUrl")
                     val baseTimeResponse = apiService.getUserBaseTime(baseTimeUrl)
                     Log.i("GMFM_Data", "📦 Réponse Heure: $baseTimeResponse")
+                    
                     val hour = baseTimeResponse.baseHour ?: 7
                     val minute = baseTimeResponse.baseMinute ?: 0
                     _baseHour.value = hour

@@ -185,6 +185,18 @@ public class DatabaseService {
         }
     }
 
+    public void deleteUserConfig(String userId) {
+        String sql = "DELETE FROM users WHERE user_id = ?";
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, userId);
+            pstmt.executeUpdate();
+            logger.info("User config deleted for user {}", userId);
+        } catch (SQLException e) {
+            logger.error("Erreur lors de la suppression de la config pour l'utilisateur {}", userId, e);
+        }
+    }
+
     public UserConfig getUserConfig(String userId) {
         String querySQL = "SELECT base_hour, base_minute FROM users WHERE user_id = ?";
         try (Connection conn = DriverManager.getConnection(DB_URL);
@@ -261,6 +273,18 @@ public class DatabaseService {
             logger.info("Toutes les chroniques pour l'utilisateur {} ont été supprimées de la base de données.", userId);
         } catch (SQLException e) {
             logger.error("Erreur lors de la suppression des chroniques pour l'utilisateur {}", userId, e);
+        }
+    }
+
+    public void resetUserCustomList(String userId) {
+        String sql = "DELETE FROM user_status WHERE user_id = ?";
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, userId);
+            pstmt.executeUpdate();
+            logger.info("Custom list status reset for user {}", userId);
+        } catch (SQLException e) {
+            logger.error("Erreur lors du reset du statut custom list pour l'utilisateur {}", userId, e);
         }
     }
 
