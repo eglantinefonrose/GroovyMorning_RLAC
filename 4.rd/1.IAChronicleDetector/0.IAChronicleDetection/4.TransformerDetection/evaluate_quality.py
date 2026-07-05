@@ -99,9 +99,14 @@ def evaluate_quality_live_kyutai(model_path, audio_path, tc_path=None, threshold
                 time.sleep(target_wall_time - elapsed)
 
         # Transcription du chunk
-        inputs = stt_processor(chunk, sampling_rate=sr, return_tensors="pt").to(device)
+        inputs = stt_processor(audio=chunk, sampling_rate=sr, return_tensors="pt").to(device)
+        
+        # Calculer dynamiquement max_new_tokens pour éviter le warning de transformers
+        max_audio_frames = inputs["input_values"].shape[-1] // stt_model.config.codec_config.frame_size
+        max_new_tokens = min(128, max_audio_frames)
+
         with torch.no_grad():
-            output_tokens = stt_model.generate(**inputs, max_new_tokens=128)
+            output_tokens = stt_model.generate(**inputs, max_new_tokens=max_new_tokens)
         text = stt_processor.batch_decode(output_tokens, skip_special_tokens=True)[0].strip()
         
         if not text:

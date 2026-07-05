@@ -1,0 +1,562 @@
+[
+    {
+        "label": "Chronique Matin",
+        "start": 4.0,
+        "end": 17.0,
+        "detected_at": 19.0,
+        "confidence": 0.95
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 24.0,
+        "end": 73.0,
+        "detected_at": 75.0,
+        "confidence": 0.97
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 74.0,
+        "end": 91.0,
+        "detected_at": 93.0,
+        "confidence": 0.97
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 92.0,
+        "end": 283.0,
+        "detected_at": 285.0,
+        "confidence": 1.0
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 284.0,
+        "end": 457.0,
+        "detected_at": 459.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 458.0,
+        "end": 639.0,
+        "detected_at": 641.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 640.0,
+        "end": 663.0,
+        "detected_at": 665.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 664.0,
+        "end": 915.0,
+        "detected_at": 917.0,
+        "confidence": 1.0
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 918.0,
+        "end": 923.0,
+        "detected_at": 925.0,
+        "confidence": 0.93
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 924.0,
+        "end": 931.0,
+        "detected_at": 933.0,
+        "confidence": 0.95
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 938.0,
+        "end": 943.0,
+        "detected_at": 945.0,
+        "confidence": 0.89
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 952.0,
+        "end": 1015.0,
+        "detected_at": 1017.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1016.0,
+        "end": 1059.0,
+        "detected_at": 1061.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1060.0,
+        "end": 1095.0,
+        "detected_at": 1097.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1098.0,
+        "end": 1107.0,
+        "detected_at": 1109.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1108.0,
+        "end": 1131.0,
+        "detected_at": 1133.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1132.0,
+        "end": 1171.0,
+        "detected_at": 1173.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1178.0,
+        "end": 1185.0,
+        "detected_at": 1187.0,
+        "confidence": 0.97
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1186.0,
+        "end": 1373.0,
+        "detected_at": 1375.0,
+        "confidence": 1.0
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1374.0,
+        "end": 1427.0,
+        "detected_at": 1429.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1434.0,
+        "end": 1465.0,
+        "detected_at": 1467.0,
+        "confidence": 0.98
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1476.0,
+        "end": 1509.0,
+        "detected_at": 1511.0,
+        "confidence": 0.98
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1510.0,
+        "end": 1515.0,
+        "detected_at": 1517.0,
+        "confidence": 0.94
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1518.0,
+        "end": 1535.0,
+        "detected_at": 1537.0,
+        "confidence": 0.96
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1556.0,
+        "end": 1585.0,
+        "detected_at": 1587.0,
+        "confidence": 0.98
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1604.0,
+        "end": 1633.0,
+        "detected_at": 1635.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1634.0,
+        "end": 1639.0,
+        "detected_at": 1641.0,
+        "confidence": 0.97
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1644.0,
+        "end": 1765.0,
+        "detected_at": 1767.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1766.0,
+        "end": 1773.0,
+        "detected_at": 1775.0,
+        "confidence": 0.94
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1776.0,
+        "end": 1837.0,
+        "detected_at": 1839.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1844.0,
+        "end": 1879.0,
+        "detected_at": 1881.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1884.0,
+        "end": 1901.0,
+        "detected_at": 1903.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1902.0,
+        "end": 1955.0,
+        "detected_at": 1957.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1958.0,
+        "end": 1963.0,
+        "detected_at": 1965.0,
+        "confidence": 0.93
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1964.0,
+        "end": 1997.0,
+        "detected_at": 1999.0,
+        "confidence": 0.98
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 1998.0,
+        "end": 2027.0,
+        "detected_at": 2029.0,
+        "confidence": 0.98
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 2028.0,
+        "end": 2327.0,
+        "detected_at": 2329.0,
+        "confidence": 1.0
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 2330.0,
+        "end": 2349.0,
+        "detected_at": 2351.0,
+        "confidence": 0.98
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 2352.0,
+        "end": 2361.0,
+        "detected_at": 2363.0,
+        "confidence": 0.98
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 2362.0,
+        "end": 2379.0,
+        "detected_at": 2381.0,
+        "confidence": 0.96
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 2384.0,
+        "end": 2391.0,
+        "detected_at": 2393.0,
+        "confidence": 0.96
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 2396.0,
+        "end": 2501.0,
+        "detected_at": 2503.0,
+        "confidence": 1.0
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 2506.0,
+        "end": 2523.0,
+        "detected_at": 2525.0,
+        "confidence": 0.98
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 2524.0,
+        "end": 2529.0,
+        "detected_at": 2531.0,
+        "confidence": 0.92
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 2536.0,
+        "end": 2727.0,
+        "detected_at": 2729.0,
+        "confidence": 1.0
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 2728.0,
+        "end": 3507.0,
+        "detected_at": 3509.0,
+        "confidence": 1.0
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 3508.0,
+        "end": 3535.0,
+        "detected_at": 3537.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 3536.0,
+        "end": 3631.0,
+        "detected_at": 3633.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 3632.0,
+        "end": 3643.0,
+        "detected_at": 3645.0,
+        "confidence": 0.98
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 3644.0,
+        "end": 3655.0,
+        "detected_at": 3657.0,
+        "confidence": 0.95
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 3658.0,
+        "end": 3669.0,
+        "detected_at": 3671.0,
+        "confidence": 0.93
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 3674.0,
+        "end": 3683.0,
+        "detected_at": 3685.0,
+        "confidence": 0.93
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 3686.0,
+        "end": 3691.0,
+        "detected_at": 3693.0,
+        "confidence": 0.95
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 3692.0,
+        "end": 3709.0,
+        "detected_at": 3711.0,
+        "confidence": 0.97
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 3718.0,
+        "end": 3729.0,
+        "detected_at": 3731.0,
+        "confidence": 0.95
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 3730.0,
+        "end": 4453.0,
+        "detected_at": 4455.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 4454.0,
+        "end": 4591.0,
+        "detected_at": 4593.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 4594.0,
+        "end": 4599.0,
+        "detected_at": 4601.0,
+        "confidence": 0.92
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 4602.0,
+        "end": 4609.0,
+        "detected_at": 4611.0,
+        "confidence": 0.92
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 4610.0,
+        "end": 4671.0,
+        "detected_at": 4673.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 4676.0,
+        "end": 4785.0,
+        "detected_at": 4787.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 4788.0,
+        "end": 4837.0,
+        "detected_at": 4839.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 4838.0,
+        "end": 4847.0,
+        "detected_at": 4849.0,
+        "confidence": 0.97
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 4852.0,
+        "end": 4859.0,
+        "detected_at": 4861.0,
+        "confidence": 0.96
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 4860.0,
+        "end": 4901.0,
+        "detected_at": 4903.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 4902.0,
+        "end": 4927.0,
+        "detected_at": 4929.0,
+        "confidence": 0.98
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 4930.0,
+        "end": 4955.0,
+        "detected_at": 4957.0,
+        "confidence": 0.98
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 4956.0,
+        "end": 4971.0,
+        "detected_at": 4973.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 4972.0,
+        "end": 4993.0,
+        "detected_at": 4995.0,
+        "confidence": 0.97
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 4994.0,
+        "end": 5005.0,
+        "detected_at": 5007.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 5020.0,
+        "end": 5025.0,
+        "detected_at": 5027.0,
+        "confidence": 0.98
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 5036.0,
+        "end": 5045.0,
+        "detected_at": 5047.0,
+        "confidence": 0.93
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 5046.0,
+        "end": 5059.0,
+        "detected_at": 5061.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 5062.0,
+        "end": 6475.0,
+        "detected_at": 6477.0,
+        "confidence": 1.0
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 6476.0,
+        "end": 7145.0,
+        "detected_at": 7147.0,
+        "confidence": 0.99
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 7148.0,
+        "end": 7153.0,
+        "detected_at": 7155.0,
+        "confidence": 0.92
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 7160.0,
+        "end": 7169.0,
+        "detected_at": 7171.0,
+        "confidence": 0.95
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 7218.0,
+        "end": 7223.0,
+        "detected_at": 7225.0,
+        "confidence": 0.93
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 7224.0,
+        "end": 7229.0,
+        "detected_at": 7231.0,
+        "confidence": 0.9
+    },
+    {
+        "label": "Chronique Matin",
+        "start": 7238.0,
+        "end": 7249.0,
+        "detected_at": 7250.8,
+        "confidence": 0.95
+    }
+]

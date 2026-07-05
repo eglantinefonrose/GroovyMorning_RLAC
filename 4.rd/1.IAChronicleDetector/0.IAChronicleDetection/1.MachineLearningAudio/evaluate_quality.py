@@ -21,7 +21,7 @@ def calculate_iou(range1, range2):
     union = (end1 - start1) + (end2 - start2) - intersection
     return intersection / union if union > 0 else 0.0
 
-def simulate_live_inference(model_path, audio_path, threshold=0.89, segment_duration=3.0, step=2.0, acceleration=None, transcribe=False):
+def simulate_live_inference(model_path, audio_path, threshold=0.89, segment_duration=3.0, step=2.0, acceleration=None, transcribe=False, json_output=None):
     """
     Simule une détection en direct en traitant l'audio par morceaux.
     """
@@ -42,6 +42,24 @@ def simulate_live_inference(model_path, audio_path, threshold=0.89, segment_dura
     
     detected_chronicles = []
     current_chronicle = None
+
+    def save_live_json():
+        if json_output:
+            output_list = []
+            for item in detected_chronicles:
+                output_list.append({
+                    "label": item.get("label", "Chronique Matin"),
+                    "start": round(item["start"], 1),
+                    "end": round(item["end"], 1),
+                    "detected_at": round(item["detected_at"], 1),
+                    "confidence": round(item["confidence"], 2)
+                })
+            try:
+                with open(json_output, 'w', encoding='utf-8') as f:
+                    json.dump(output_list, f, indent=4, ensure_ascii=False)
+                print(f" [LIVE JSON] Écrit : {json_output}")
+            except Exception as e:
+                print(f" Erreur écriture JSON live : {e}")
     
     # Simulation du flux
     for start_t in np.arange(0, duration - segment_duration, step):
@@ -75,18 +93,29 @@ def simulate_live_inference(model_path, audio_path, threshold=0.89, segment_dura
         # Logique de lissage/fusion "live"
         if prob >= threshold:
             if current_chronicle is None:
-                current_chronicle = {'start': start_t, 'end': start_t + segment_duration, 'conf': prob}
+                current_chronicle = {
+                    'label': "Chronique Matin",
+                    'start': start_t,
+                    'end': start_t + segment_duration,
+                    'conf': prob,
+                    'confidence': prob
+                }
             else:
                 current_chronicle['end'] = start_t + segment_duration
                 current_chronicle['conf'] = max(current_chronicle['conf'], prob)
+                current_chronicle['confidence'] = max(current_chronicle['confidence'], prob)
         else:
             if current_chronicle:
                 if current_chronicle['end'] - current_chronicle['start'] >= 5.0:
+                    current_chronicle['detected_at'] = start_t + segment_duration
                     detected_chronicles.append(current_chronicle)
+                    save_live_json()
                 current_chronicle = None
                 
     if current_chronicle and current_chronicle['end'] - current_chronicle['start'] >= 5.0:
+        current_chronicle['detected_at'] = duration
         detected_chronicles.append(current_chronicle)
+        save_live_json()
         
     return detected_chronicles
 
@@ -106,17 +135,32 @@ def evaluate_quality(model_path, audio_path, tc_path=None, threshold=0.89, live_
     
     # 1. Prédire
     if live_sim:
-        segments = simulate_live_inference(model_path, audio_path, threshold=threshold, acceleration=acceleration, transcribe=transcribe)
+        if not json_output:
+            json_output = "live_detections.json"
+        segments = simulate_live_inference(model_path, audio_path, threshold=threshold, acceleration=acceleration, transcribe=transcribe, json_output=json_output)
     else:
         classifier = ChronicleClassifier()
         classifier.load_model(model_path)
         segments = classifier.detect_chronicles_in_file(audio_path, threshold=threshold, extract_segments=False)
     
-    # Export JSON si demandé
+    # Export JSON si demandé (pour le mode batch ou en fin de traitement)
     if json_output:
-        with open(json_output, 'w', encoding='utf-8') as f:
-            json.dump(segments, f, indent=4, ensure_ascii=False)
-        print(f"\n💾 Résultats de détection sauvegardés dans : {json_output}")
+        formatted_segments = []
+        for s in segments:
+            detected_at = s.get('detected_at', s['end'])
+            formatted_segments.append({
+                "label": s.get('label', "Chronique Matin"),
+                "start": round(s['start'], 1),
+                "end": round(s['end'], 1),
+                "detected_at": round(detected_at, 1),
+                "confidence": round(s.get('confidence', s.get('conf', 0.0)), 2)
+            })
+        try:
+            with open(json_output, 'w', encoding='utf-8') as f:
+                json.dump(formatted_segments, f, indent=4, ensure_ascii=False)
+            print(f"\n💾 Résultats de détection sauvegardés dans : {json_output}")
+        except Exception as e:
+            print(f"\nErreur d'écriture dans {json_output} : {e}")
 
     print(f"\n📺 Chroniques détectées :")
     print("-" * 60)
