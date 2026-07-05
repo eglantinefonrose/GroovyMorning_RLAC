@@ -1,0 +1,10 @@
+[project]
+name = "6-livetranscriptionstartandenddetection"
+version = "0.1.0"
+description = "Detection of chronicle starts and ends in live transcription"
+dependencies = [
+    "torch",
+    "transformers",
+    "faster-whisper",
+    "tqdm"
+]

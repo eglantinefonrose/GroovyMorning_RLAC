@@ -54,6 +54,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     val baseHour by viewModel.baseHour.collectAsState()
     val baseMinute by viewModel.baseMinute.collectAsState()
     val error by viewModel.error.collectAsState()
+    val isFirstVisit by viewModel.isFirstVisit.collectAsState()
     
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -67,9 +68,30 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     var isPlayerOpen by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+    var showOnboarding by remember { mutableStateOf(false) }
+    var hasShownOnboardingThisSession by remember { mutableStateOf(false) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+
+    val isLoadingData by viewModel.isLoading.collectAsState()
+    var hasAttemptedFirstLoad by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isLoadingData) {
+        if (!isLoadingData) {
+            // Un petit délai pour s'assurer que les StateFlow sont bien synchronisés
+            kotlinx.coroutines.delay(500)
+            hasAttemptedFirstLoad = true
+        }
+    }
+
+    LaunchedEffect(chronicles, isLoadingData, hasAttemptedFirstLoad, isFirstVisit) {
+        if (hasAttemptedFirstLoad && !isLoadingData && chronicles.isEmpty() && isFirstVisit && !hasShownOnboardingThisSession) {
+            showOnboarding = true
+            hasShownOnboardingThisSession = true
+        } else if (!isLoadingData && (chronicles.isNotEmpty() || !isFirstVisit)) {
+            hasShownOnboardingThisSession = true
+        }
+    }
 
     BackHandler(enabled = isPlayerOpen) {
         isPlayerOpen = false
@@ -237,8 +259,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                     ) 
                 }
                 composable(Screen.Live.route) { 
-                    val isLoadingData by viewModel.isLoading.collectAsState()
-                    
                     LiveView(
                         chronicles = chronicles,
                         isLoading = isLoadingData,
@@ -270,6 +290,16 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
             ) {
                 Column(horizontalAlignment = Alignment.End) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
+                        // Help Icon Button
+                        IconButton(onClick = { showOnboarding = true }) {
+                            Icon(
+                                Icons.Default.HelpOutline, 
+                                contentDescription = "Aide", 
+                                tint = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
                         // Clock Icon Button
                         IconButton(onClick = { showTimePicker = true }) {
                             Icon(
@@ -377,6 +407,13 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                     }
                 }
             )
+        }
+
+        if (showOnboarding) {
+            OnboardingCarousel(onDismiss = { 
+                showOnboarding = false 
+                viewModel.setFirstVisitComplete()
+            })
         }
 
         // Full Screen Player

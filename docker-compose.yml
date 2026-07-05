@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # --- Backend Java (RLAC-AudioRecorder) ---
   # Gère les enregistrements, le planning et l'API pour les apps mobiles
@@ -34,16 +32,23 @@ services:
     volumes:
       - ./2.RLAC-IAChronicleSegmenter/data:/app/data
       - ./2.RLAC-IAChronicleSegmenter/assets:/app/assets
+    env_file:
+      - .env
+    environment:
+      - JAVA_API_URL=http://java-backend:8000
     restart: unless-stopped
     networks:
       - rlac-network
 
   # --- Cloudflare Tunnel (Accès à Distance) ---
-  # Permet d'accéder à l'API Java depuis n'importe où sans ouvrir de ports
-  # REMPLACEZ 'YOUR_TOKEN' par votre jeton Cloudflare Tunnel
+  # Permet d'accéder à l'API Java depuis n'importe où sans ouvrir de ports.
+  # Ce service est en profil 'tunnel'. Il ne démarrera PAS par défaut.
+  # Pour l'activer, utilisez : docker compose --profile tunnel up
   tunnel:
     image: cloudflare/cloudflared:latest
     container_name: rlac-remote-tunnel
+    profiles:
+      - tunnel
     command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
     restart: unless-stopped
     depends_on:

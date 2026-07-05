@@ -6,6 +6,7 @@ import service.DatabaseService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ChroniclesManagerService {
     private static final Logger logger = LoggerFactory.getLogger(ChroniclesManagerService.class);
@@ -43,9 +44,19 @@ public class ChroniclesManagerService {
     public List<Chronicle> getChronicles(String userID) {
         List<Chronicle> chronicles = dbService.getChronicles(userID);
         if (chronicles.isEmpty() && !dbService.hasUserCustomList(userID)) {
-            return RadioProgramService.getAllChronicles();
+            chronicles = RadioProgramService.getAllChronicles();
         }
-        return chronicles;
+
+        // Récupérer l'heure de début de l'utilisateur (base time)
+        DatabaseService.UserConfig config = dbService.getUserConfig(userID);
+        int userBaseSeconds = config.baseHour * 3600 + config.baseMinute * 60;
+        
+        // Référence théorique : La matinale commence à 07:00:00 sur France Inter
+        int referenceSeconds = 7 * 3600; 
+
+        return chronicles.stream()
+                .filter(c -> (referenceSeconds + c.getStartTime()) >= userBaseSeconds)
+                .collect(Collectors.toList());
     }
 
     public void removeChroniclesForUser(String userID) {

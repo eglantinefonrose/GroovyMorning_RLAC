@@ -2,17 +2,10 @@
 set -e
 
 # Configuration des URLs
-JAVA_BASE_URL=${JAVA_API_URL:-"http://backend-java:8000"}
+JAVA_BASE_URL=${JAVA_API_URL:-"http://java-backend:8000"}
 PYTHON_LOCAL_URL="http://localhost:8001"
 
-# 1. Attendre que la base de données soit prête
-echo "⏳ [Entrypoint] Waiting for database (Postgres)..."
-while ! nc -z database 5432; do
-  sleep 1
-done
-echo "✅ [Entrypoint] Database is ready!"
-
-# 2. Attendre que Java soit prêt
+# 1. Attendre que Java soit prêt
 echo "⏳ [Entrypoint] Waiting for Java backend at $JAVA_BASE_URL..."
 while ! curl -s --fail "$JAVA_BASE_URL/api/status" > /dev/null; do
   sleep 2

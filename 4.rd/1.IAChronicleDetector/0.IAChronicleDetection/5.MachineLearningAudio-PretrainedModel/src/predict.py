@@ -59,9 +59,12 @@ def format_time(seconds: float) -> str:
     ms = int((seconds - int(seconds)) * 1000)
     return f"{h:02d}:{m:02d}:{s:02d}.{ms:03d}"
 
+import time
+
 def predict(audio_path: str, model_type: str, model_dir: str = None, is_binary: bool = False, 
             window_size: float = 10.0, overlap: float = 5.0, threshold: float = 0.4, 
-            gap_filling: float = 5.0, min_duration: float = 5.0, debug: bool = False):
+            gap_filling: float = 5.0, min_duration: float = 5.0, debug: bool = False,
+            acceleration: float = 0.0):
     
     config = MODEL_CONFIGS.get(model_type, MODEL_CONFIGS["wav2vec2"])
     
@@ -95,7 +98,15 @@ def predict(audio_path: str, model_type: str, model_dir: str = None, is_binary: 
     # Pre-check feature extractor padding/max_length requirements
     is_ast = (model_type == "ast")
     
+    t0 = time.time()
     for start in np.arange(0, duration, step):
+        if acceleration > 0:
+            target_time = start / acceleration
+            elapsed = time.time() - t0
+            sleep_time = target_time - elapsed
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+
         end = min(start + window_size, duration)
         if end - start < 2.0: # Skip very short segments
             continue

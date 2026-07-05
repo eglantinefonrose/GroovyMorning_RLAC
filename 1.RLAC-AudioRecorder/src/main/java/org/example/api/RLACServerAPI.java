@@ -257,6 +257,33 @@ public class RLACServerAPI {
     }
 
     /**
+     * curl -X DELETE "http://localhost:8000/api/clearUserConfig"
+     */
+    @DELETE
+    @Path("/clearUserConfig")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response clearUserConfig() {
+        String userId = DatabaseService.getInstance().getLocalUserId();
+        try {
+            logger.info("🧹 Demande de nettoyage complet de la configuration pour l'utilisateur: {}", userId);
+            
+            rlacService.clearUserConfiguration(userId);
+            
+            // Revenir à l'heure par défaut (07:00) pour le scheduler Python
+            notifyPythonScheduler(7, 0);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "La liste des chroniques et l'heure de programmation ont été supprimées (remises à zéro).");
+            
+            return Response.ok(response).build();
+        } catch (Exception e) {
+            logger.error("Erreur lors du nettoyage de la configuration", e);
+            return createErrorResponse("Erreur interne du serveur: " + e.getMessage());
+        }
+    }
+
+    /**
      * curl "http://localhost:8000/api/getUserBaseTime"
      */
     @GET

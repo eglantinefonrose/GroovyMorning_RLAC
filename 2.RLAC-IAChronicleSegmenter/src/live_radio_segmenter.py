@@ -1,6 +1,11 @@
 import numpy as np
 import os
 import time
+from dotenv import load_dotenv
+
+# Charger les variables d'environnement depuis .env
+load_dotenv()
+
 import glob
 from scipy import signal
 import warnings
@@ -12,15 +17,25 @@ import whisper
 import wave
 import unicodedata
 from flask import Flask, request, jsonify
+from datetime import datetime
+
+# Nouveaux imports pour DeepSeek
+try:
+    from src.scraper import get_chroniques
+    from src.deepseek_detector import DeepSeekDetector
+except ImportError:
+    from scraper import get_chroniques
+    from deepseek_detector import DeepSeekDetector
 
 warnings.filterwarnings('ignore')
 
 class UnifiedLiveSegmenter:
-    def __init__(self, jingles_dir, pipe_path='/tmp/audio_pipe', threshold=0.50, whisper_model="medium"):
+    def __init__(self, jingles_dir, pipe_path='/tmp/audio_pipe', threshold=0.50, whisper_model="medium", detection_mode="legacy"):
         self.sample_rate = 16000
         self.pipe_path = pipe_path
         self.threshold = threshold
         self.chunk_size = 512 # Latence ultra-faible : 32ms
+        self.detection_mode = detection_mode
         
         self.sequence = [
             {"type": "jingle", "name": "journal de 7h", "target": "grande_matinale_jingle_7h.m4a"},
@@ -34,6 +49,37 @@ class UnifiedLiveSegmenter:
             {"type": "keyword", "name": "Edito eco", "target": "édito éco"},
             {"type": "jingle",  "name": "L’invite de 7h50", "target": "grande_matinale_jingle_7h50.m4a"}
         ]
+
+        # Initialisation DeepSeek si nécessaire
+        self.deepseek_detector = None
+        if self.detection_mode == "deepseek":
+            print("🤖 Mode DETECTION: DeepSeek API")
+            api_key = os.environ.get("DEEPSEEK_API_KEY")
+            if not api_key:
+                print("⚠️ [DeepSeek] DEEPSEEK_API_KEY manquante. Repli sur le mode legacy.")
+                self.detection_mode = "legacy"
+            else:
+                target_date = os.environ.get("TARGET_DATE")
+                if target_date:
+                    print(f"🔍 Récupération de la grille pour le {target_date}...")
+                else:
+                    print("🔍 Récupération de la grille du jour...")
+                
+                schedule_data = get_chroniques(target_date)
+                if schedule_data:
+                    print(f"✅ {len(schedule_data)} chroniques trouvées :")
+                    for item in schedule_data:
+                        print(f"   - {item.get('time')} : {item.get('title')}")
+                else:
+                    print("⚠️ Aucune chronique trouvée dans la grille.")
+                
+                self.deepseek_detector = DeepSeekDetector(api_key, schedule=schedule_data, is_simulation=os.environ.get("SIMU", "false").lower() == "true")
+                self.context_buffer = []
+                self.max_context = 5
+        
+        if self.detection_mode == "legacy":
+            print("📻 Mode DETECTION: Legacy (Jingles + Keywords)")
+
         self.current_step = 0
         self.step_just_changed = True
         
@@ -61,8 +107,39 @@ class UnifiedLiveSegmenter:
         self.time_offset = 0.0 # Décalage temporel global (delta)
         
         self.load_jingles(jingles_dir)
-        print(f"🚀 Chargement Whisper '{whisper_model}'...")
-        self.model = whisper.load_model(whisper_model)
+        
+        # Initialisation du moteur de transcription (Kyutai ou Whisper)
+        self.use_kyutai = os.environ.get("USE_KYUTAI", "true").lower() == "true"
+        
+        if self.use_kyutai:
+            print(f"🚀 Chargement Kyutai STT (Streaming Mode)...")
+            try:
+                import torch
+                from transformers import pipeline
+                self.device = "cuda" if torch.cuda.is_available() else "cpu"
+                if self.device == "cpu" and os.uname().sysname == "Darwin": # Optimisation Mac Silicon
+                    self.device = "mps"
+                
+                self.stt_pipeline = pipeline(
+                    "automatic-speech-recognition",
+                    model="kyutai/stt-1b-en_fr",
+                    device=self.device,
+                    torch_dtype=torch.float16 if self.device != "cpu" else torch.float32
+                )
+                print("✅ Kyutai STT prêt.")
+            except ImportError:
+                print("❌ Erreur: Le module 'transformers' est manquant.")
+                print("   Veuillez l'installer avec: pip install transformers accelerate")
+                print("   Ou assurez-vous d'utiliser le bon environnement virtuel (ex: ./.venv/bin/python3)")
+                self.use_kyutai = False
+            except Exception as e:
+                print(f"❌ Erreur chargement Kyutai: {e}. Repli sur Whisper.")
+                self.use_kyutai = False
+
+        if not self.use_kyutai:
+            print(f"🚀 Chargement Whisper '{whisper_model}'...")
+            self.model = whisper.load_model(whisper_model)
+        
         print(f"✅ Système prêt. Chunk: {self.chunk_size} samples")
 
     def normalize_text(self, text):
@@ -72,6 +149,10 @@ class UnifiedLiveSegmenter:
 
     def load_jingles(self, jingles_dir):
         self.jingle_data = {}
+        # On ne charge les jingles que si on est en mode legacy ou si on en a besoin
+        if self.detection_mode != "legacy":
+            return
+            
         print(f"📁 Chargement des jingles...")
         required = set(item["target"] for item in self.sequence if item["type"] == "jingle")
         for name in required:
@@ -113,8 +194,12 @@ class UnifiedLiveSegmenter:
         
         pcm_chunk = (chunk * 32768).astype(np.int16).tobytes()
         self.whisper_audio_accumulated.extend(pcm_chunk)
-        if len(self.whisper_audio_accumulated) >= (5 * self.sample_rate * 2):
-            start_ts = self.total_samples_processed - (5 * self.sample_rate)
+        
+        # Réduire l'accumulation à 2s pour Kyutai (plus réactif) au lieu de 5s
+        accumulation_limit = 2 if self.use_kyutai else 5
+        
+        if len(self.whisper_audio_accumulated) >= (accumulation_limit * self.sample_rate * 2):
+            start_ts = self.total_samples_processed - (accumulation_limit * self.sample_rate)
             self.transcription_queue.put((bytes(self.whisper_audio_accumulated), start_ts))
             self.whisper_audio_accumulated = bytearray()
 
@@ -130,13 +215,13 @@ class UnifiedLiveSegmenter:
             return self.sync_buffer[self.sync_buffer_index-length:self.sync_buffer_index]
         return np.concatenate((self.sync_buffer[-(length-self.sync_buffer_index):], self.sync_buffer[:self.sync_buffer_index]))
 
-    def on_detected(self, item, score=None, exact_time=None):
+    def on_detected(self, item, score=None, exact_time=None, trigger_text=None):
         time_sec = exact_time if exact_time is not None else (self.total_samples_processed / self.sample_rate)
         # On applique l'offset global au temps du flux pour obtenir le temps "réel" corrigé
         corrected_time = time_sec + self.time_offset
         
         time_str = time.strftime('%H:%M:%S', time.gmtime(corrected_time))
-        now_str = time.strftime('%H:%M:%S')
+        now_str = datetime.now().strftime("%H:%M:%S")
         
         # Envoi du signal de FIN pour la chronique qui vient de se terminer
         if self.last_chronicle_name:
@@ -162,10 +247,12 @@ class UnifiedLiveSegmenter:
                     print(f"   [API ERROR] Signal de fin : {e}")
             threading.Thread(target=call_api_end, daemon=True).start()
 
-        print(f"\n\n{'🔥' if item['type']=='jingle' else '✨'} {'='*56}")
+        print(f"\n\n{'🔥' if item.get('type')=='jingle' else '✨'} {'='*56}")
         print(f"⭐ DÉBUT DE LA CHRONIQUE : {item['name']}")
         print(f"   Position DÉBUT (corrigée): {time_str} ({corrected_time:.1f}s)")
         print(f"   Détecté à (live)      : {now_str}")
+        if trigger_text:
+            print(f"   Phrase déclencheur    : \"{trigger_text}\"")
         if score: print(f"   Score : {score:.4f}")
         print(f"{'='*60}\n")
         
@@ -190,32 +277,62 @@ class UnifiedLiveSegmenter:
         self.last_chronicle_name = item['name']
         self.last_chronicle_start_time = time_sec
 
-        self.current_step += 1
-        self.step_just_changed = True
-        if self.current_step < len(self.sequence):
-            next_it = self.sequence[self.current_step]
-            print(f"➡️ Cible suivante : {next_it['name']} ({next_it['type']})")
-        else:
-            print("🏁 SÉQUENCE TERMINÉE !"); self.running = False
+        if self.detection_mode == "legacy":
+            self.current_step += 1
+            self.step_just_changed = True
+            if self.current_step < len(self.sequence):
+                next_it = self.sequence[self.current_step]
+                print(f"➡️ Cible suivante : {next_it['name']} ({next_it['type']})")
+            else:
+                print("🏁 SÉQUENCE TERMINÉE !"); self.running = False
 
     def transcription_worker(self):
+        print(f"🧵 Worker transcription démarré ({'Kyutai' if self.use_kyutai else 'Whisper'})")
         while self.running:
             try:
                 audio_data, start_samples = self.transcription_queue.get(timeout=1)
-                if self.current_step >= len(self.sequence) or self.sequence[self.current_step]["type"] != "keyword":
-                    continue
-                temp_wav = f"/tmp/wh_{int(time.time())}.wav"
-                with wave.open(temp_wav, 'wb') as wav:
-                    wav.setnchannels(1); wav.setsampwidth(2); wav.setframerate(self.sample_rate)
-                    wav.writeframes(audio_data)
-                result = self.model.transcribe(temp_wav, language="fr", fp16=False)
-                text = result["text"].strip()
-                os.remove(temp_wav)
+                
+                text = ""
+                if self.use_kyutai:
+                    # Conversion des octets en numpy array float32
+                    audio_np = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / 32768.0
+                    # Appel Kyutai STT
+                    result = self.stt_pipeline(audio_np)
+                    text = result["text"].strip()
+                else:
+                    # Ancien mode Whisper
+                    temp_wav = f"/tmp/wh_{int(time.time())}.wav"
+                    with wave.open(temp_wav, 'wb') as wav:
+                        wav.setnchannels(1); wav.setsampwidth(2); wav.setframerate(self.sample_rate)
+                        wav.writeframes(audio_data)
+                    result = self.model.transcribe(temp_wav, language="fr", fp16=False)
+                    text = result["text"].strip()
+                    os.remove(temp_wav)
+                
                 if text:
-                    print(f"💬 Transcription: \"{text}\"")
-                    if self.normalize_text(self.sequence[self.current_step]["target"]) in self.normalize_text(text):
-                        self.on_detected(self.sequence[self.current_step], exact_time=start_samples / self.sample_rate)
-            except: continue
+                    print(f"💬 Transcription ({'K' if self.use_kyutai else 'W'}): \"{text}\"")
+                    
+                    if self.detection_mode == "deepseek" and self.deepseek_detector:
+                        # Analyse via DeepSeek
+                        current_time_sec = start_samples / self.sample_rate
+                        res = self.deepseek_detector.analyze_sentence(text, self.context_buffer, current_time_sec=current_time_sec)
+                        if res.get("detecte"):
+                            chronicle_name = res.get("chronique")
+                            self.on_detected({"name": chronicle_name, "type": "ai"}, exact_time=current_time_sec, trigger_text=text)
+                        
+                        # Mise à jour du buffer de contexte
+                        self.context_buffer.append(text)
+                        if len(self.context_buffer) > self.max_context:
+                            self.context_buffer.pop(0)
+                            
+                    elif self.detection_mode == "legacy":
+                        if self.current_step < len(self.sequence) and self.sequence[self.current_step]["type"] == "keyword":
+                            target = self.normalize_text(self.sequence[self.current_step]["target"])
+                            if target in self.normalize_text(text):
+                                self.on_detected(self.sequence[self.current_step], exact_time=start_samples / self.sample_rate, trigger_text=text)
+            except Exception as e:
+                # print(f"Error in transcription worker: {e}")
+                continue
 
     def fast_rolling_energy(self, signal_sq, window_len):
         """Calcul de l'énergie glissante optimisé."""
@@ -228,163 +345,73 @@ class UnifiedLiveSegmenter:
             self.total_samples_processed = int(position_in_seconds * self.sample_rate)
             
         self.add_to_buffer(chunk)
-        if not self.running or self.current_step >= len(self.sequence):
+        if not self.running:
             return
 
-        item = self.sequence[self.current_step]
-        
-        if item["type"] == "jingle":
-            data = self.jingle_data.get(item["target"])
-            if data:
-                lookback = 20 if self.step_just_changed else 1.5
-                search_len = min(int(data["length"] + lookback * self.sample_rate), self.total_samples_processed)
-                if search_len >= data["length"]:
-                    audio = self.get_latest_audio(search_len)
-                    corr = signal.correlate(audio, data["signal"], mode='valid')
-                    energy = self.fast_rolling_energy(audio**2, data["length"])
-                    score_array = np.abs(corr) / (energy * data["norm"] + 1e-6)
-                    score = np.max(score_array)
-                    self.step_just_changed = False
-                    
-                    if score > self.threshold:
-                        best_pos = np.argmax(score_array)
-                        jingle_start_samples = (self.total_samples_processed - len(audio)) + best_pos
-                        exact_time = max(0.0, jingle_start_samples / self.sample_rate)
-                        self.on_detected(item, score=score, exact_time=exact_time)
-                    elif time.time() - self.last_status_time > 0.25:
-                        self.last_status_time = time.time()
-                        print(f"\r📡 LIVE | Flux: {self.total_samples_processed/self.sample_rate:5.1f}s | Cible: {item['target'][:15]} | Score: {score:.3f}/{self.threshold}", end="", flush=True)
-        
-        elif item["type"] == "keyword" and time.time() - self.last_status_time > 0.5:
-            self.last_status_time = time.time()
-            print(f"\r📡 LIVE | Flux: {self.total_samples_processed/self.sample_rate:5.1f}s | Cible: {item['name']} 🎤", end="", flush=True)
-
-    def find_offset(self, sync_chunk, reported_seconds):
-        # sync_chunk est à 4000Hz (2s = 8000 samples)
-        # On cherche dans les 60 dernières secondes du sync_buffer
-        search_len = min(self.sync_buffer_size, self.total_sync_samples)
-        if search_len < len(sync_chunk):
-            return 0, 0
+        # En mode legacy, on fait la corrélation jingle
+        if self.detection_mode == "legacy" and self.current_step < len(self.sequence):
+            item = self.sequence[self.current_step]
             
-        search_audio = self.get_latest_sync_audio(search_len)
-        
-        # Corrélation croisée
-        corr = signal.correlate(search_audio, sync_chunk, mode='valid')
-        # Énergie pour la normalisation
-        # Utilisation d'une version simplifiée pour 4000Hz
-        search_energy = np.sqrt(np.convolve(search_audio**2, np.ones(len(sync_chunk)), mode='valid'))
-        chunk_norm = np.linalg.norm(sync_chunk)
-        
-        score_array = np.abs(corr) / (search_energy * chunk_norm + 1e-6)
-        best_pos = np.argmax(score_array)
-        max_score = score_array[best_pos]
-        
-        # Position réelle dans le flux sync (échantillons à 4000Hz)
-        real_sync_samples = (self.total_sync_samples - search_len) + best_pos
-        real_seconds = real_sync_samples / self.sync_sr
-        
-        # Delta = Temps Master (reported) - Temps Local (real)
-        delta = reported_seconds - real_seconds
-        return delta, float(max_score)
+            if item["type"] == "jingle":
+                data = self.jingle_data.get(item["target"])
+                if data:
+                    lookback = 20 if self.step_just_changed else 1.5
+                    search_len = min(int(data["length"] + lookback * self.sample_rate), self.total_samples_processed)
+                    if search_len >= data["length"]:
+                        audio = self.get_latest_audio(search_len)
+                        corr = signal.correlate(audio, data["signal"], mode='valid')
+                        
+                        energy_audio = self.fast_rolling_energy(audio**2, data["length"])
+                        norm_corr = corr / (energy_audio * data["norm"] + 1e-6)
+                        score = np.max(norm_corr)
+                        
+                        if score > self.threshold:
+                            delay_samples = len(norm_corr) - 1 - np.argmax(norm_corr)
+                            detection_time = (self.total_samples_processed - delay_samples - data["length"]) / self.sample_rate
+                            self.on_detected(item, score=score, exact_time=detection_time)
+                            self.step_just_changed = True
+                        else:
+                            self.step_just_changed = False
 
-    def start_api(self):
-        app = Flask(__name__)
-        
-        @app.route('/api/feed_audio', methods=['POST'])
-        def feed_audio():
-            raw_data = request.get_data()
-            if not raw_data:
-                return jsonify({"error": "No data"}), 400
-            
-            # Récupération de la position optionnelle (en secondes)
-            pos_sec = request.args.get('positionInSeconds', type=float)
-            
-            chunk = np.frombuffer(raw_data, dtype=np.int16).astype(np.float32) / 32768.0
-            self.process_audio_chunk(chunk, position_in_seconds=pos_sec)
-            return jsonify({
-                "status": "success",
-                "total_samples": self.total_samples_processed,
-                "current_time": self.total_samples_processed / self.sample_rate,
-                "current_step": self.current_step
-            })
-        @app.route('/api/get_offset', methods=['POST'])
-        def get_offset():
-            raw_data = request.get_data()
-            pos_sec = request.args.get('positionInSeconds', type=float, default=0.0)
-            if not raw_data:
-                return jsonify({"error": "No data"}), 400
-            
-            # On attend du 4000Hz pour la synchro
-            chunk = np.frombuffer(raw_data, dtype=np.int16).astype(np.float32) / 32768.0
-            delta, score = self.find_offset(chunk, pos_sec)
-            
-            return jsonify({
-                "delta": delta,
-                "score": score
-            })
-
-        @app.route('/api/status', methods=['GET'])
-        def status():
-            return jsonify({
-                "running": self.running,
-                "current_step": self.current_step,
-                "total_seconds": self.total_samples_processed / self.sample_rate,
-                "last_chronicle": self.last_chronicle_name
-            })
-
-        print("📡 API démarrée sur http://localhost:8002")
-        app.run(host='0.0.0.0', port=8002, debug=False, use_reloader=False)
-
-    def run(self, simu=True):
+    def run(self, simu=False):
+        # Lancement du worker de transcription
         threading.Thread(target=self.transcription_worker, daemon=True).start()
-        threading.Thread(target=self.start_api, daemon=True).start()
         
         source = None
+        self.process = None # Processus ffmpeg pour le live
         try:
             if simu:
-                import stat
-                # Créer le pipe s'il n'existe pas
+                print(f"📁 Mode SIMULATION : écoute sur {self.pipe_path}")
                 if not os.path.exists(self.pipe_path):
                     os.mkfifo(self.pipe_path)
-                else:
-                    # Vérifier si c'est bien un FIFO
-                    mode = os.stat(self.pipe_path).st_mode
-                    if not stat.S_ISFIFO(mode):
-                        os.remove(self.pipe_path)
-                        os.mkfifo(self.pipe_path)
-                
-                print(f"📡 Mode SIMULATION (Pipe: {self.pipe_path})")
-                print("⏳ En attente de données dans le pipe... (Lancez votre commande ffmpeg)")
-                
-                # La boucle de simulation pour permettre de relancer ffmpeg sans couper le segmenter
-                while self.running:
-                    with open(self.pipe_path, 'rb') as source:
-                        print("✅ Flux connecté au pipe.")
-                        while self.running:
-                            raw = source.read(self.chunk_size * 2)
-                            if not raw:
-                                print("\n⚠️ Fin du flux dans le pipe. En attente de la prochaine connexion...")
-                                break
-                            chunk = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
-                            self.process_audio_chunk(chunk)
+                source = open(self.pipe_path, 'rb')
             else:
-                stream_url = "http://icecast.radiofrance.fr/franceinter-hifi.aac"
-                print(f"📡 Mode LIVE (Stream: {stream_url})")
+                print("🎤 Mode LIVE : écoute sur le flux radio France Inter")
+                stream_url = "https://stream.radiofrance.fr/franceinter/franceinter_hifi.m3u8"
                 cmd = [
-                    'ffmpeg', '-i', stream_url,
-                    '-f', 's16le', '-ac', '1', '-ar', str(self.sample_rate),
-                    '-loglevel', 'quiet', '-'
+                    'ffmpeg',
+                    '-i', stream_url,
+                    '-f', 's16le',
+                    '-ac', '1',
+                    '-ar', str(self.sample_rate),
+                    '-loglevel', 'error',
+                    '-'
                 ]
-                self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+                self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
                 source = self.process.stdout
 
-                print(f"✅ Flux connecté. Analyse en cours...")
-                while self.running:
-                    raw = source.read(self.chunk_size * 2)
-                    if not raw:
-                        print("\n⚠️ Fin du flux ou erreur de lecture.")
+            while self.running:
+                raw_data = source.read(self.chunk_size * 2)
+                if not raw_data:
+                    if simu:
+                        time.sleep(0.01)
+                        continue
+                    else:
+                        print("⚠️ Fin du flux live ou erreur ffmpeg.")
                         break
-                    chunk = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
+                
+                chunk = np.frombuffer(raw_data, dtype=np.int16).astype(np.float32) / 32768.0
+                if len(chunk) > 0:
                     self.process_audio_chunk(chunk)
                 
         except KeyboardInterrupt:
@@ -393,9 +420,15 @@ class UnifiedLiveSegmenter:
             print(f"\n❌ Erreur pendant l'exécution : {e}")
         finally: 
             self.running = False
-            if hasattr(self, 'process'):
+            if self.process:
+                print("🧹 Arrêt du processus ffmpeg...")
                 self.process.terminate()
-            if source and hasattr(source, 'close'):
+                try:
+                    self.process.wait(timeout=2)
+                except subprocess.TimeoutExpired:
+                    self.process.kill()
+            
+            if source and hasattr(source, 'close') and simu: # On ne ferme stdout que si c'est un fichier
                 source.close()
             
             if self.last_chronicle_name:
@@ -411,9 +444,10 @@ class UnifiedLiveSegmenter:
                     python_api_url = os.environ.get('PYTHON_API_URL', 'http://localhost:8001')
                     requests.post(f"{python_api_url}/api/realChronicleEndTime", 
                                   params={
-                                      "userId": "testUser",
+                                      "userId": "master",
                                       "nomDeChronique": self.last_chronicle_name,
-                                      "realDuration": duration
+                                      "realDuration": duration,
+                                      "endTime": int(total_sec)
                                   }, timeout=1)
                     print(f"   [API] Signal de fin envoyé pour '{self.last_chronicle_name}'")
                 except: pass
@@ -422,10 +456,13 @@ if __name__ == "__main__":
     # On récupère le mode SIMU depuis l'environnement (par défaut False)
     SIMU = os.environ.get("SIMU", "false").lower() == "true"
     
+    # Mode de détection (legacy ou deepseek)
+    DETECTION_MODE = os.environ.get("DETECTION_MODE", "legacy").lower()
+    
     # Chemin vers les jingles (ajusté pour Docker)
     jingles_path = "/app/assets/jingles_chroniques/jingles_m4a"
     if not os.path.exists(jingles_path):
         jingles_path = "assets/jingles_chroniques/jingles_m4a"
         
-    segmenter = UnifiedLiveSegmenter(jingles_path, threshold=0.50)
+    segmenter = UnifiedLiveSegmenter(jingles_path, threshold=0.50, detection_mode=DETECTION_MODE)
     segmenter.run(simu=SIMU)

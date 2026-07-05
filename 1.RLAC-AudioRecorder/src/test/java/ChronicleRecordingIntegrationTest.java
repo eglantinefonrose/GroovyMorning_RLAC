@@ -59,9 +59,9 @@ public class ChronicleRecordingIntegrationTest {
         chroniclesManagerService.addChronicle(testUserId, new Chronicle(chronicle1.getNomDeChronique(), 0, 10)); // 10 secondes
 
         Chronicle chronicle2 = allProgramChronicles.stream()
-                .filter(c -> c.getNomDeChronique().equals("les 80 secondes"))
+                .filter(c -> c.getNomDeChronique().equalsIgnoreCase("Les 80 secondes"))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("Chronique 'les 80 secondes' non trouvée."));
+                .orElseThrow(() -> new AssertionError("Chronique 'Les 80 secondes' non trouvée."));
         chroniclesManagerService.addChronicle(testUserId, new Chronicle(chronicle2.getNomDeChronique(), 10, 20)); // 10 secondes
 
         // On n'en ajoute que 2 pour le test, car addChronicle initialise déjà avec les 13 défauts.
@@ -79,7 +79,7 @@ public class ChronicleRecordingIntegrationTest {
         recording.service.DynamicRecordingService dynamicService = recording.service.DynamicRecordingService.getInstance();
         
         String chronicle1 = "journal de 7h";
-        String chronicle2 = "les 80 secondes";
+        String chronicle2 = "Les 80 secondes";
 
         // Start C1
         dynamicService.handleStartNotification(testUserId, chronicle1);

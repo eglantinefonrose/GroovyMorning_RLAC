@@ -14,17 +14,19 @@ data class Chronicle(
     val duration: Int?
         get() = if (startTime != null && endTime != null) endTime - startTime else null
 
+    fun getFormattedTime(baseHour: Int, baseMinute: Int, offsetSeconds: Int? = null): String {
+        val effectiveOffset = offsetSeconds ?: startTime ?: 0
+        val baseSeconds = (baseHour * 3600) + (baseMinute * 60)
+        val totalSeconds = baseSeconds + effectiveOffset
+        
+        val hour = (totalSeconds / 3600) % 24
+        val minute = (totalSeconds % 3600) / 60
+        
+        return String.format("%02dh%02d", hour, minute)
+    }
+
     val formattedTime: String
-        get() {
-            if (startTime == null) return "--h--"
-            val baseSeconds = (globalBaseHour * 3600) + (globalBaseMinute * 60)
-            val totalSeconds = baseSeconds + startTime
-            
-            val hour = (totalSeconds / 3600) % 24
-            val minute = (totalSeconds % 3600) / 60
-            
-            return String.format("%02dh%02d", hour, minute)
-        }
+        get() = getFormattedTime(globalBaseHour, globalBaseMinute)
 
     companion object {
         var globalBaseHour: Int = 7

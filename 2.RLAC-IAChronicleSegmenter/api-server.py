@@ -1,16 +1,38 @@
 import sqlite3
 import os
+from dotenv import load_dotenv
+
+# Charger les variables d'environnement depuis .env
+load_dotenv()
+
 import subprocess
 import sys
 import time
 import threading
 import schedule
+import requests
 from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+# Configuration Java Backend
+JAVA_BASE_URL = os.environ.get('JAVA_API_URL', 'http://localhost:8080')
+
+def forward_to_java(endpoint, params):
+    """Envoie un signal HTTP POST au serveur Java"""
+    url = f"{JAVA_BASE_URL}{endpoint}"
+    def task():
+        try:
+            print(f"📡 [Forward] Sending to Java: {url} with {params}")
+            requests.post(url, params=params, timeout=2)
+        except Exception as e:
+            print(f"⚠️ [Forward Error] Could not reach Java backend: {e}")
+    
+    # On lance l'appel dans un thread pour ne pas bloquer l'API Python
+    threading.Thread(target=task, daemon=True).start()
 
 # Configuration SQLite
 DB_PATH = os.environ.get('DB_PATH', 'data/master_events.db')
@@ -38,10 +60,11 @@ init_db()
 
 def run_segmenter():
     """Lance le segmenter à l'heure programmée"""
-    print(f"[{datetime.now()}] Lancement du segmenter (Mode SIMU: {os.environ.get('SIMU', 'false')})...")
+    target_date = os.environ.get('TARGET_DATE', 'aujourd\'hui')
+    print(f"[{datetime.now()}] Lancement du segmenter (Mode SIMU: {os.environ.get('SIMU', 'false')}, Date: {target_date})...")
 
     # Tuer l'ancien segmenter s'il tourne
-    subprocess.run(["pkill", "-f", "live_radio_segmenter.py"], stderr=subprocess.DEVNULL)
+    stop_segmenter()
 
     # Lancer le nouveau segmenter (dans le dossier src/)
     # On s'assure de passer l'environnement actuel (contenant SIMU=true)
@@ -51,6 +74,11 @@ def run_segmenter():
     )
 
     print(f"[{datetime.now()}] Segmenter lancé avec PID: {segmenter_process.pid}")
+
+def stop_segmenter():
+    """Arrête le segmenter s'il est en cours d'exécution"""
+    print(f"[{datetime.now()}] Arrêt du segmenter...")
+    subprocess.run(["pkill", "-f", "live_radio_segmenter.py"], stderr=subprocess.DEVNULL)
 
 def scheduler_loop():
     """Boucle infinie pour exécuter les tâches planifiées"""
@@ -64,11 +92,14 @@ def update_scheduler(hour, minute):
     schedule.clear()
     time_str = f"{int(hour):02d}:{int(minute):02d}"
     schedule.every().day.at(time_str).do(run_segmenter)
+    # On garde l'arrêt à 09:10 même si on change l'heure de début
+    schedule.every().day.at("09:10").do(stop_segmenter)
     print(f"⏰ [Scheduler] Prochain segmenter programmé à {time_str}")
 
 # Initialisation du scheduler
-# Par défaut à 09:30 comme dans l'ancien scheduler.py
-schedule.every().day.at("09:30").do(run_segmenter)
+# Lancement à 06:58 et arrêt à 09:10
+schedule.every().day.at("06:58").do(run_segmenter)
+schedule.every().day.at("09:10").do(stop_segmenter)
 
 # Lancement du thread scheduler
 threading.Thread(target=scheduler_loop, daemon=True).start()
@@ -128,6 +159,14 @@ def chronicle_start():
     print(f"🚀 [Python API] Broadcasting START via WebSocket: {event_data}")
     socketio.emit('chronicle_start', event_data)
     
+    # Forward au Java via HTTP
+    forward_to_java("/api/realChronicleStartTime", {
+        "userId": user_id,
+        "nomDeChronique": chronicle_name,
+        "startTime": start_time,
+        "confidence": confidence
+    })
+    
     return jsonify({"status": "success"})
 
 @app.route('/api/realChronicleEndTime', methods=['POST'])
@@ -160,6 +199,14 @@ def chronicle_end():
     }
     print(f"🚀 [Python API] Broadcasting END via WebSocket: {event_data}")
     socketio.emit('chronicle_end', event_data)
+    
+    # Forward au Java via HTTP
+    forward_to_java("/api/realChronicleEndTime", {
+        "userId": user_id,
+        "nomDeChronique": chronicle_name,
+        "realDuration": duration,
+        "endTime": end_time
+    })
     
     return jsonify({"status": "success"})
 

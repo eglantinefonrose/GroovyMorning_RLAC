@@ -39,6 +39,8 @@ fun ScheduleView(
     val chronicles by viewModel.chronicles.collectAsState()
     val isProgramming by viewModel.isProgramming.collectAsState()
     val isLoadingData by viewModel.isLoading.collectAsState()
+    val baseHour by viewModel.baseHour.collectAsState()
+    val baseMinute by viewModel.baseMinute.collectAsState()
 
     val pullToRefreshState = rememberPullToRefreshState()
 
@@ -103,8 +105,11 @@ fun ScheduleView(
                     modifier = Modifier.weight(1f)
                 ) {
                     itemsIndexed(chronicles) { index, chronicle ->
+                        val displayTime = chronicle.getFormattedTime(7, 0)
+                        
                         TimelineRow(
                             chronicle = chronicle,
+                            displayTime = displayTime,
                             onMoveUp = if (index > 0) { { viewModel.moveChronicle(index, index - 1) } } else null,
                             onMoveDown = if (index < chronicles.size - 1) { { viewModel.moveChronicle(index, index + 1) } } else null
                         )
@@ -163,6 +168,7 @@ fun ScheduleView(
 @Composable
 fun TimelineRow(
     chronicle: Chronicle,
+    displayTime: String,
     onMoveUp: (() -> Unit)? = null,
     onMoveDown: (() -> Unit)? = null
 ) {
@@ -176,7 +182,7 @@ fun TimelineRow(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = chronicle.formattedTime, 
+                text = displayTime, 
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color.White.copy(alpha = 0.6f)

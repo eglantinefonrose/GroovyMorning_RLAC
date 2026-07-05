@@ -44,6 +44,20 @@ public class RLACService {
         logger.info("Successfully removed all chronicles and schedules for user: {}", userID);
     }
 
+    public void clearUserConfiguration(String userID) throws SchedulerException {
+        logger.info("Clearing all configuration for user: {}", userID);
+        // 1. Annuler les jobs et supprimer les chroniques
+        removeUserChronicles(userID);
+        
+        // 2. Supprimer la config utilisateur (base time)
+        DatabaseService.getInstance().deleteUserConfig(userID);
+        
+        // 3. Reset le statut de liste personnalisée pour revenir aux défauts
+        DatabaseService.getInstance().resetUserCustomList(userID);
+        
+        logger.info("Successfully cleared all configuration for user: {}", userID);
+    }
+
     public static File getUserMediaDir(String userID) {
         File mediaDir = new File("media");
         File userDir = new File(mediaDir, "userID_" + userID);
