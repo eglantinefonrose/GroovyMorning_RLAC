@@ -32,6 +32,7 @@ class ChronicleValidator:
         
         self.validated_names = set()
         self.last_theo_minutes = -1
+        self.last_valid_audio_seconds = -1
 
     def normalize_name(self, name):
         """Nettoyage du nom pour le matching."""
@@ -68,8 +69,12 @@ class ChronicleValidator:
         diff = current_wall_minutes - theo_minutes
         diff_str = f"{int(diff):+} min"
 
-        # RÈGLE 1 : Trop tôt (> 5 min avant l'horaire théorique)
-        if diff < -5:
+        # RÈGLE 0 : Durée minimum (30 secondes depuis la dernière détection validée)
+        if self.last_valid_audio_seconds != -1 and (audio_seconds - self.last_valid_audio_seconds) < 30:
+            return False, "REJETÉ (TROP COURT)", current_wall_time, diff_str
+
+        # RÈGLE 1 : Trop tôt (> 1 min avant l'horaire théorique)
+        if diff < -1:
             return False, "REJETÉ (TROP TÔT)", current_wall_time, diff_str
 
         # RÈGLE 2 : Déjà validée (doublon)
@@ -83,4 +88,5 @@ class ChronicleValidator:
         # VALIDATION
         self.validated_names.add(match_key)
         self.last_theo_minutes = theo_minutes
+        self.last_valid_audio_seconds = audio_seconds
         return True, "VALIDÉ", current_wall_time, diff_str

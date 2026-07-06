@@ -90,9 +90,16 @@ def process_stream(segment_gen, detector, validator, start_time="07:00", is_audi
             phrase_count += 1
             current_sentence = segment["text"]
             
-            # Affichage en temps réel de la phrase
-            print(f"> {current_sentence}")
-            log_f.write(f"Traitement phrase {phrase_count}: {current_sentence}\n")
+            # Si c'est de l'audio, on utilise le timestamp réel, sinon on estime
+            if is_audio and "start" in segment and segment["start"] is not None:
+                simulated_seconds = segment["start"]
+            else:
+                simulated_seconds += 5 # Estimation pour le texte
+
+            # Affichage en temps réel de la phrase avec timestamp
+            time_str = f"[{int(simulated_seconds // 60):02d}:{int(simulated_seconds % 60):02d}]"
+            print(f"{time_str} > {current_sentence}")
+            log_f.write(f"{time_str} Traitement phrase {phrase_count}: {current_sentence}\n")
             log_f.flush()
 
             if dry_run:
@@ -100,12 +107,6 @@ def process_stream(segment_gen, detector, validator, start_time="07:00", is_audi
 
             # Analyse via DeepSeek
             result = detector.analyze_sentence(current_sentence)
-            
-            # Si c'est de l'audio, on utilise le timestamp réel, sinon on estime
-            if is_audio and "start" in segment and segment["start"] is not None:
-                simulated_seconds = segment["start"]
-            else:
-                simulated_seconds += 5 # Estimation pour le texte
             
             if result.get("detecte"):
                 chronique_name = result.get("chronique")
@@ -131,7 +132,7 @@ def process_stream(segment_gen, detector, validator, start_time="07:00", is_audi
                         "label": chronique_name,
                         "start": segment.get("start", simulated_seconds),
                         "end": segment.get("end", simulated_seconds + 5.0),
-                        "detected_at": segment.get("end", simulated_seconds + 5.0),
+                        "detected_at": segment.get("start", simulated_seconds),
                         "confidence": 1.0 # DeepSeek est considéré comme binaire/confiant ici
                     })
             
