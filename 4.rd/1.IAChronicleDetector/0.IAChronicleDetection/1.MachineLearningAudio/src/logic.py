@@ -19,8 +19,56 @@ from tqdm import tqdm
 import soundfile as sf
 import random
 from datetime import datetime
+import torch
+from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq, KyutaiSpeechToTextProcessor, KyutaiSpeechToTextForConditionalGeneration
 
 warnings.filterwarnings('ignore')
+
+class KyutaiTranscriber:
+    """Utilitaire pour la transcription avec le modèle Kyutai STT"""
+
+    def __init__(self, model_id="kyutai/stt-1b-en_fr-trfs", device=None):
+        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        print(f"Chargement du modèle STT {model_id} sur {self.device}...")
+        
+        try:
+            # Pour transformers >= 4.53.0
+            self.processor = KyutaiSpeechToTextProcessor.from_pretrained(model_id)
+            self.model = KyutaiSpeechToTextForConditionalGeneration.from_pretrained(
+                model_id,
+                torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
+                device_map=self.device
+            )
+        except Exception as e:
+            print(f"Échec du chargement avec Kyutai classes, tentative avec AutoClasses... (Erreur: {e})")
+            # Fallback sur AutoModel
+            self.processor = AutoProcessor.from_pretrained(model_id)
+            self.model = AutoModelForSpeechSeq2Seq.from_pretrained(
+                model_id,
+                torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
+                device_map=self.device
+            )
+        
+        self.sr = 24000 # Le modèle Kyutai nécessite du 24kHz
+
+    def transcribe(self, audio: np.ndarray, original_sr: int) -> str:
+        """Transcrit un segment audio"""
+        # Resampling si nécessaire pour Kyutai (24kHz)
+        if original_sr != self.sr:
+            audio_resampled = librosa.resample(audio, orig_sr=original_sr, target_sr=self.sr)
+        else:
+            audio_resampled = audio
+
+        inputs = self.processor(audio_resampled, sampling_rate=self.sr, return_tensors="pt").to(self.device)
+        
+        with torch.no_grad():
+            # Kyutai generate peut retourner un tuple ou les tokens directement selon la version
+            outputs = self.model.generate(**inputs)
+            if isinstance(outputs, tuple):
+                outputs = outputs[0]
+                
+        transcription = self.processor.batch_decode(outputs, skip_special_tokens=True)
+        return transcription[0] if transcription else ""
 
 @dataclass
 class TrainingConfig:

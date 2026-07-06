@@ -7,11 +7,10 @@ L'objectif est de fournir un banc d'essai unifié capable de mesurer les perform
 
 ## 2. Architecture du Système d'Évaluation
 
-Le framework repose sur quatre piliers :
-*   **Les Wrappers (`methods/`)** : Des interfaces standardisées qui encapsulent chaque modèle. Qu'il s'agisse d'un LLM (Claude, DeepSeek), d'un modèle audio pré-entraîné ou d'une forêt aléatoire, chaque méthode expose la même API pour traiter un flux.
-*   **Le Simulateur (`simulator.py`)** : Il simule une écoute "temps réel" en découpant le fichier audio en segments temporels (buffers) de taille fixe (ex: 5 secondes).
+Le framework repose sur trois piliers :
+*   **Les résultats** : Le système supporte l'injection directe de fichiers JSON (contenant `label`, `start`, `end`, `detected_at` et `confidence`) pour évaluer des résultats calculés dans par différentes méthodes.
 *   **La Vérité Terrain (`ground_truth/`)** : Un fichier de référence (JSON) contenant les horodatages exacts (début et fin) de chaque chronique réelle.
-*   **L'Évaluateur (`evaluator.py`)** : Le moteur de calcul qui compare les prédictions aux données réelles.
+*   **L'Évaluateur (`evaluator.py`)** : Le moteur de calcul qui compare les prédictions (issues du simulateur ou d'un JSON) aux données réelles.
 
 ## 3. Métriques de Performance
 
@@ -30,6 +29,12 @@ Le **Intersection over Union (IoU)** mesure le chevauchement entre la période d
 ### C. Latence
 La latence est le délai entre le début réel d'une chronique et le moment où le système confirme sa détection. C'est un paramètre critique pour les applications en direct.
 
+### D. Évaluation Label-Agnostic
+Le framework propose un mode **Label-Agnostic**. Lorsqu'il est activé, l'évaluateur ignore le type de chronique (le label) pour se concentrer uniquement sur la détection temporelle. 
+*   **Utilité** : Évaluer la capacité d'un algorithme à détecter *l'occurrence* d'une chronique, indépendamment de sa classification correcte.
+*   **Fonctionnement** : Une détection est validée si elle chevauche n'importe quelle chronique de la vérité terrain avec un IoU suffisant (> 0.3), même si leurs labels diffèrent.
+*   **Usage par défaut** : Ce mode est automatiquement activé pour certaines méthodes comme `live_transcription`.
+
 ## 4. Calcul du Score Global (Overall Score)
 
 Pour faciliter la comparaison entre les méthodes, un score sur 100 est calculé selon la pondération suivante :
@@ -43,13 +48,16 @@ Pour faciliter la comparaison entre les méthodes, un score sur 100 est calculé
 
 ## 5. Fonctionnement du Programme `main.py`
 
-Le script principal orchestre l'évaluation en suivant ces étapes :
-1.  **Chargement** de la vérité terrain et de la méthode demandée.
-2.  **Simulation** : Le flux est passé au wrapper par morceaux.
-3.  **Collecte** : Chaque détection est enregistrée avec son timestamp de détection (`detected_at`).
-4.  **Analyse** : L'évaluateur fait correspondre les détections aux chroniques réelles.
-5.  **Rapport** : Génération d'un résumé statistique et d'un fichier JSON détaillé (`results_[methode].json`).
+Le script principal orchestre l'évaluation en se focalisant sur le traitement des fichiers de résultats :
+
+1.  **Préparation** : Les outils de détection externes génèrent leurs prédictions au format JSON.
+2.  **Injection** : Le programme `main.py` charge ces fichiers ainsi que la vérité terrain correspondante. Le flag `--label-agnostic` peut être passé pour ignorer la comparaison des labels.
+3.  **Analyse** : L'évaluateur compare les deux jeux de données et calcule les scores (IoU, Latence, F1).
+4.  **Rapport** : Génération d'un résumé détaillé (`results_[methode].json`) et mise à jour automatique de la matrice comparative globale (`evaluation_matrix.csv`).
+
+*Note : Les anciens modes de simulation "temps réel" via wrappers sont conservés de manière transitoire mais ne constituent plus la cible privilégiée du framework.*
 
 ## Conclusion
 
 Cette méthodologie permet de mettre en lumière le compromis "Précision vs Réactivité". Par exemple, une approche basée sur un LLM "Global" pourra être très précise sur les limites temporelles mais avoir une latence élevée, tandis qu'une méthode audio légère pourra être quasi instantanée au prix d'une précision moindre.
+égère pourra être quasi instantanée au prix d'une précision moindre.

@@ -4,8 +4,18 @@ import sys
 import os
 import requests
 import time
+import threading
+import queue
 from pathlib import Path
 from faster_whisper import WhisperModel
+
+# Optionnel pour le mode live
+try:
+    import sounddevice as sd
+    import numpy as np
+    LIVE_AVAILABLE = True
+except ImportError:
+    LIVE_AVAILABLE = False
 
 OLLAMA_URL = "http://localhost:11434/api/chat"
 MODEL = "qwen3:14b"
@@ -41,13 +51,61 @@ def analyze_segment_with_llm(phrase, history):
     except:
         return "{\"detecte\": false}"
 
+def live_detection(model_size="base"):
+    if not LIVE_AVAILABLE:
+        print("Erreur: sounddevice et numpy sont requis pour le mode live.", file=sys.stderr)
+        return
+
+    print(f"Initialisation Live (Whisper {model_size})...", file=sys.stderr)
+    model = WhisperModel(model_size, device="cpu", compute_type="int8")
+    audio_queue = queue.Queue()
+    history = []
+
+    def audio_callback(indata, frames, time, status):
+        audio_queue.put(indata.copy())
+
+    def process_llm(text):
+        nonlocal history
+        res_raw = analyze_segment_with_llm(text, history)
+        try:
+            res = json.loads(res_raw)
+            if res.get("detecte"):
+                print(f"\n🔔 [DÉTECTION] {res.get('chronique')} : \"{text}\"")
+            history.append({"role": "user", "content": text})
+            history.append({"role": "assistant", "content": res_raw})
+            if len(history) > 20: history = history[-20:]
+        except: pass
+
+    print("🎙️ Écoute activée. Parlez dans le micro...", file=sys.stderr)
+    audio_buffer = np.array([], dtype=np.float32)
+    sample_rate = 16000
+
+    with sd.InputStream(samplerate=sample_rate, channels=1, callback=audio_callback):
+        while True:
+            data = audio_queue.get()
+            audio_buffer = np.append(audio_buffer, data.flatten())
+
+            if len(audio_buffer) > sample_rate * 2.5: # Analyser par blocs de 2.5s
+                segments, _ = model.transcribe(audio_buffer, beam_size=1, language="fr")
+                text = " ".join([s.text.strip() for s in segments]).strip()
+                if text:
+                    print(f"Transcrit: {text}")
+                    threading.Thread(target=process_llm, args=(text,), daemon=True).start()
+                audio_buffer = np.array([], dtype=np.float32)
+
 def main():
-    parser = argparse.ArgumentParser(description="Détecte les chroniques (Approche LLM Simulation)")
-    parser.add_argument("audio", help="Chemin audio")
+    parser = argparse.ArgumentParser(description="Détecte les chroniques (Approche LLM)")
+    parser.add_argument("audio", nargs="?", help="Chemin audio (optionnel si --live)")
     parser.add_argument("--whisper-model", default="base")
+    parser.add_argument("--live", action="store_true", help="Mode live (micro)")
     args = parser.parse_args()
 
-    if not Path(args.audio).exists():
+    if args.live:
+        live_detection(model_size=args.whisper_model)
+        return
+
+    if not args.audio or not Path(args.audio).exists():
+        parser.print_help()
         sys.exit(1)
 
     segments = transcribe_audio(args.audio, model_size=args.whisper_model)

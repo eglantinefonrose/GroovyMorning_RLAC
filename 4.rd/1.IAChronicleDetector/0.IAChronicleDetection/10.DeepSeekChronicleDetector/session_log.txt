@@ -1,0 +1,20 @@
+[00:05] Traitement phrase 1: Et maintenant, 80 secondes de science en couleur, car si la science est notre bien commun, elle doit sortir des labos de la blancheur, rien n'empêche d'être rigoureux et pop, et c'est le pari du magazine Epsilon qui fête ses 5 ans, une aventure singulière dans une presse scientifique en crise, ses fondateurs à l'époque ont quitté Science et Vie en estimant que leur indépendance était remise en cause, leur journal aujourd'hui est libre, il n'est pas la propriété d'un grand groupe industriel, il ne dépend pas de la publicité mais de ses ventes et de ses seuls abonnés.
+[DÉTECTION] 🔔 Les 80'' | REJETÉ (TROP TÔT) | 07:00 (-13 min)
+Reasoning: La phrase commence par 'Et maintenant, 80 secondes...' ce qui indique le lancement immédiat de la chronique 'Les 80''.
+[00:10] Traitement phrase 2: Voilà pour l'esprit d'Epsilon qui renouvelle notre appétit pour la science tous les mois, on peut s'en faire une idée, avec son numéro spécial anniversaire, et 50 questions scientifiques qu'on ne se posait pas il y a 5 ans, à quoi rêvent les méduses ?
+[00:15] Traitement phrase 3: Et si on n'avait rien compris à la transmission de la grippe ?
+[00:20] Traitement phrase 4: De quoi parle Lésia entre elles, ou encore les femmes vont-elles devenir plus rapides que les hommes ?
+[00:25] Traitement phrase 5: Moi non, j'ai déjà dit ici que je ne courais jamais à moins d'être poursuivi par une bête sauvage, mais j'apprends que celles qui en ont sous le pied et qui courent sur des distances dignes de lignes TGV type 260 km, sont quasi au niveau des hommes, elles remportent régulièrement des courses mixtes, leur fibre musculaire, leur poids, l'utilisation des graisses, les rend plus endurantes, et comme les records et les performances des hommes vont bientôt stagner, il est possible que les femmes les rattrapent, de ce côté-là on l'a compris, ce sera sans moi.
+[00:30] Traitement phrase 6: On pourra aussi découvrir qu'il existe des classes sociales chez les plantes, mais oui, et se demander s'il faut tuer les chats, oulala, le dernier numéro d'Epsilon en kiosque à partir d'aujourd'hui.
+[00:35] Traitement phrase 7: Il nous accompagne jusqu'à 7h30, bonjour, Aline Afanoukou et Cyril Lacarrière, on parle de quoi dans l'édito-média ce matin ?
+[00:40] Traitement phrase 8: Eh bien je vous parle des bons résultats de l'équipe sur le numérique, mais c'est une exception dans la presse française.
+[00:45] Traitement phrase 9: L'équipe, le journal est dans Musique Aline.
+[00:50] Traitement phrase 10: Aïe aïe aïe aïe aïe aïe, c'est le disque que j'écoute en continu, en illimité, c'est le retour de Séoul Georges.
+[00:55] Traitement phrase 11: Génial, et dans un instant, le grand reportage de France Inter sur l'île d'Ouessant.
+[01:00] Traitement phrase 12: En France, les fruits et les légumes frais bio, on les mange à toutes les sauces, à l'apéro, en salade, en flan, en brochette, ou encore en smoothie quand on a fini toutes les brochettes.
+[01:05] Traitement phrase 13: Bref, en France, on aime tout ce qu'il y a de plus bio.
+[01:10] Traitement phrase 14: C'est bio les fruits et légumes frais.
+[01:15] Traitement phrase 15: 7h16, France Inter, la grande matinale, Florence Paracuelos.
+[DÉTECTION] 🔔 Le Grand reportage de France Inter | REJETÉ (TROP TÔT) | 07:01 (-15 min)
+Reasoning: L'heure annoncée (7h16) précède immédiatement le créneau du Grand reportage (7h17) et le contexte précédent annonce ce reportage.
+[01:20] Traitement phrase 16: Le grand reportage de France Inter sur l'île d'Ouessant, ce matin, confronté comme bien des communes à la fermeture de son église, arrêté pris le mois dernier, car le bâtiment du 19e siècle menace de s'effondrer.

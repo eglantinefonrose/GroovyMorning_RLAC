@@ -34,13 +34,15 @@ class FusionEngine:
         decision = {
             "total_score": total_score,
             "is_detected": total_score >= self.thresholds.get("combined_threshold", 0.75),
-            "state": self.state
+            "state": self.state,
+            "new_detection": False
         }
 
         # State machine logic
         if decision["is_detected"]:
             if self.state == "IDLE":
                 self.state = "DETECTED"
+                decision["new_detection"] = True
                 logger.success(f"{timestamp}>>> CHRONICLE DETECTED <<<")
             else:
                 self.state = "DETECTED"

@@ -1,15 +1,18 @@
 import os
+# Fix pour les erreurs de cache numba/librosa
+os.environ['NUMBA_CACHE_DIR'] = '/tmp/numba_cache'
 import argparse
 import sys
 import numpy as np
 import time
+import json
 from pathlib import Path
 import librosa
 from tqdm import tqdm
 
 # Ajout du dossier src au path pour les imports
 sys.path.append(os.path.join(os.getcwd(), 'src'))
-from logic import ChronicleClassifier, TimecodeLoader
+from logic import ChronicleClassifier, TimecodeLoader, KyutaiTranscriber
 
 def calculate_iou(range1, range2):
     start1, end1 = range1
@@ -18,13 +21,17 @@ def calculate_iou(range1, range2):
     union = (end1 - start1) + (end2 - start2) - intersection
     return intersection / union if union > 0 else 0.0
 
-def simulate_live_inference(model_path, audio_path, threshold=0.89, segment_duration=3.0, step=2.0, acceleration=None):
+def simulate_live_inference(model_path, audio_path, threshold=0.89, segment_duration=3.0, step=2.0, acceleration=None, transcribe=False, json_output=None):
     """
     Simule une détection en direct en traitant l'audio par morceaux.
     """
     classifier = ChronicleClassifier()
     classifier.load_model(model_path)
     
+    transcriber = None
+    if transcribe:
+        transcriber = KyutaiTranscriber()
+
     audio, sr = librosa.load(audio_path, sr=classifier.feature_extractor.sr)
     duration = len(audio) / sr
     
@@ -35,6 +42,24 @@ def simulate_live_inference(model_path, audio_path, threshold=0.89, segment_dura
     
     detected_chronicles = []
     current_chronicle = None
+
+    def save_live_json():
+        if json_output:
+            output_list = []
+            for item in detected_chronicles:
+                output_list.append({
+                    "label": item.get("label", "Chronique Matin"),
+                    "start": round(item["start"], 1),
+                    "end": round(item["end"], 1),
+                    "detected_at": round(item["detected_at"], 1),
+                    "confidence": round(item["confidence"], 2)
+                })
+            try:
+                with open(json_output, 'w', encoding='utf-8') as f:
+                    json.dump(output_list, f, indent=4, ensure_ascii=False)
+                print(f" [LIVE JSON] Écrit : {json_output}")
+            except Exception as e:
+                print(f" Erreur écriture JSON live : {e}")
     
     # Simulation du flux
     for start_t in np.arange(0, duration - segment_duration, step):
@@ -52,32 +77,56 @@ def simulate_live_inference(model_path, audio_path, threshold=0.89, segment_dura
         # Prédiction sur ce segment uniquement
         _, prob = classifier.predict_segment(segment_audio, segment_duration)
         
+        # Transcription si demandée
+        text = ""
+        if transcriber:
+            text = transcriber.transcribe(segment_audio, sr)
+        
+        # Affichage temps réel
+        status = "🎵 CHRONIQUE" if prob >= threshold else "   "
+        time_str = f"[{int(start_t)//60:02d}:{int(start_t)%60:02d}s]"
+        output_line = f"{time_str} Prob: {prob:4.0%} | {status}"
+        if transcribe:
+            output_line += f" | {text}"
+        print(output_line)
+
         # Logique de lissage/fusion "live"
         if prob >= threshold:
             if current_chronicle is None:
-                current_chronicle = {'start': start_t, 'end': start_t + segment_duration, 'conf': prob}
+                current_chronicle = {
+                    'label': "Chronique Matin",
+                    'start': start_t,
+                    'end': start_t + segment_duration,
+                    'conf': prob,
+                    'confidence': prob
+                }
             else:
                 current_chronicle['end'] = start_t + segment_duration
                 current_chronicle['conf'] = max(current_chronicle['conf'], prob)
+                current_chronicle['confidence'] = max(current_chronicle['confidence'], prob)
         else:
             if current_chronicle:
                 if current_chronicle['end'] - current_chronicle['start'] >= 5.0:
+                    current_chronicle['detected_at'] = start_t + segment_duration
                     detected_chronicles.append(current_chronicle)
+                    save_live_json()
                 current_chronicle = None
                 
     if current_chronicle and current_chronicle['end'] - current_chronicle['start'] >= 5.0:
+        current_chronicle['detected_at'] = duration
         detected_chronicles.append(current_chronicle)
+        save_live_json()
         
     return detected_chronicles
 
-def evaluate_quality(model_path, audio_path, tc_path, threshold=0.89, live_sim=True, acceleration=None):
+def evaluate_quality(model_path, audio_path, tc_path=None, threshold=0.89, live_sim=True, acceleration=None, transcribe=False, json_output=None):
     if not os.path.exists(model_path):
         print(f"Erreur : Le modèle '{model_path}' n'existe pas.")
         return
     if not os.path.exists(audio_path):
         print(f"Erreur : Le fichier audio '{audio_path}' n'existe pas.")
         return
-    if not os.path.exists(tc_path):
+    if tc_path and not os.path.exists(tc_path):
         print(f"Erreur : Le fichier de timecodes '{tc_path}' n'existe pas.")
         return
 
@@ -86,12 +135,33 @@ def evaluate_quality(model_path, audio_path, tc_path, threshold=0.89, live_sim=T
     
     # 1. Prédire
     if live_sim:
-        segments = simulate_live_inference(model_path, audio_path, threshold=threshold, acceleration=acceleration)
+        if not json_output:
+            json_output = "live_detections.json"
+        segments = simulate_live_inference(model_path, audio_path, threshold=threshold, acceleration=acceleration, transcribe=transcribe, json_output=json_output)
     else:
         classifier = ChronicleClassifier()
         classifier.load_model(model_path)
         segments = classifier.detect_chronicles_in_file(audio_path, threshold=threshold, extract_segments=False)
     
+    # Export JSON si demandé (pour le mode batch ou en fin de traitement)
+    if json_output:
+        formatted_segments = []
+        for s in segments:
+            detected_at = s.get('detected_at', s['end'])
+            formatted_segments.append({
+                "label": s.get('label', "Chronique Matin"),
+                "start": round(s['start'], 1),
+                "end": round(s['end'], 1),
+                "detected_at": round(detected_at, 1),
+                "confidence": round(s.get('confidence', s.get('conf', 0.0)), 2)
+            })
+        try:
+            with open(json_output, 'w', encoding='utf-8') as f:
+                json.dump(formatted_segments, f, indent=4, ensure_ascii=False)
+            print(f"\n💾 Résultats de détection sauvegardés dans : {json_output}")
+        except Exception as e:
+            print(f"\nErreur d'écriture dans {json_output} : {e}")
+
     print(f"\n📺 Chroniques détectées :")
     print("-" * 60)
     print(f"{'Index':<5} | {'Début (s)':<10} | {'Fin (s)':<10} | {'Confiance':<10}")
@@ -101,6 +171,11 @@ def evaluate_quality(model_path, audio_path, tc_path, threshold=0.89, live_sim=T
         print(f"{i:<5} | {s['start']:<10.1f} | {s['end']:<10.1f} | {s['conf']:<10.1%}")
         pred_intervals.append((s['start'], s['end']))
     print("-" * 60)
+
+    # Si pas de fichier GT, on s'arrête ici
+    if not tc_path:
+        print("\nℹ️ Aucun fichier de vérité terrain (--gt) fourni. Évaluation de la qualité sautée.")
+        return
 
     # 2. Charger la vérité terrain
     gt_intervals = TimecodeLoader.load_timecodes(tc_path)
@@ -165,10 +240,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Évalue la qualité de détection des chroniques pour le ML Audio.")
     parser.add_argument("--model", default="models/rlac-audio-segmenter-chroniques_model.pkl", help="Chemin vers le modèle .pkl")
     parser.add_argument("--audio", required=True, help="Chemin vers le fichier audio")
-    parser.add_argument("--gt", required=True, help="Chemin vers le fichier de vérité terrain (timecodes)")
+    parser.add_argument("--gt", help="Chemin vers le fichier de vérité terrain (timecodes) [OPTIONNEL]")
     parser.add_argument("--threshold", type=float, default=0.89, help="Seuil de détection")
     parser.add_argument("--no-live", action="store_true", help="Désactiver la simulation live")
     parser.add_argument("--acceleration", type=float, default=None, help="Facteur d'accélération pour la simulation live")
+    parser.add_argument("--transcribe", action="store_true", help="Activer la transcription live avec Kyutai STT")
+    parser.add_argument("--json", help="Chemin du fichier JSON pour exporter les résultats")
     
     args = parser.parse_args()
-    evaluate_quality(args.model, args.audio, args.gt, args.threshold, live_sim=not args.no_live, acceleration=args.acceleration)
+    evaluate_quality(args.model, args.audio, args.gt, args.threshold, live_sim=not args.no_live, acceleration=args.acceleration, transcribe=args.transcribe, json_output=args.json)

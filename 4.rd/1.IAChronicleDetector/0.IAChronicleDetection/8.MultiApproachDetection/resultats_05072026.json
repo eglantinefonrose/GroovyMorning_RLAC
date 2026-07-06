@@ -1,0 +1,482 @@
+[
+  {
+    "label": "Chronique",
+    "start": 10.0,
+    "end": 15.0,
+    "detected_at": 15.0,
+    "confidence": 0.787
+  },
+  {
+    "label": "actualité",
+    "start": 25.0,
+    "end": 30.0,
+    "detected_at": 30.0,
+    "confidence": 0.764
+  },
+  {
+    "label": "Chronique",
+    "start": 65.0,
+    "end": 70.0,
+    "detected_at": 70.0,
+    "confidence": 0.75
+  },
+  {
+    "label": [
+      "Tennis",
+      "Livre événement sur le casse du Louvre",
+      "Interview of Raphaël Gluxman"
+    ],
+    "start": 100.0,
+    "end": 105.0,
+    "detected_at": 105.0,
+    "confidence": 0.812
+  },
+  {
+    "label": "Entretien avec Raphaël Gluxman et reportage sur les parcs municipaux",
+    "start": 140.0,
+    "end": 145.0,
+    "detected_at": 145.0,
+    "confidence": 0.799
+  },
+  {
+    "label": "Changement climatique et conséquences",
+    "start": 150.0,
+    "end": 155.0,
+    "detected_at": 155.0,
+    "confidence": 0.783
+  },
+  {
+    "label": "Chronique",
+    "start": 215.0,
+    "end": 220.0,
+    "detected_at": 220.0,
+    "confidence": 0.782
+  },
+  {
+    "label": "Amendement au projet de loi agricole, prédation animale",
+    "start": 410.0,
+    "end": 415.0,
+    "detected_at": 415.0,
+    "confidence": 0.768
+  },
+  {
+    "label": "Discussion politique sur une amendement pour protéger l'espèce",
+    "start": 450.0,
+    "end": 455.0,
+    "detected_at": 455.0,
+    "confidence": 0.77
+  },
+  {
+    "label": "Politics in Jordan, Tennis at Roland Garos",
+    "start": 610.0,
+    "end": 615.0,
+    "detected_at": 615.0,
+    "confidence": 0.753
+  },
+  {
+    "label": "Pièce d'or",
+    "start": 740.0,
+    "end": 745.0,
+    "detected_at": 745.0,
+    "confidence": 0.774
+  },
+  {
+    "label": "Monnaie de Paris, Marien, marché des pièces d'or",
+    "start": 765.0,
+    "end": 770.0,
+    "detected_at": 770.0,
+    "confidence": 0.76
+  },
+  {
+    "label": "Matière précieuse, Mariana, Investissement",
+    "start": 775.0,
+    "end": 780.0,
+    "detected_at": 780.0,
+    "confidence": 0.786
+  },
+  {
+    "label": "Chronique",
+    "start": 915.0,
+    "end": 920.0,
+    "detected_at": 920.0,
+    "confidence": 0.752
+  },
+  {
+    "label": "Chronique",
+    "start": 930.0,
+    "end": 935.0,
+    "detected_at": 935.0,
+    "confidence": 0.77
+  },
+  {
+    "label": "Musique et Fruits Bio",
+    "start": 945.0,
+    "end": 950.0,
+    "detected_at": 950.0,
+    "confidence": 0.782
+  },
+  {
+    "label": "Chronique",
+    "start": 955.0,
+    "end": 960.0,
+    "detected_at": 960.0,
+    "confidence": 0.768
+  },
+  {
+    "label": "Reportage sur la fermeture d'une église",
+    "start": 985.0,
+    "end": 990.0,
+    "detected_at": 990.0,
+    "confidence": 0.774
+  },
+  {
+    "label": "Visite et préservation d'une église sur une île",
+    "start": 1055.0,
+    "end": 1060.0,
+    "detected_at": 1060.0,
+    "confidence": 0.78
+  },
+  {
+    "label": "Appel au don privé",
+    "start": 1110.0,
+    "end": 1115.0,
+    "detected_at": 1115.0,
+    "confidence": 0.76
+  },
+  {
+    "label": "Mariage dans une chapelle",
+    "start": 1140.0,
+    "end": 1145.0,
+    "detected_at": 1145.0,
+    "confidence": 0.763
+  },
+  {
+    "label": "Célébration des funérailles",
+    "start": 1165.0,
+    "end": 1170.0,
+    "detected_at": 1170.0,
+    "confidence": 0.77
+  },
+  {
+    "label": "Informations en ligne et leur accès",
+    "start": 1335.0,
+    "end": 1340.0,
+    "detected_at": 1340.0,
+    "confidence": 0.763
+  },
+  {
+    "label": "Musique brésilienne",
+    "start": 1380.0,
+    "end": 1385.0,
+    "detected_at": 1385.0,
+    "confidence": 0.783
+  },
+  {
+    "label": "Musique brésilienne",
+    "start": 1440.0,
+    "end": 1445.0,
+    "detected_at": 1445.0,
+    "confidence": 0.761
+  },
+  {
+    "label": "Musique",
+    "start": 1520.0,
+    "end": 1525.0,
+    "detected_at": 1525.0,
+    "confidence": 0.774
+  },
+  {
+    "label": "Musique Brésilienne",
+    "start": 1535.0,
+    "end": 1540.0,
+    "detected_at": 1540.0,
+    "confidence": 0.754
+  },
+  {
+    "label": "Musique",
+    "start": 1585.0,
+    "end": 1590.0,
+    "detected_at": 1590.0,
+    "confidence": 0.779
+  },
+  {
+    "label": "Chronique",
+    "start": 1740.0,
+    "end": 1745.0,
+    "detected_at": 1745.0,
+    "confidence": 0.76
+  },
+  {
+    "label": "Chronique",
+    "start": 1770.0,
+    "end": 1775.0,
+    "detected_at": 1775.0,
+    "confidence": 0.757
+  },
+  {
+    "label": "Fête du sacrifice",
+    "start": 1810.0,
+    "end": 1815.0,
+    "detected_at": 1815.0,
+    "confidence": 0.782
+  },
+  {
+    "label": "Mosquée de Marseille",
+    "start": 1835.0,
+    "end": 1840.0,
+    "detected_at": 1840.0,
+    "confidence": 0.75
+  },
+  {
+    "label": "Chronique",
+    "start": 1845.0,
+    "end": 1850.0,
+    "detected_at": 1850.0,
+    "confidence": 0.767
+  },
+  {
+    "label": "Construction de grandes mosquées à Marseille",
+    "start": 1895.0,
+    "end": 1900.0,
+    "detected_at": 1900.0,
+    "confidence": 0.759
+  },
+  {
+    "label": "Construction d'une grande mosquée à Marseille",
+    "start": 1910.0,
+    "end": 1915.0,
+    "detected_at": 1915.0,
+    "confidence": 0.753
+  },
+  {
+    "label": "Omophobie dans le Sénégal et l'aide apportée par Abou Bacard en France",
+    "start": 2360.0,
+    "end": 2365.0,
+    "detected_at": 2365.0,
+    "confidence": 0.753
+  },
+  {
+    "label": "Droits des homosexuels en Afrique",
+    "start": 2390.0,
+    "end": 2395.0,
+    "detected_at": 2395.0,
+    "confidence": 0.766
+  },
+  {
+    "label": "Récit d'un réfugié et présentation d'un auteur avec son roman",
+    "start": 2425.0,
+    "end": 2430.0,
+    "detected_at": 2430.0,
+    "confidence": 0.76
+  },
+  {
+    "label": "Chronique",
+    "start": 2475.0,
+    "end": 2480.0,
+    "detected_at": 2480.0,
+    "confidence": 0.817
+  },
+  {
+    "label": "Chronique",
+    "start": 2500.0,
+    "end": 2505.0,
+    "detected_at": 2505.0,
+    "confidence": 0.76
+  },
+  {
+    "label": "Chronique",
+    "start": 2730.0,
+    "end": 2735.0,
+    "detected_at": 2735.0,
+    "confidence": 0.779
+  },
+  {
+    "label": "Investissement locatif en France",
+    "start": 2885.0,
+    "end": 2890.0,
+    "detected_at": 2890.0,
+    "confidence": 0.786
+  },
+  {
+    "label": "Vol de Vaudard",
+    "start": 3015.0,
+    "end": 3020.0,
+    "detected_at": 3020.0,
+    "confidence": 0.767
+  },
+  {
+    "label": "Voleurs du Louvre",
+    "start": 3030.0,
+    "end": 3035.0,
+    "detected_at": 3035.0,
+    "confidence": 0.766
+  },
+  {
+    "label": "Audition pour la recherche de bijoux volés",
+    "start": 3515.0,
+    "end": 3520.0,
+    "detected_at": 3520.0,
+    "confidence": 0.773
+  },
+  {
+    "label": "Chronique",
+    "start": 3650.0,
+    "end": 3655.0,
+    "detected_at": 3655.0,
+    "confidence": 0.783
+  },
+  {
+    "label": "Chronique",
+    "start": 3945.0,
+    "end": 3950.0,
+    "detected_at": 3950.0,
+    "confidence": 0.756
+  },
+  {
+    "label": "Isolation et ventilation dans les logements",
+    "start": 3960.0,
+    "end": 3965.0,
+    "detected_at": 3965.0,
+    "confidence": 0.758
+  },
+  {
+    "label": "Tribunal",
+    "start": 4215.0,
+    "end": 4220.0,
+    "detected_at": 4220.0,
+    "confidence": 0.774
+  },
+  {
+    "label": "Débat sur l'état de droit démocratique",
+    "start": 4235.0,
+    "end": 4240.0,
+    "detected_at": 4240.0,
+    "confidence": 0.792
+  },
+  {
+    "label": "État de droit démocratique",
+    "start": 4245.0,
+    "end": 4250.0,
+    "detected_at": 4250.0,
+    "confidence": 0.773
+  },
+  {
+    "label": "Discussion avec le président du Conseil constitutionnel",
+    "start": 4265.0,
+    "end": 4270.0,
+    "detected_at": 4270.0,
+    "confidence": 0.784
+  },
+  {
+    "label": "Délocalisation du Conseil constitutionnel et problèmes sociaux",
+    "start": 4300.0,
+    "end": 4305.0,
+    "detected_at": 4305.0,
+    "confidence": 0.814
+  },
+  {
+    "label": "Les conditions des migrants en situation irrégulière, les Talibans et leur traitement des femmes",
+    "start": 4480.0,
+    "end": 4485.0,
+    "detected_at": 4485.0,
+    "confidence": 0.769
+  },
+  {
+    "label": "Histoire et activisme des migrants afghans en Suède",
+    "start": 4505.0,
+    "end": 4510.0,
+    "detected_at": 4510.0,
+    "confidence": 0.793
+  },
+  {
+    "label": "Activisme afghan en Suède",
+    "start": 4520.0,
+    "end": 4525.0,
+    "detected_at": 4525.0,
+    "confidence": 0.773
+  },
+  {
+    "label": "Présentation d'un film",
+    "start": 4655.0,
+    "end": 4660.0,
+    "detected_at": 4660.0,
+    "confidence": 0.779
+  },
+  {
+    "label": "Chronique",
+    "start": 4795.0,
+    "end": 4800.0,
+    "detected_at": 4800.0,
+    "confidence": 0.779
+  },
+  {
+    "label": "Guerre civile au Liban",
+    "start": 4995.0,
+    "end": 5000.0,
+    "detected_at": 5000.0,
+    "confidence": 0.781
+  },
+  {
+    "label": "Chronique",
+    "start": 5020.0,
+    "end": 5025.0,
+    "detected_at": 5025.0,
+    "confidence": 0.756
+  },
+  {
+    "label": "Radio program",
+    "start": 5055.0,
+    "end": 5060.0,
+    "detected_at": 5060.0,
+    "confidence": 0.774
+  },
+  {
+    "label": "Radio",
+    "start": 5065.0,
+    "end": 5070.0,
+    "detected_at": 5070.0,
+    "confidence": 0.769
+  },
+  {
+    "label": "DAB plus, Grande matinale, Grand entretien",
+    "start": 5075.0,
+    "end": 5080.0,
+    "detected_at": 5080.0,
+    "confidence": 0.769
+  },
+  {
+    "label": "Discours politique et élections",
+    "start": 5385.0,
+    "end": 5390.0,
+    "detected_at": 5390.0,
+    "confidence": 0.753
+  },
+  {
+    "label": "Chronique",
+    "start": 5855.0,
+    "end": 5860.0,
+    "detected_at": 5860.0,
+    "confidence": 0.752
+  },
+  {
+    "label": "Gouvernemental",
+    "start": 6310.0,
+    "end": 6315.0,
+    "detected_at": 6315.0,
+    "confidence": 0.803
+  },
+  {
+    "label": "Publicité pour Orange Pro",
+    "start": 6435.0,
+    "end": 6440.0,
+    "detected_at": 6440.0,
+    "confidence": 0.772
+  },
+  {
+    "label": "Interview ou présentation d'invité",
+    "start": 7160.0,
+    "end": 7165.0,
+    "detected_at": 7165.0,
+    "confidence": 0.756
+  }
+]

@@ -1,4 +1,5 @@
 import json
+import statistics
 
 def calculate_iou(pred_start, pred_end, gt_start, gt_end):
     """Calculates Intersection over Union (IoU) for two time intervals."""
@@ -14,8 +15,9 @@ def calculate_iou(pred_start, pred_end, gt_start, gt_end):
     return intersection / union if union > 0 else 0.0
 
 class Evaluator:
-    def __init__(self, iou_threshold=0.5):
+    def __init__(self, iou_threshold=0.5, label_agnostic=False):
         self.iou_threshold = iou_threshold
+        self.label_agnostic = label_agnostic
 
     def evaluate(self, predictions, ground_truth):
         """
@@ -48,6 +50,10 @@ class Evaluator:
                 if i in matched_gt_indices:
                     continue
                 
+                # Check label matching unless label_agnostic is True
+                if not self.label_agnostic and pred.get('label') != gt.get('label'):
+                    continue
+                
                 iou = calculate_iou(pred['start'], pred['end'], gt['start'], gt['end'])
                 if iou > best_iou:
                     best_iou = iou
@@ -78,12 +84,30 @@ class Evaluator:
         tp = len(results["matches"])
         fp = len(results["false_positives"])
         fn = len(results["missed_chronicles"])
+        total_gt = len(ground_truth)
+        total_pred = len(predictions)
 
         precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
         recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
         f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
-        avg_latency = sum(latencies) / len(latencies) if latencies else 0.0
-        avg_iou = sum(ious) / len(ious) if ious else 0.0
+        
+        # Enhanced Statistics
+        def get_stats(data):
+            if not data:
+                return {"avg": 0.0, "min": 0.0, "max": 0.0, "median": 0.0, "std": 0.0}
+            return {
+                "avg": sum(data) / len(data),
+                "min": min(data),
+                "max": max(data),
+                "median": statistics.median(data),
+                "std": statistics.stdev(data) if len(data) > 1 else 0.0
+            }
+
+        latency_stats = get_stats(latencies)
+        iou_stats = get_stats(ious)
+
+        avg_latency = latency_stats["avg"]
+        avg_iou = iou_stats["avg"]
 
         # Overall score (arbitrary combination of IoU and Latency)
         # Latency component: 1.0 if latency < 5s, 0.0 if latency > 60s, linear in between
@@ -91,12 +115,51 @@ class Evaluator:
         # IoU component: avg_iou
         overall_score = (avg_iou * 0.6 + latency_score * 0.4) * 100 if tp > 0 else 0.0
 
+        # Breakdown by label
+        label_metrics = {}
+        if not self.label_agnostic:
+            # Get all unique labels from both GT and Predictions
+            all_labels = set(gt.get('label') for gt in ground_truth) | set(p.get('label') for p in predictions if p.get('label'))
+            
+            for label in all_labels:
+                label_gt = [gt for gt in ground_truth if gt.get('label') == label]
+                label_matches = [m for m in results["matches"] if m['gt'].get('label') == label]
+                # A false positive is assigned to a label if it HAS that label but didn't match anything
+                label_fp = [fp for fp in results["false_positives"] if fp.get('label') == label]
+                
+                tp_l = len(label_matches)
+                fp_l = len(label_fp)
+                fn_l = len(label_gt) - tp_l
+                
+                prec_l = tp_l / (tp_l + fp_l) if (tp_l + fp_l) > 0 else 0.0
+                rec_l = tp_l / (tp_l + fn_l) if (tp_l + fn_l) > 0 else 0.0
+                f1_l = 2 * (prec_l * rec_l) / (prec_l + rec_l) if (prec_l + rec_l) > 0 else 0.0
+                
+                label_metrics[label] = {
+                    "total_gt": len(label_gt),
+                    "tp": tp_l,
+                    "fp": fp_l,
+                    "fn": fn_l,
+                    "precision": prec_l,
+                    "recall": rec_l,
+                    "f1_score": f1_l
+                }
+
         results["metrics"] = {
+            "total_gt": total_gt,
+            "total_pred": total_pred,
+            "tp": tp,
+            "fp": fp,
+            "fn": fn,
             "precision": precision,
             "recall": recall,
             "f1_score": f1,
             "avg_latency": avg_latency,
             "avg_iou": avg_iou,
+            "latency_stats": latency_stats,
+            "iou_stats": iou_stats,
+            "label_metrics": label_metrics,
+            "latency_score": latency_score,
             "overall_score": overall_score
         }
 

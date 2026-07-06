@@ -60,16 +60,23 @@ class ChroniclePipeline:
                     match = self.store.find_match(self.source, fp)
                     if match:
                         logger.success(f"{timestamp}Fast Match: {match}")
+                        yield {
+                            "label": f"Match: {match}",
+                            "start": round(current_offset, 2),
+                            "end": round(current_offset + chunk_duration, 2),
+                            "detected_at": round(current_offset + chunk_duration, 2),
+                            "confidence": 1.0
+                        }
                         current_offset += chunk_duration
                         continue
                 
-                # 2. Parallel Sensors (simplified here as sequential but could be multi-threaded)
+                # 2. Parallel Sensors
                 stt_result = self.stt.transcribe(chunk)
                 music_score = self.audio_events.analyze(chunk)
                 novelty_score = self.novelty.compute_novelty(chunk)
                 speaker_distance = self.diarization.detect_change(chunk)
                 
-                # 3. Semantic Analysis (uses context)
+                # 3. Semantic Analysis
                 context = self.stt.get_full_context()
                 semantic_result = self.semantic.analyze(context)
                 
@@ -83,6 +90,15 @@ class ChroniclePipeline:
                 
                 decision = self.fusion.fuse(scores, offset=current_offset)
                 
+                if decision["new_detection"]:
+                    yield {
+                        "label": semantic_result.get("topic") or "Chronique",
+                        "start": round(current_offset, 2),
+                        "end": round(current_offset + chunk_duration, 2),
+                        "detected_at": round(current_offset + chunk_duration, 2),
+                        "confidence": round(decision["total_score"], 3)
+                    }
+
                 # 5. Learning
                 if decision["is_detected"] and fp:
                     self.store.store_fingerprint(self.source, fp, 5.0, f"jingle_{int(time.time())}")

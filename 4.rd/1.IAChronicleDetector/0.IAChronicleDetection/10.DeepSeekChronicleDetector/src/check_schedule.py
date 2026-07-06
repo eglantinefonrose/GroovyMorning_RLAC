@@ -139,8 +139,8 @@ def compare_with_schedule(detections):
             diff = est_minutes - theo_minutes
             diff_str = f"{diff:+} min"
             
-            # RÈGLE 1 : Trop tôt (> 5 min avant l'horaire théorique)
-            if diff < -5:
+            # RÈGLE 1 : Trop tôt (> 1 min avant l'horaire théorique)
+            if diff < -1:
                 status = "REJETÉ (TROP TÔT)"
                 results["REJETÉ (TROP TÔT)"] += 1
             

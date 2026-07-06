@@ -1,0 +1,107 @@
+[
+  {
+    "label": "Le journal de 7h",
+    "start": 0.0,
+    "end": 780.0,
+    "detected_at": 0.0,
+    "confidence": 1.0
+  },
+  {
+    "label": "Les 80''",
+    "start": 780.0,
+    "end": 960.0,
+    "detected_at": 780.0,
+    "confidence": 1.0
+  },
+  {
+    "label": "Le grand reportage",
+    "start": 960.0,
+    "end": 1140.0,
+    "detected_at": 960.0,
+    "confidence": 1.0
+  },
+  {
+    "label": "L'édito médias",
+    "start": 1140.0,
+    "end": 1320.0,
+    "detected_at": 1140.0,
+    "confidence": 1.0
+  },
+  {
+    "label": "Musicaline",
+    "start": 1320.0,
+    "end": 1620.0,
+    "detected_at": 1380.0,
+    "confidence": 1.0
+  },
+  {
+    "label": "La météo",
+    "start": 1620.0,
+    "end": 2520.0,
+    "detected_at": 1680.0,
+    "confidence": 1.0
+  },
+  {
+    "label": "L'édito politique",
+    "start": 2520.0,
+    "end": 2700.0,
+    "detected_at": 2520.0,
+    "confidence": 1.0
+  },
+  {
+    "label": "L'édito éco",
+    "start": 2700.0,
+    "end": 2760.0,
+    "detected_at": 2700.0,
+    "confidence": 1.0
+  },
+  {
+    "label": "L'invité de 7h50",
+    "start": 2760.0,
+    "end": 3480.0,
+    "detected_at": 2760.0,
+    "confidence": 1.0
+  },
+  {
+    "label": "Le billet de Bertrand Chameroy",
+    "start": 3480.0,
+    "end": 3600.0,
+    "detected_at": 3480.0,
+    "confidence": 1.0
+  },
+  {
+    "label": "Le journal de 8h",
+    "start": 3600.0,
+    "end": 4740.0,
+    "detected_at": 3600.0,
+    "confidence": 1.0
+  },
+  {
+    "label": "Géopolitique",
+    "start": 4740.0,
+    "end": 4800.0,
+    "detected_at": 4740.0,
+    "confidence": 1.0
+  },
+  {
+    "label": "L'invité de 8h20 : le grand entretien",
+    "start": 4800.0,
+    "end": 6420.0,
+    "detected_at": 4800.0,
+    "confidence": 1.0
+  },
+  {
+    "label": "Dans l'œil de",
+    "start": 6420.0,
+    "end": 6780.0,
+    "detected_at": 6420.0,
+    "confidence": 1.0
+  },
+  {
+    "label": "Un monde nouveau",
+    "start": 6780.0,
+    "end": 6840.0,
+    "detected_at": 6780.0,
+    "confidence": 1.0
+  }
+]
