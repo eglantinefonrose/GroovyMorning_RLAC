@@ -42,7 +42,15 @@ public class DynamicRecordingService {
     private boolean isChronicleAuthorized(String userId, String chronicleName) {
         List<Chronicle> userChronicles = chroniclesManagerService.getChronicles(userId);
         return userChronicles.stream()
-                .anyMatch(c -> c.getNomDeChronique().equals(chronicleName));
+                .anyMatch(c -> normalize(c.getNomDeChronique()).equals(normalize(chronicleName)));
+    }
+
+    private String normalize(String name) {
+        if (name == null) return "";
+        return name.toLowerCase()
+                .replace("’", "'")
+                .replace(" ", "")
+                .trim();
     }
 
     public void handleStartNotification(String userId, String chronicleName) {

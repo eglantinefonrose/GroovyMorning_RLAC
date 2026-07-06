@@ -13,7 +13,7 @@ public class RadioProgramService {
 
     static {
         // Source: User request (updated default program)
-        PROGRAM_CHRONICLES.add(new Chronicle("journal de 7h", 0, 780));
+        PROGRAM_CHRONICLES.add(new Chronicle("Le journal de 7h", 0, 780));
         PROGRAM_CHRONICLES.add(new Chronicle("Les 80 secondes", 780, 960));
         PROGRAM_CHRONICLES.add(new Chronicle("Le grand reportage", 960, 1200));
         PROGRAM_CHRONICLES.add(new Chronicle("Edito media", 1200, 1380));

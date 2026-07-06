@@ -54,7 +54,7 @@ public class WebSocketClientService {
                     
                     // Vérification si cette chronique est dans MON planning
                     boolean isPlanned = DatabaseService.getInstance().getChronicles(localUserId).stream()
-                            .anyMatch(c -> c.getNomDeChronique().equals(chronicleName));
+                            .anyMatch(c -> normalize(c.getNomDeChronique()).equals(normalize(chronicleName)));
 
                     if (isPlanned) {
                         logger.info("🎯 [User:{}] Chronicle {} is in my plan. Starting recording...", localUserId, chronicleName);
@@ -88,6 +88,14 @@ public class WebSocketClientService {
         } catch (Exception e) {
             logger.error("Failed to initialize WebSocket client", e);
         }
+    }
+
+    private String normalize(String name) {
+        if (name == null) return "";
+        return name.toLowerCase()
+                .replace("’", "'")
+                .replace(" ", "")
+                .trim();
     }
 
     public void disconnect() {
