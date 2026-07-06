@@ -98,8 +98,8 @@ def update_scheduler(hour, minute):
 
 # Initialisation du scheduler
 # Lancement à 06:58 et arrêt à 09:10
-schedule.every().day.at("20:34").do(run_segmenter)
-schedule.every().day.at("20:55").do(stop_segmenter)
+schedule.every().day.at("06:58").do(run_segmenter)
+schedule.every().day.at("09:10").do(stop_segmenter)
 
 # Lancement du thread scheduler
 threading.Thread(target=scheduler_loop, daemon=True).start()
@@ -246,8 +246,8 @@ if __name__ == '__main__':
         os.environ['TARGET_DATE'] = args.date
         print(f"📅 Date forcée par argument: {args.date}")
 
-    # if os.environ.get("SIMU", "").lower() == "true":
-    #     print("🧪 Mode SIMU détecté : Lancement immédiat pour test...")
-    #     run_segmenter()
+    if os.environ.get("SIMU", "").lower() == "true":
+        print("🧪 Mode SIMU détecté : Lancement immédiat pour test...")
+        run_segmenter()
 
     socketio.run(app, host='0.0.0.0', port=args.port, debug=False, allow_unsafe_werkzeug=True)

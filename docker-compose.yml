@@ -34,12 +34,29 @@ services:
     volumes:
       - ./2.RLAC-IAChronicleSegmenter/data:/app/data
       - ./2.RLAC-IAChronicleSegmenter/assets:/app/assets
+      - shared-pipe:/tmp
     env_file:
       - .env
     environment:
       - JAVA_API_URL=http://java-backend:8000
       - SIMU=${SIMU:-false}
     restart: unless-stopped
+    networks:
+      - rlac-network
+
+  # --- Simulateur FFmpeg (Mode SIMU uniquement) ---
+  # Envoie le fichier audio dans le pipe pour simuler un flux live
+  ffmpeg-simu:
+    image: jrottenberg/ffmpeg:latest
+    container_name: rlac-ffmpeg-simu
+    volumes:
+      - ./4.rd/@assets:/data
+      - shared-pipe:/tmp
+    command: >
+      -re -i /data/3.modelEvaluationData/france-inter/audio/27-05-2026.m4a 
+      -f s16le -ac 1 -ar 16000 -y /tmp/audio_pipe
+    profiles:
+      - simu
     networks:
       - rlac-network
 
@@ -53,9 +70,14 @@ services:
     restart: unless-stopped
     depends_on:
       - java-backend
+    profiles:
+      - tunnel
     networks:
       - rlac-network
 
 networks:
   rlac-network:
     driver: bridge
+
+volumes:
+  shared-pipe:
