@@ -29,6 +29,12 @@ Le **Intersection over Union (IoU)** mesure le chevauchement entre la période d
 ### C. Latence
 La latence est le délai entre le début réel d'une chronique et le moment où le système confirme sa détection. C'est un paramètre critique pour les applications en direct.
 
+### D. Évaluation Label-Agnostic
+Le framework propose un mode **Label-Agnostic**. Lorsqu'il est activé, l'évaluateur ignore le type de chronique (le label) pour se concentrer uniquement sur la détection temporelle. 
+*   **Utilité** : Évaluer la capacité d'un algorithme à détecter *l'occurrence* d'une chronique, indépendamment de sa classification correcte.
+*   **Fonctionnement** : Une détection est validée si elle chevauche n'importe quelle chronique de la vérité terrain avec un IoU suffisant (> 0.3), même si leurs labels diffèrent.
+*   **Usage par défaut** : Ce mode est automatiquement activé pour certaines méthodes comme `live_transcription`.
+
 ## 4. Calcul du Score Global (Overall Score)
 
 Pour faciliter la comparaison entre les méthodes, un score sur 100 est calculé selon la pondération suivante :
@@ -45,7 +51,7 @@ Pour faciliter la comparaison entre les méthodes, un score sur 100 est calculé
 Le script principal orchestre l'évaluation en se focalisant sur le traitement des fichiers de résultats :
 
 1.  **Préparation** : Les outils de détection externes génèrent leurs prédictions au format JSON.
-2.  **Injection** : Le programme `main.py` charge ces fichiers ainsi que la vérité terrain correspondante.
+2.  **Injection** : Le programme `main.py` charge ces fichiers ainsi que la vérité terrain correspondante. Le flag `--label-agnostic` peut être passé pour ignorer la comparaison des labels.
 3.  **Analyse** : L'évaluateur compare les deux jeux de données et calcule les scores (IoU, Latence, F1).
 4.  **Rapport** : Génération d'un résumé détaillé (`results_[methode].json`) et mise à jour automatique de la matrice comparative globale (`evaluation_matrix.csv`).
 
