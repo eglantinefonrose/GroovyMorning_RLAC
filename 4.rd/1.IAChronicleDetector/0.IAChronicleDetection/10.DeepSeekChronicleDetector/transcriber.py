@@ -133,63 +133,74 @@ class Transcriber:
             yield from self._transcribe_kyutai_stt(audio_path)
 
     def _transcribe_kyutai_stt(self, audio_path):
-        """Transcription via Transformers (stt-1b-en_fr)."""
+        """Transcription via Transformers (stt-1b-en_fr) avec découpage en phrases pour DeepSeek."""
         import torch
         import librosa
-        print(f"[KYUTAI_STT] Début de la transcription : {audio_path}")
+        import re
+        print(f"[KYUTAI_STT] Début de la transcription (mode phrases) : {audio_path}")
         
         # Audio must be 24kHz
-        audio, _ = librosa.load(audio_path, sr=24000)
+        audio, sr = librosa.load(audio_path, sr=24000)
+        total_duration = len(audio) / sr
         
-        # Chunk processing to simulate stream if it's a long file
-        chunk_size = 24000 * 30 # 30 seconds chunks
-        for i in range(0, len(audio), chunk_size):
-            chunk = audio[i:i + chunk_size]
-            if len(chunk) == 0:
+        # On utilise des segments de 60s pour la transcription (bon compromis VRAM/Contexte)
+        # Mais on va yield CHAQUE phrase individuellement.
+        chunk_size_s = 60.0 
+        chunk_samples = int(chunk_size_s * sr)
+        
+        for i in range(0, len(audio), chunk_samples):
+            chunk = audio[i : i + chunk_samples]
+            if len(chunk) < sr * 0.5:
                 continue
+                
+            s_start = i / sr
             
-            # Utilisation explicite de audio= pour garantir que le processeur capture les données
-            inputs = self.processor(audio=chunk, sampling_rate=24000, return_tensors="pt").to(self.device)
+            inputs = self.processor(audio=chunk, sampling_rate=sr, return_tensors="pt").to(self.device)
             
-            # Extraction de la clé input_values qui est vitale pour Kyutai STT
-            input_values = inputs.get("input_values")
-            if input_values is None:
-                # Fallback sur input_features si nécessaire
-                input_values = inputs.get("input_features")
-            
-            if input_values is None:
-                print(f"[ERREUR] Le processeur n'a pas généré de données audio (Clés: {list(inputs.keys())})")
-                continue
-
-            gen_kwargs = {
-                "input_values": input_values,
-                "max_new_tokens": 128, # Limite pour éviter les boucles infinies sur de petits chunks
-            }
-            
-            # Ajout du masque de padding s'il existe
-            mask = inputs.get("attention_mask") or inputs.get("padding_mask")
-            if mask is not None:
-                gen_kwargs["attention_mask"] = mask
+            # Calcul dynamique de max_new_tokens
+            try:
+                max_audio_frames = inputs["input_values"].shape[-1] // self.model.config.codec_config.frame_size
+                max_new_tokens = min(896, max_audio_frames) # Cap plus haut pour 60s
+            except:
+                max_new_tokens = 448
 
             with torch.no_grad():
-                output_tokens = self.model.generate(**gen_kwargs)
+                # On laisse le modèle générer la transcription complète du segment
+                output_tokens = self.model.generate(
+                    **inputs, 
+                    max_new_tokens=max_new_tokens,
+                    do_sample=False,
+                    num_beams=1
+                )
             
-            transcription = self.processor.batch_decode(output_tokens, skip_special_tokens=True)[0]
+            full_text = self.processor.batch_decode(output_tokens, skip_special_tokens=True)[0].strip()
             
-            if transcription.strip():
-                yield {
-                    "start": i / 24000,
-                    "end": min((i + chunk_size) / 24000, len(audio) / 24000),
-                    "text": transcription.strip()
-                }
+            if full_text:
+                # On découpe le texte du chunk en phrases réelles
+                # On utilise une regex pour splitter sur . ! ? suivi d'un espace
+                sentences = re.split(r'(?<=[.!?])\s+', full_text)
+                
+                for sentence in sentences:
+                    sentence = sentence.strip()
+                    if len(sentence) < 3:
+                        continue
+                        
+                    # Note: Le timing est approximatif à l'intérieur du chunk de 60s
+                    yield {
+                        "start": s_start,
+                        "end": s_start + chunk_size_s,
+                        "text": sentence
+                    }
 
     def _transcribe_kyutai_mlx(self, audio_path):
-        import sphn
+        import librosa
         from moshi_mlx import models
         print(f"[KYUTAI_MLX] Début de la transcription : {audio_path}")
         
         # Audio must be 24kHz mono
-        in_pcms, _ = sphn.read(audio_path, sample_rate=24000)
+        # librosa load convertit automatiquement en mono et rééchantillonne
+        audio, _ = librosa.load(audio_path, sr=24000, mono=True)
+        in_pcms = audio[np.newaxis, :] # Ajout d'une dimension pour simuler le batch/canaux
         
         # Padding
         pad_right = int(1.5 * 24000)

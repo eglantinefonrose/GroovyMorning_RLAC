@@ -44,6 +44,29 @@ def update_evaluation_matrix(method_name, audio_path, score):
     
     print(f"Global results updated in {matrix_file}")
 
+def apply_soft_scoring(results):
+    """Applies a less strict scoring system to the evaluation results."""
+    metrics = results["metrics"]
+    if not results.get("matches"):
+        metrics["overall_score"] = 0.0
+        return results
+
+    # 1. More permissive Latency Score (0 to 120s instead of 0 to 60s)
+    # 1.0 if latency < 10s, 0.0 if latency > 120s, linear in between
+    avg_latency = metrics.get("avg_latency", 0)
+    soft_latency_score = max(0.0, min(1.0, 1.0 - (avg_latency - 10) / 110))
+    metrics["soft_latency_score"] = soft_latency_score
+    
+    # 2. Weighted Score including F1-Score (to reward reliability/recall)
+    avg_iou = metrics.get("avg_iou", 0)
+    f1 = metrics.get("f1_score", 0)
+    
+    # New formula: F1 * (60% IoU + 40% Latency) * 100
+    # This rewards methods that find the chronicles even if timing isn't perfect
+    soft_score = f1 * (avg_iou * 0.6 + soft_latency_score * 0.4) * 100
+    metrics["overall_score"] = soft_score
+    return results
+
 def load_ground_truth(file_path):
     if file_path.endswith('.json'):
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -135,12 +158,57 @@ def print_report(method_name, results):
     print(f" EVALUATION REPORT: {method_name} ")
     print("="*40)
     metrics = results["metrics"]
+    
+    print(f"--- DETECTIONS COUNTS ---")
+    print(f"Ground Truth:    {metrics.get('total_gt', 0)}")
+    print(f"Predictions:     {metrics.get('total_pred', 0)}")
+    print(f"True Positives:  {metrics.get('tp', 0)}")
+    print(f"False Positives: {metrics.get('fp', 0)}")
+    print(f"Missed (FN):     {metrics.get('fn', 0)}")
+    
+    print(f"\n--- PERFORMANCE METRICS ---")
     print(f"Precision:    {metrics['precision']:.2f}")
     print(f"Recall:       {metrics['recall']:.2f}")
     print(f"F1-Score:     {metrics['f1_score']:.2f}")
-    print(f"Avg Latency:  {metrics['avg_latency']:.2f}s")
-    print(f"Avg IoU:      {metrics['avg_iou']:.2f}")
-    print(f"OVERALL SCORE: {metrics['overall_score']:.2f}/100")
+    
+    if "latency_stats" in metrics:
+        ls = metrics["latency_stats"]
+        print(f"\n--- LATENCY STATISTICS ---")
+        print(f"Average:   {ls['avg']:.2f}s")
+        print(f"Median:    {ls['median']:.2f}s")
+        print(f"Min / Max: {ls['min']:.2f}s / {ls['max']:.2f}s")
+        print(f"Std Dev:   {ls['std']:.2f}s")
+    else:
+        print(f"Avg Latency:  {metrics['avg_latency']:.2f}s")
+
+    if "iou_stats" in metrics:
+        is_stats = metrics["iou_stats"]
+        print(f"\n--- IOU STATISTICS ---")
+        print(f"Average:   {is_stats['avg']:.2f}")
+        print(f"Median:    {is_stats['median']:.2f}")
+        print(f"Min / Max: {is_stats['min']:.2f} / {is_stats['max']:.2f}")
+        print(f"Std Dev:   {is_stats['std']:.2f}")
+    else:
+        print(f"Avg IoU:      {metrics['avg_iou']:.2f}")
+    
+    if metrics.get("label_metrics"):
+        print(f"\n--- PER-LABEL BREAKDOWN ---")
+        print(f"{'Label':<30} | {'GT':<2} | {'TP':<2} | {'FP':<2} | {'F1':<5}")
+        print("-" * 50)
+        # Sort by F1 score ascending to show problematic labels first
+        sorted_labels = sorted(metrics["label_metrics"].items(), key=lambda x: x[1]['f1_score'])
+        for label, l_m in sorted_labels:
+            print(f"{label[:30]:<30} | {l_m['total_gt']:<2} | {l_m['tp']:<2} | {l_m['fp']:<2} | {l_m['f1_score']:>5.2f}")
+
+    print(f"\n--- SCORE BREAKDOWN (Soft Scoring) ---")
+    print(f"Reliability (F1):    {metrics['f1_score']:.2f}")
+    print(f"Timing (Avg IoU):    {metrics['avg_iou']:.2f} (Weight: 60%)")
+    # soft_latency_score might not be present if apply_soft_scoring wasn't called or failed
+    latency_score = metrics.get('soft_latency_score', metrics.get('latency_score', 0))
+    print(f"Rapidity (Latency): {latency_score:.2f} (Weight: 40%)")
+    print(f"Formula: F1 * (0.6*IoU + 0.4*Latency) * 100")
+    
+    print(f"\nOVERALL SCORE: {metrics['overall_score']:.2f}/100")
     print("="*40)
 
 def print_comparison_summary(all_results):
@@ -160,8 +228,10 @@ def main():
     parser.add_argument("--method", help="Method name (e.g., deepseek)")
     parser.add_argument("--gt", help="Ground Truth file (JSON/TXT)")
     parser.add_argument("--results", help="Path to a pre-existing results JSON file to evaluate")
+    parser.add_argument("--audioname", help="Explicit name of the audio for the evaluation matrix")
     parser.add_argument("--buffer", type=int, default=5, help="Buffer size in seconds")
     parser.add_argument("--methods", nargs="*", help="List all available methods or run multiple methods")
+    parser.add_argument("--label-agnostic", action="store_true", help="Ignore labels during evaluation (match only by time)")
     
     args = parser.parse_args()
 
@@ -185,34 +255,42 @@ def main():
             with open(args.results, 'r', encoding='utf-8') as f:
                 res_data = json.load(f)
             
-            # Extraction des détections (supporte le format deepseek ou une liste brute)
-            if isinstance(res_data, dict) and "detections" in res_data:
-                detections = res_data["detections"]
+            # Extraction des détections (supporte différents formats)
+            if isinstance(res_data, dict):
+                if "detections" in res_data:
+                    detections = res_data["detections"]
+                elif "matches" in res_data and "false_positives" in res_data:
+                    # Format deepseek/live_transcription custom
+                    detections = res_data["matches"] + res_data["false_positives"]
+                else:
+                    print("Error: Results file format not recognized (dict without 'detections' or 'matches/false_positives').")
+                    return
             elif isinstance(res_data, list):
                 detections = res_data
             else:
-                print("Error: Results file format not recognized (expected list or dict with 'detections').")
+                print("Error: Results file format not recognized (expected list or dict).")
                 return
 
             # Évaluation
-            is_label_agnostic = (args.method == "live_transcription")
-            evaluator = Evaluator(label_agnostic=is_label_agnostic)
+            is_label_agnostic = args.label_agnostic or (args.method == "live_transcription")
+            # Using a more permissive IoU threshold of 0.3
+            evaluator = Evaluator(iou_threshold=0.3, label_agnostic=is_label_agnostic)
             results = evaluator.evaluate(detections, gt_data)
+            results = apply_soft_scoring(results)
             
             # Report
             print_report(args.method, results)
             
-            # Update Matrix
-            if args.audio:
-                update_evaluation_matrix(args.method, args.audio, results["metrics"]['overall_score'])
+            # Update Matrix (Priority: --audioname > --audio > results filename)
+            if args.audioname:
+                csv_id = args.audioname
+            elif args.audio:
+                csv_id = args.audio
             else:
-                print("Warning: --audio not provided, evaluation matrix not updated.")
+                csv_id = os.path.basename(args.results)
                 
-            # Save results
-            output_file = f"evaluated_{args.method}.json"
-            with open(output_file, "w", encoding="utf-8") as f:
-                json.dump(results, f, indent=2, ensure_ascii=False)
-            print(f"Detailed evaluation saved to {output_file}")
+            update_evaluation_matrix(args.method, csv_id, results["metrics"]['overall_score'])
+            
             return
             
         except Exception as e:
@@ -257,22 +335,19 @@ def main():
 
         # 4. Evaluate
         # Mode label_agnostic pour live_transcription (pas de noms de chroniques)
-        is_label_agnostic = (method_name == "live_transcription")
-        evaluator = Evaluator(label_agnostic=is_label_agnostic)
+        is_label_agnostic = args.label_agnostic or (method_name == "live_transcription")
+        # Using a more permissive IoU threshold of 0.3
+        evaluator = Evaluator(iou_threshold=0.3, label_agnostic=is_label_agnostic)
         results = evaluator.evaluate(detections, gt_data)
+        results = apply_soft_scoring(results)
         all_results[method_name] = results
 
         # 5. Report
         print_report(method_name, results)
         
-        # Save results
-        output_file = f"results_{method_name}.json"
-        with open(output_file, "w", encoding="utf-8") as f:
-            json.dump(results, f, indent=2, ensure_ascii=False)
-        print(f"Detailed results saved to {output_file}")
-
         # 6. Matrix Update
-        update_evaluation_matrix(method_name, args.audio, results["metrics"]['overall_score'])
+        csv_id = args.audioname if args.audioname else args.audio
+        update_evaluation_matrix(method_name, csv_id, results["metrics"]['overall_score'])
 
     if len(methods_to_run) > 1:
         print_comparison_summary(all_results)

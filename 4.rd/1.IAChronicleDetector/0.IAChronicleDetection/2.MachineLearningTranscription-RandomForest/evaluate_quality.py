@@ -78,14 +78,14 @@ def simulate_live_inference(model_path, srt_path, threshold=0.5):
         
     return [(c['start'], c['end']) for c in detected_chronicles]
 
-def evaluate_quality(model_path, audio_path, tc_path, live_sim=True, acceleration=None):
+def evaluate_quality(model_path, audio_path, tc_path=None, live_sim=True, acceleration=None):
     if not os.path.exists(model_path):
         print(f"Erreur : Le modèle '{model_path}' n'existe pas.")
         return
     if not os.path.exists(audio_path):
         print(f"Erreur : L'audio '{audio_path}' n'existe pas.")
         return
-    if not os.path.exists(tc_path):
+    if tc_path and not os.path.exists(tc_path):
         print(f"Erreur : Les timecodes '{tc_path}' n'existent pas.")
         return
 
@@ -93,23 +93,21 @@ def evaluate_quality(model_path, audio_path, tc_path, live_sim=True, acceleratio
     print(f"Transcription de {audio_path}...")
     segments = transcribe_audio(audio_path)
     
-    # On crée un fichier SRT temporaire ou on adapte simulate_live_inference
-    # Pour RF, on peut passer les segments directement
-    
     mode_str = "LIVE SIMULÉ" if live_sim else "BATCH"
     print(f"--- Évaluation de Qualité ({mode_str}) pour RF ---")
-    if acceleration:
-        print(f"Accélération : {acceleration}x")
-        start_wall_time = time.time()
+    
+    pred_results = []
     
     if live_sim:
-        # On adapte simulate_live_inference pour prendre des segments
+        if acceleration:
+            print(f"Accélération : {acceleration}x")
+        start_wall_time = time.time()
+        
         classifier = RadioChroniqueClassifier.load_model(model_path)
         X_live = classifier.prepare_features(segments, training=False)
         all_probs = classifier.classifier.predict_proba(X_live)[:, 1]
         smoothed_probs = np.convolve(all_probs, np.ones(3)/3, mode='same')
         
-        pred_intervals = []
         current = None
         for i, p in enumerate(smoothed_probs):
             if acceleration and acceleration > 0:
@@ -120,24 +118,61 @@ def evaluate_quality(model_path, audio_path, tc_path, live_sim=True, acceleratio
                     time.sleep(target_wall_time - elapsed)
 
             if p >= 0.5:
-                if current is None: current = [segments[i]['start'], segments[i]['end']]
-                else: current[1] = segments[i]['end']
+                if current is None:
+                    current = {
+                        "label": "Chronique Matin",
+                        "start": segments[i]['start'],
+                        "end": segments[i]['end'],
+                        "confidence": float(p)
+                    }
+                else:
+                    current['end'] = segments[i]['end']
+                    current['confidence'] = max(current['confidence'], float(p))
             elif current:
-                if current[1] - current[0] >= 5.0: pred_intervals.append(tuple(current))
+                if current['end'] - current['start'] >= 5.0:
+                    current['detected_at'] = segments[i]['start']
+                    pred_results.append(current)
                 current = None
+        
+        if current and current['end'] - current['start'] >= 5.0:
+            current['detected_at'] = segments[-1]['end']
+            pred_results.append(current)
+            
     else:
-        # Batch mode
+        # Batch mode basique pour éviter les erreurs
         classifier = RadioChroniqueClassifier.load_model(model_path)
         X = classifier.prepare_features(segments, training=False)
-        preds = classifier.classifier.predict(X)
-        # Logique de regroupement... (simplifiée pour l'exemple)
-        pred_intervals = [] # ...
+        probs = classifier.classifier.predict_proba(X)[:, 1]
+        smoothed_probs = np.convolve(probs, np.ones(3)/3, mode='same')
+        
+        current = None
+        for i, p in enumerate(smoothed_probs):
+            if p >= 0.5:
+                if current is None:
+                    current = {"label": "Chronique Matin", "start": segments[i]['start'], "end": segments[i]['end'], "confidence": float(p)}
+                else:
+                    current['end'] = segments[i]['end']
+                    current['confidence'] = max(current['confidence'], float(p))
+            elif current:
+                if current['end'] - current['start'] >= 5.0:
+                    current['detected_at'] = segments[i]['start']
+                    pred_results.append(current)
+                current = None
+
+    pred_intervals = [(r['start'], r['end']) for r in pred_results]
 
     print(f"\n📺 Chroniques détectées :")
     print("-" * 60)
-    for i, (start, end) in enumerate(pred_intervals, 1):
-        print(f"{i:<5} | {start:<10.1f} | {end:<10.1f}")
+    for i, res in enumerate(pred_results, 1):
+        print(f"{i:<5} | {res['start']:<10.1f} | {res['end']:<10.1f} | Conf: {res['confidence']:.2f}")
     print("-" * 60)
+
+    if not tc_path:
+        output_file = "inference_results.json"
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(pred_results, f, indent=4, ensure_ascii=False)
+        print(f"\n📁 Résultats de l'inférence enregistrés dans {output_file}")
+        return
 
     gt_intervals = load_timecodes(tc_path)
     print(f"\n✅ Vérité Terrain chargée : {len(gt_intervals)} chroniques attendues.")
@@ -186,7 +221,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Évalue la qualité en simulation live.")
     parser.add_argument("--model", default="models/radio_chronique_rf.pkl")
     parser.add_argument("--srt", required=True)
-    parser.add_argument("--gt", required=True)
+    parser.add_argument("--gt", required=False, help="Fichier de vérité terrain (optionnel)")
     parser.add_argument("--no-live", action="store_true")
     parser.add_argument("--acceleration", type=float, default=None, help="Acceleration factor for live simulation")
     

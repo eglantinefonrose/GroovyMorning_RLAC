@@ -45,6 +45,7 @@ def analyze_with_deepseek(phrase, history):
 def main():
     parser = argparse.ArgumentParser(description="Détecte les chroniques (Approche DeepSeek)")
     parser.add_argument("audio", help="Chemin audio")
+    parser.add_argument("--provider", default="kyutai_stt", choices=["whisper", "kyutai", "kyutai_mlx", "kyutai_stt"], help="Fournisseur de transcription")
     parser.add_argument("--whisper-model", default="base")
     args = parser.parse_args()
 
@@ -52,11 +53,11 @@ def main():
         print("Erreur: DEEPSEEK_API_KEY non trouvée", file=sys.stderr)
         sys.exit(1)
 
-    transcriber = Transcriber(model_size=args.whisper_model)
+    transcriber = Transcriber(model_size=args.whisper_model, provider=args.provider)
     results = []
     history = []
     
-    print(f"Analyse avec DeepSeek {MODEL}...", file=sys.stderr)
+    print(f"Analyse avec DeepSeek {MODEL} via {args.provider}...", file=sys.stderr)
     for seg in transcriber.transcribe_stream(args.audio):
         res_raw = analyze_with_deepseek(seg['text'], history)
         try:

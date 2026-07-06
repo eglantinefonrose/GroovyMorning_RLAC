@@ -7,7 +7,7 @@ from pathlib import Path
 from detector import ChronicleDetector
 from transcriber import Transcriber
 
-def evaluate_quality(audio_path, gt_file, acceleration=1.0, model_size="base"):
+def evaluate_quality(audio_path, gt_file, acceleration=1.0, model_size="base", provider="kyutai_stt"):
     if not os.path.exists(audio_path):
         print(f"Erreur : Audio non trouvé {audio_path}")
         return
@@ -26,9 +26,9 @@ def evaluate_quality(audio_path, gt_file, acceleration=1.0, model_size="base"):
     # Prompt par défaut pour France Inter
     prompt = ["Le journal de 7h", "Le journal de 8h", "L'invité de 8h20"]
     detector = ChronicleDetector(prompt)
-    transcriber = Transcriber(model_size=model_size)
+    transcriber = Transcriber(model_size=model_size, provider=provider)
     
-    print(f"--- Évaluation LIVE DeepSeek (Accélération: {acceleration}x) ---")
+    print(f"--- Évaluation LIVE DeepSeek (Provider: {provider}, Accélération: {acceleration}x) ---")
     
     detections = []
     start_wall_time = time.time()
@@ -81,6 +81,7 @@ if __name__ == "__main__":
     parser.add_argument("--gt", required=True)
     parser.add_argument("--acceleration", type=float, default=1.0)
     parser.add_argument("--model", default="base")
+    parser.add_argument("--provider", default="kyutai_stt", choices=["whisper", "kyutai", "kyutai_mlx", "kyutai_stt"])
     args = parser.parse_args()
     
-    evaluate_quality(args.audio, args.gt, acceleration=args.acceleration, model_size=args.model)
+    evaluate_quality(args.audio, args.gt, acceleration=args.acceleration, model_size=args.model, provider=args.provider)

@@ -62,16 +62,16 @@ Génération d'un résumé incluant :
 /
 ├── main.py                 # Orchestrateur
 ├── evaluator.py            # Logique de calcul des scores
-├── simulator.py            # Simulation de flux audio
+├── ground_truth/           # Fichiers de référence (.json)
+├── results/                # (Optionnel) Dossier pour les injections JSON
 ├── SYSTEM_SPECS.md         # Ce document
-├── methods/                # Dossier contenant les wrappers vers les sous-projets
-│   ├── method_0_wrapper.py
-│   ├── method_10_wrapper.py
-│   └── ...
-└── ground_truth/           # Fichiers de référence (.json ou .txt)
+├── simulator.py (Legacy)   # Simulation de flux audio
+└── methods/ (Legacy)       # Wrappers vers les anciens sous-projets
 ```
 
 ## 5. Contraintes Techniques
 - Langage : Python 3.10+
 - Portabilité : Les méthodes doivent pouvoir être isolées (via leurs propres `venv` ou via une gestion propre des imports).
+- Logs : Garder une trace détaillée de chaque étape de détection pour le debug.
+olées (via leurs propres `venv` ou via une gestion propre des imports).
 - Logs : Garder une trace détaillée de chaque étape de détection pour le debug.

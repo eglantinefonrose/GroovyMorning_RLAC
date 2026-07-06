@@ -1,0 +1,114 @@
+[
+  {
+    "label": "Chronique détectée",
+    "start": 0.0,
+    "end": 945.0,
+    "detected_at": 950.0,
+    "confidence": 0.013
+  },
+  {
+    "label": "Chronique détectée",
+    "start": 960.0,
+    "end": 1345.0,
+    "detected_at": 1350.0,
+    "confidence": 0.003
+  },
+  {
+    "label": "Chronique détectée",
+    "start": 1350.0,
+    "end": 1600.0,
+    "detected_at": 1605.0,
+    "confidence": 0.013
+  },
+  {
+    "label": "Chronique détectée",
+    "start": 1605.0,
+    "end": 1610.0,
+    "detected_at": 1615.0,
+    "confidence": 0.0
+  },
+  {
+    "label": "Chronique détectée",
+    "start": 1640.0,
+    "end": 1760.0,
+    "detected_at": 1765.0,
+    "confidence": 0.001
+  },
+  {
+    "label": "Chronique détectée",
+    "start": 1775.0,
+    "end": 2500.0,
+    "detected_at": 2505.0,
+    "confidence": 0.004
+  },
+  {
+    "label": "Chronique détectée",
+    "start": 2510.0,
+    "end": 2530.0,
+    "detected_at": 2535.0,
+    "confidence": 0.0
+  },
+  {
+    "label": "Chronique détectée",
+    "start": 2550.0,
+    "end": 2890.0,
+    "detected_at": 2895.0,
+    "confidence": 0.006
+  },
+  {
+    "label": "Chronique détectée",
+    "start": 2895.0,
+    "end": 3640.0,
+    "detected_at": 3645.0,
+    "confidence": 0.005
+  },
+  {
+    "label": "Chronique détectée",
+    "start": 3655.0,
+    "end": 4780.0,
+    "detected_at": 4785.0,
+    "confidence": 0.001
+  },
+  {
+    "label": "Chronique détectée",
+    "start": 4785.0,
+    "end": 5015.0,
+    "detected_at": 5020.0,
+    "confidence": 0.0
+  },
+  {
+    "label": "Chronique détectée",
+    "start": 5025.0,
+    "end": 5065.0,
+    "detected_at": 5070.0,
+    "confidence": 0.005
+  },
+  {
+    "label": "Chronique détectée",
+    "start": 5095.0,
+    "end": 6425.0,
+    "detected_at": 6430.0,
+    "confidence": 0.003
+  },
+  {
+    "label": "Chronique détectée",
+    "start": 6430.0,
+    "end": 6440.0,
+    "detected_at": 6445.0,
+    "confidence": 0.001
+  },
+  {
+    "label": "Chronique détectée",
+    "start": 6455.0,
+    "end": 6465.0,
+    "detected_at": 6470.0,
+    "confidence": 0.0
+  },
+  {
+    "label": "Chronique détectée",
+    "start": 6470.0,
+    "end": 7250.75,
+    "detected_at": 7250.75,
+    "confidence": 0.0
+  }
+]
