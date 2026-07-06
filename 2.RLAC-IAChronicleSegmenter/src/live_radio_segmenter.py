@@ -52,32 +52,8 @@ class UnifiedLiveSegmenter:
             {"type": "jingle",  "name": "L’invite de 7h50", "target": "grande_matinale_jingle_7h50.m4a"}
         ]
 
-        # Initialisation DeepSeek si nécessaire
+        # Initialisation DeepSeek si nécessaire (Déplacée dans run() pour un chargement à l'heure H)
         self.deepseek_detector = None
-        if self.detection_mode == "deepseek":
-            print("🤖 Mode DETECTION: DeepSeek API")
-            api_key = os.environ.get("DEEPSEEK_API_KEY")
-            if not api_key:
-                print("⚠️ [DeepSeek] DEEPSEEK_API_KEY manquante. Repli sur le mode legacy.")
-                self.detection_mode = "legacy"
-            else:
-                target_date = os.environ.get("TARGET_DATE")
-                if target_date:
-                    print(f"🔍 Récupération de la grille pour le {target_date}...")
-                else:
-                    print("🔍 Récupération de la grille du jour...")
-                
-                schedule_data = get_chroniques(target_date)
-                if schedule_data:
-                    print(f"✅ {len(schedule_data)} chroniques trouvées :")
-                    for item in schedule_data:
-                        print(f"   - {item.get('time')} : {item.get('title')}")
-                else:
-                    print("⚠️ Aucune chronique trouvée dans la grille.")
-                
-                self.deepseek_detector = DeepSeekDetector(api_key, schedule=schedule_data, is_simulation=os.environ.get("SIMU", "false").lower() == "true")
-                self.context_buffer = []
-                self.max_context = 5
         
         if self.detection_mode == "legacy":
             print("📻 Mode DETECTION: Legacy (Jingles + Keywords)")
@@ -352,6 +328,35 @@ class UnifiedLiveSegmenter:
                             self.step_just_changed = False
 
     def run(self, simu=False):
+        # Initialisation du détecteur DeepSeek (chargement de la grille) juste avant de démarrer
+        if self.detection_mode == "deepseek":
+            print("🤖 Mode DETECTION: DeepSeek API")
+            api_key = os.environ.get("DEEPSEEK_API_KEY")
+            if not api_key:
+                print("⚠️ [DeepSeek] DEEPSEEK_API_KEY manquante. Repli sur le mode legacy.")
+                self.detection_mode = "legacy"
+            else:
+                target_date = os.environ.get("TARGET_DATE")
+                if target_date:
+                    print(f"🔍 Récupération de la grille pour le {target_date}...")
+                else:
+                    print("🔍 Récupération de la grille du jour...")
+                
+                schedule_data = get_chroniques(target_date)
+                if schedule_data:
+                    print(f"✅ {len(schedule_data)} chroniques trouvées :")
+                    for item in schedule_data:
+                        print(f"   - {item.get('time')} : {item.get('title')}")
+                else:
+                    print("⚠️ Aucune chronique trouvée dans la grille.")
+                
+                self.deepseek_detector = DeepSeekDetector(api_key, schedule=schedule_data, is_simulation=os.environ.get("SIMU", "false").lower() == "true")
+                self.context_buffer = []
+                self.max_context = 5
+        
+        if self.detection_mode == "legacy":
+            print("📻 Mode DETECTION: Legacy (Jingles + Keywords)")
+
         # Lancement du worker de transcription
         threading.Thread(target=self.transcription_worker, daemon=True).start()
         

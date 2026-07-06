@@ -26,15 +26,15 @@ def run_segmenter():
     
     print(f"[{datetime.now()}] Segmenter lancé avec PID: {segmenter_process.pid}")
 
-# Planification à 6h55 chaque jour
-schedule.every().day.at("20:50").do(run_segmenter)
+# Planification à 21:57 chaque jour
+schedule.every().day.at("21:57").do(run_segmenter)
 
-# SI on est en mode SIMU, on lance une première fois immédiatement pour tester
-if os.environ.get("SIMU", "").lower() == "true":
-    print("🧪 Mode SIMU détecté : Lancement immédiat pour test...")
-    run_segmenter()
+# Démarrage immédiat en mode SIMU désactivé pour respecter l'heure programmée
+# if os.environ.get("SIMU", "").lower() == "true":
+#     print("🧪 Mode SIMU détecté : Lancement immédiat pour test...")
+#     run_segmenter()
 
-print(f"Scheduler démarré. Le segmenter sera lancé automatiquement à 6h55 chaque jour.")
+print(f"Scheduler démarré. Le segmenter sera lancé automatiquement à 21:57 chaque jour.")
 
 # Garder le scheduler actif
 while True:

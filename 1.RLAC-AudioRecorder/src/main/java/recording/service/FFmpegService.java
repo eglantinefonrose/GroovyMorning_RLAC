@@ -163,6 +163,24 @@ public class FFmpegService {
         }
     }
 
+    public void clearContinuousFolder() {
+        File continuousDir = new File("media/continuous");
+        if (!continuousDir.exists()) {
+            continuousDir.mkdirs();
+            return;
+        }
+        
+        logger.info("🧹 Clearing media/continuous directory...");
+        File[] files = continuousDir.listFiles();
+        if (files != null) {
+            for (File f : files) {
+                if (f.isFile()) {
+                    f.delete();
+                }
+            }
+        }
+    }
+
     public double getMasterOffsetSeconds() {
         return masterOffsetSeconds;
     }

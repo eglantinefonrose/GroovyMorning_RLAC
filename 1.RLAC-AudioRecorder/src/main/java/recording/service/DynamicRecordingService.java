@@ -26,6 +26,28 @@ public class DynamicRecordingService {
     private DynamicRecordingService() {
         this.ffmpegService = new FFmpegService();
         this.chroniclesManagerService = ChroniclesManagerService.getInstance();
+        
+        // Planifier un nettoyage quotidien 5 minutes avant l'heure de base par défaut (ex: 06:55)
+        scheduler.scheduleAtFixedRate(this::checkDailyCleanup, 1, 1, TimeUnit.MINUTES);
+    }
+
+    private void checkDailyCleanup() {
+        LocalDateTime now = LocalDateTime.now();
+        // On récupère la config du user par défaut (local)
+        DatabaseService.UserConfig config = DatabaseService.getInstance().getUserConfig(
+            DatabaseService.getInstance().getLocalUserId()
+        );
+        
+        // Si on est à config.baseHour : config.baseMinute - 5
+        LocalDateTime cleanupTime = now.withHour(config.baseHour).withMinute(config.baseMinute).withSecond(0).minusMinutes(5);
+        
+        // Si l'heure actuelle correspond à l'heure de cleanup (à la minute près)
+        if (now.getHour() == cleanupTime.getHour() && now.getMinute() == cleanupTime.getMinute()) {
+            logger.info("⏰ Daily cleanup triggered before baseHour ({}:{})", config.baseHour, config.baseMinute);
+            ffmpegService.stopContinuousRecording();
+            ffmpegService.clearContinuousFolder();
+            // On ne redémarre pas ici, il redémarrera au premier signal START
+        }
     }
 
     public static synchronized DynamicRecordingService getInstance() {

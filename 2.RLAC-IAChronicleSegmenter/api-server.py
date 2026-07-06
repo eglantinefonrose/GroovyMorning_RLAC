@@ -92,16 +92,22 @@ def update_scheduler(hour, minute):
     schedule.clear()
     time_str = f"{int(hour):02d}:{int(minute):02d}"
     schedule.every().day.at(time_str).do(run_segmenter)
-    # On garde l'arrêt à 09:10 même si on change l'heure de début
-    schedule.every().day.at("09:10").do(stop_segmenter)
-    print(f"⏰ [Scheduler] Prochain segmenter programmé à {time_str}")
+    # Utilise END_TIME pour l'arrêt
+    schedule.every().day.at(END_TIME).do(stop_segmenter)
+    print(f"⏰ [Scheduler] Prochain segmenter programmé à {time_str} (Arrêt à {END_TIME})")
 
 # Initialisation du scheduler
-# Lancement à 06:58 et arrêt à 09:10
-schedule.every().day.at("06:58").do(run_segmenter)
-schedule.every().day.at("09:10").do(stop_segmenter)
+START_TIME = os.environ.get('START_TIME', '21:57')
+END_TIME = os.environ.get('END_TIME', '09:10')
+
+print(f"⏰ [Scheduler] Configuration : {START_TIME} -> {END_TIME}")
+print(f"🕒 [System] Heure actuelle du conteneur : {datetime.now().strftime('%H:%M:%S')}")
+
+schedule.every().day.at(START_TIME).do(run_segmenter)
+schedule.every().day.at(END_TIME).do(stop_segmenter)
 
 # Lancement du thread scheduler
+print("⏰ [Scheduler] Démarrage de la boucle de surveillance...")
 threading.Thread(target=scheduler_loop, daemon=True).start()
 
 @app.route('/api/updateSchedulerTime', methods=['POST'])
@@ -246,8 +252,7 @@ if __name__ == '__main__':
         os.environ['TARGET_DATE'] = args.date
         print(f"📅 Date forcée par argument: {args.date}")
 
-    if os.environ.get("SIMU", "").lower() == "true":
-        print("🧪 Mode SIMU détecté : Lancement immédiat pour test...")
-        run_segmenter()
+    # FORCE REMOVAL: No immediate run_segmenter() here.
+    # The segmenter MUST only start at START_TIME via the scheduler thread.
 
     socketio.run(app, host='0.0.0.0', port=args.port, debug=False, allow_unsafe_werkzeug=True)
