@@ -2,9 +2,10 @@ import json
 import os
 
 # Configuration des chemins
-TRANSCRIPT_FILE = "full_show_transcription.txt"
-DETECTIONS_FILE = "detections_output/detections_live_deepseek.json"
-OUTPUT_HTML = "viz.html"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TRANSCRIPT_FILE = os.path.join(BASE_DIR, "full_show_transcription.txt")
+DETECTIONS_FILE = os.path.join(BASE_DIR, "detections_output/detections_live_deepseek.json")
+OUTPUT_HTML = os.path.join(BASE_DIR, "html/viz.html")
 
 def generate_viz():
     # 1. Lire la transcription

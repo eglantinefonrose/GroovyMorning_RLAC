@@ -30,8 +30,9 @@ if not DEEPSEEK_API_KEY:
 
 # Global for signal handling
 ALL_DETECTIONS = []
-OUTPUT_JSON = "detections_live_deepseek.json"
-LOG_FILE = "session_log.txt"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUTPUT_JSON = os.path.join(BASE_DIR, "detections_live_deepseek.json")
+LOG_FILE = os.path.join(BASE_DIR, "session_log.txt")
 
 def signal_handler(sig, frame):
     print("\n[INFO] Interruption reçue. Sauvegarde des résultats...")
@@ -184,9 +185,10 @@ if __name__ == "__main__":
             process_stream(segment_gen, detector, validator, args.start_time, is_audio=False, dry_run=args.simu)
         else:
             # Par défaut, si rien n'est spécifié, on prend full_show_transcription.txt si il existe
-            if os.path.exists("full_show_transcription.txt"):
-                print("Utilisation par défaut de full_show_transcription.txt")
-                segment_gen = get_sentences_from_file("full_show_transcription.txt")
+            default_file = os.path.join(BASE_DIR, "full_show_transcription.txt")
+            if os.path.exists(default_file):
+                print(f"Utilisation par défaut de {default_file}")
+                segment_gen = get_sentences_from_file(default_file)
                 process_stream(segment_gen, detector, validator, args.start_time, is_audio=False, dry_run=args.simu)
             else:
                 parser.print_help()

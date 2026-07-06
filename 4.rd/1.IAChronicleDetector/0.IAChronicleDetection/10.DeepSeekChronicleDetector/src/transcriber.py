@@ -103,7 +103,7 @@ class Transcriber:
     def _find_kyutai_binary(self):
         # Chemins potentiels pour le binaire
         paths = [
-            Path(__file__).resolve().parent.parent.parent / "1.DataCreation/7.kyutai-VADDetection/delayed-streams-modeling/stt-rs/target/release/kyutai-stt-rs",
+            Path(__file__).resolve().parent.parent.parent.parent / "1.DataCreation/7.kyutai-VADDetection/delayed-streams-modeling/stt-rs/target/release/kyutai-stt-rs",
             Path("/usr/local/bin/kyutai-stt-rs"),
             Path("./kyutai-stt-rs")
         ]
@@ -133,64 +133,54 @@ class Transcriber:
             yield from self._transcribe_kyutai_stt(audio_path)
 
     def _transcribe_kyutai_stt(self, audio_path):
-        """Transcription via Transformers (stt-1b-en_fr) avec découpage en phrases pour DeepSeek."""
+        """Transcription via Transformers (stt-1b-en_fr) en une seule passe, sans découpage manuel en chunks de 60s."""
         import torch
         import librosa
         import re
-        print(f"[KYUTAI_STT] Début de la transcription (mode phrases) : {audio_path}")
+        print(f"[KYUTAI_STT] Début de la transcription (mode intégral) : {audio_path}")
         
         # Audio must be 24kHz
         audio, sr = librosa.load(audio_path, sr=24000)
-        total_duration = len(audio) / sr
         
-        # On utilise des segments de 60s pour la transcription (bon compromis VRAM/Contexte)
-        # Mais on va yield CHAQUE phrase individuellement.
-        chunk_size_s = 60.0 
-        chunk_samples = int(chunk_size_s * sr)
+        # On passe l'audio complet au processeur
+        inputs = self.processor(audio=audio, sampling_rate=sr, return_tensors="pt").to(self.device)
         
-        for i in range(0, len(audio), chunk_samples):
-            chunk = audio[i : i + chunk_samples]
-            if len(chunk) < sr * 0.5:
-                continue
-                
-            s_start = i / sr
-            
-            inputs = self.processor(audio=chunk, sampling_rate=sr, return_tensors="pt").to(self.device)
-            
-            # Calcul dynamique de max_new_tokens
-            try:
-                max_audio_frames = inputs["input_values"].shape[-1] // self.model.config.codec_config.frame_size
-                max_new_tokens = min(896, max_audio_frames) # Cap plus haut pour 60s
-            except:
-                max_new_tokens = 448
+        # Calcul dynamique de max_new_tokens basé sur la durée totale
+        try:
+            max_audio_frames = inputs["input_values"].shape[-1] // self.model.config.codec_config.frame_size
+            # On laisse une marge généreuse pour le texte
+            max_new_tokens = min(4096, max_audio_frames) 
+        except:
+            max_new_tokens = 2048
 
-            with torch.no_grad():
-                # On laisse le modèle générer la transcription complète du segment
-                output_tokens = self.model.generate(
-                    **inputs, 
-                    max_new_tokens=max_new_tokens,
-                    do_sample=False,
-                    num_beams=1
-                )
+        with torch.no_grad():
+            output_tokens = self.model.generate(
+                **inputs, 
+                max_new_tokens=max_new_tokens,
+                do_sample=False,
+                num_beams=1
+            )
+        
+        full_text = self.processor.batch_decode(output_tokens, skip_special_tokens=True)[0].strip()
+        
+        if full_text:
+            # On découpe le texte intégral en phrases pour le détecteur
+            sentences = re.split(r'(?<=[.!?])\s+', full_text)
             
-            full_text = self.processor.batch_decode(output_tokens, skip_special_tokens=True)[0].strip()
-            
-            if full_text:
-                # On découpe le texte du chunk en phrases réelles
-                # On utilise une regex pour splitter sur . ! ? suivi d'un espace
-                sentences = re.split(r'(?<=[.!?])\s+', full_text)
+            # Note: Le timing précis par phrase est difficile sans alignement temporel (forced alignment)
+            # On répartit le temps proportionnellement ou on reste sur une estimation simple.
+            total_duration = len(audio) / sr
+            for i, sentence in enumerate(sentences):
+                sentence = sentence.strip()
+                if len(sentence) < 3:
+                    continue
                 
-                for sentence in sentences:
-                    sentence = sentence.strip()
-                    if len(sentence) < 3:
-                        continue
-                        
-                    # Note: Le timing est approximatif à l'intérieur du chunk de 60s
-                    yield {
-                        "start": s_start,
-                        "end": s_start + chunk_size_s,
-                        "text": sentence
-                    }
+                # Estimation simple du timestamp
+                yield {
+                    "start": (i / len(sentences)) * total_duration if len(sentences) > 0 else 0,
+                    "end": ((i + 1) / len(sentences)) * total_duration if len(sentences) > 0 else total_duration,
+                    "text": sentence
+                }
 
     def _transcribe_kyutai_mlx(self, audio_path):
         import librosa
