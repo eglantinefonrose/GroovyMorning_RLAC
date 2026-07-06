@@ -23,9 +23,11 @@ from datetime import datetime
 try:
     from src.scraper import get_chroniques
     from src.deepseek_detector import DeepSeekDetector
+    from src.transcriber import Transcriber
 except ImportError:
     from scraper import get_chroniques
     from deepseek_detector import DeepSeekDetector
+    from transcriber import Transcriber
 
 warnings.filterwarnings('ignore')
 
@@ -110,35 +112,10 @@ class UnifiedLiveSegmenter:
         
         # Initialisation du moteur de transcription (Kyutai ou Whisper)
         self.use_kyutai = os.environ.get("USE_KYUTAI", "true").lower() == "true"
+        provider = os.environ.get("TRANSCRIPTION_PROVIDER", "kyutai_stt" if self.use_kyutai else "whisper")
         
-        if self.use_kyutai:
-            print(f"🚀 Chargement Kyutai STT (Streaming Mode)...")
-            try:
-                import torch
-                from transformers import pipeline
-                self.device = "cuda" if torch.cuda.is_available() else "cpu"
-                if self.device == "cpu" and os.uname().sysname == "Darwin": # Optimisation Mac Silicon
-                    self.device = "mps"
-                
-                self.stt_pipeline = pipeline(
-                    "automatic-speech-recognition",
-                    model="kyutai/stt-1b-en_fr",
-                    device=self.device,
-                    torch_dtype=torch.float16 if self.device != "cpu" else torch.float32
-                )
-                print("✅ Kyutai STT prêt.")
-            except ImportError:
-                print("❌ Erreur: Le module 'transformers' est manquant.")
-                print("   Veuillez l'installer avec: pip install transformers accelerate")
-                print("   Ou assurez-vous d'utiliser le bon environnement virtuel (ex: ./.venv/bin/python3)")
-                self.use_kyutai = False
-            except Exception as e:
-                print(f"❌ Erreur chargement Kyutai: {e}. Repli sur Whisper.")
-                self.use_kyutai = False
-
-        if not self.use_kyutai:
-            print(f"🚀 Chargement Whisper '{whisper_model}'...")
-            self.model = whisper.load_model(whisper_model)
+        print(f"🚀 Initialisation du transcripteur (Provider: {provider})...")
+        self.transcriber = Transcriber(model_size=whisper_model, provider=provider)
         
         print(f"✅ Système prêt. Chunk: {self.chunk_size} samples")
 
@@ -200,6 +177,7 @@ class UnifiedLiveSegmenter:
         
         if len(self.whisper_audio_accumulated) >= (accumulation_limit * self.sample_rate * 2):
             start_ts = self.total_samples_processed - (accumulation_limit * self.sample_rate)
+            print(f"📦 [Audio] Bloc de 2s prêt -> Envoi au worker")
             self.transcription_queue.put((bytes(self.whisper_audio_accumulated), start_ts))
             self.whisper_audio_accumulated = bytearray()
 
@@ -287,30 +265,28 @@ class UnifiedLiveSegmenter:
                 print("🏁 SÉQUENCE TERMINÉE !"); self.running = False
 
     def transcription_worker(self):
-        print(f"🧵 Worker transcription démarré ({'Kyutai' if self.use_kyutai else 'Whisper'})")
+        print(f"🧵 Worker transcription démarré (Provider: {self.transcriber.provider})")
         while self.running:
             try:
-                audio_data, start_samples = self.transcription_queue.get(timeout=1)
+                try:
+                    audio_data, start_samples = self.transcription_queue.get(timeout=1)
+                except queue.Empty:
+                    continue
+
+                # Conversion des octets en numpy array float32
+                audio_np = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / 32768.0
                 
-                text = ""
-                if self.use_kyutai:
-                    # Conversion des octets en numpy array float32
-                    audio_np = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / 32768.0
-                    # Appel Kyutai STT
-                    result = self.stt_pipeline(audio_np)
-                    text = result["text"].strip()
-                else:
-                    # Ancien mode Whisper
-                    temp_wav = f"/tmp/wh_{int(time.time())}.wav"
-                    with wave.open(temp_wav, 'wb') as wav:
-                        wav.setnchannels(1); wav.setsampwidth(2); wav.setframerate(self.sample_rate)
-                        wav.writeframes(audio_data)
-                    result = self.model.transcribe(temp_wav, language="fr", fp16=False)
-                    text = result["text"].strip()
-                    os.remove(temp_wav)
+                # Appel du transcripteur
+                print(f"🎤 [Worker] Début transcription bloc {start_samples/self.sample_rate:.1f}s...")
+                segments = self.transcriber.transcribe(audio_np)
+                print(f"✅ [Worker] Bloc traité ({len(segments)} segments trouvés)")
                 
-                if text:
-                    print(f"💬 Transcription ({'K' if self.use_kyutai else 'W'}): \"{text}\"")
+                for segment in segments:
+                    text = segment.get("text", "").strip()
+                    if not text:
+                        continue
+                        
+                    print(f"💬 Transcription ({self.transcriber.provider[0].upper()}): \"{text}\"")
                     
                     if self.detection_mode == "deepseek" and self.deepseek_detector:
                         # Analyse via DeepSeek
@@ -331,7 +307,9 @@ class UnifiedLiveSegmenter:
                             if target in self.normalize_text(text):
                                 self.on_detected(self.sequence[self.current_step], exact_time=start_samples / self.sample_rate, trigger_text=text)
             except Exception as e:
-                # print(f"Error in transcription worker: {e}")
+                print(f"❌ Erreur critique dans le worker de transcription: {e}")
+                import traceback
+                traceback.print_exc()
                 continue
 
     def fast_rolling_energy(self, signal_sq, window_len):
@@ -410,6 +388,10 @@ class UnifiedLiveSegmenter:
                         print("⚠️ Fin du flux live ou erreur ffmpeg.")
                         break
                 
+                # Heartbeat toutes les ~5 secondes (16000 samples/s * 5 / chunk_size)
+                if self.total_samples_processed % (self.sample_rate * 5) < self.chunk_size:
+                    print(f"💓 [Heartbeat] Lecture en cours... (Total: {self.total_samples_processed / self.sample_rate:.1f}s)")
+
                 chunk = np.frombuffer(raw_data, dtype=np.int16).astype(np.float32) / 32768.0
                 if len(chunk) > 0:
                     self.process_audio_chunk(chunk)

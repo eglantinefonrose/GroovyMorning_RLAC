@@ -104,11 +104,6 @@ schedule.every().day.at("09:10").do(stop_segmenter)
 # Lancement du thread scheduler
 threading.Thread(target=scheduler_loop, daemon=True).start()
 
-# SI on est en mode SIMU, on lance une première fois immédiatement pour tester
-if os.environ.get("SIMU", "").lower() == "true":
-    print("🧪 Mode SIMU détecté : Lancement immédiat pour test...")
-    run_segmenter()
-
 @app.route('/api/updateSchedulerTime', methods=['POST'])
 def api_update_scheduler_time():
     """Met à jour l'heure du scheduler via API"""
@@ -240,5 +235,19 @@ def status():
     })
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8001))
-    socketio.run(app, host='0.0.0.0', port=port, debug=False, allow_unsafe_werkzeug=True)
+    import argparse
+    parser = argparse.ArgumentParser(description="API Server for IA Chronicle Segmenter")
+    parser.add_argument("--date", help="Forcer la date pour le scrap (format: DD-MM-YYYY, ex: 27-05-2026)")
+    parser.add_argument("--simu", action="store_true", help="Activer le mode simulation (SIMU=true)")
+    parser.add_argument("--port", type=int, default=int(os.environ.get('PORT', 8001)), help="Port du serveur (défaut: 8001)")
+    args = parser.parse_args()
+
+    if args.date:
+        os.environ['TARGET_DATE'] = args.date
+        print(f"📅 Date forcée par argument: {args.date}")
+
+    if os.environ.get("SIMU", "").lower() == "true":
+        print("🧪 Mode SIMU détecté : Lancement immédiat pour test...")
+        run_segmenter()
+
+    socketio.run(app, host='0.0.0.0', port=args.port, debug=False, allow_unsafe_werkzeug=True)
