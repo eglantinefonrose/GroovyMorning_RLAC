@@ -1348,3 +1348,172 @@ Traitement phrase 1279: Vous savez pourquoi ?
 Traitement phrase 1280: Parce que je pense que tout le monde doit se préparer.
 Traitement phrase 1281: Parce que cette élection est fondamentale.
 Traitement phrase 1282: On joue l'avenir de notre nation.
+Traitement phrase 1283: Je ne laisserai pas la France basculer dans le camp du poutinisme, dans le camp du trumpisme, dans le camp de la xénophobie.
+Traitement phrase 1284: Et nous sommes l'alternative.
+Traitement phrase 1285: Nous allons gagner cette élection.
+Traitement phrase 1286: Et j'aimerais convaincre les électrices et les électeurs de gauche.
+Traitement phrase 1287: On va s'arrêter là.
+Traitement phrase 1288: On n'y va pas pour être premier à gauche.
+Traitement phrase 1289: Ça ne m'intéresse pas.
+Traitement phrase 1290: On ira pour gagner l'élection.
+Traitement phrase 1291: Et transformer la France.
+Traitement phrase 1292: Faire en sorte qu'elle ait...
+Traitement phrase 1293: Bien compris, Raphaël.
+Traitement phrase 1294: Elle soit à nouveau cette promesse de justice, à celles et ceux qui ont besoin de la politique pour vivre.
+Traitement phrase 1295: Parce qu'ils sont victimes des inégalités.
+Traitement phrase 1296: Et c'est cela la clé de tout.
+Traitement phrase 1297: Ma volonté est inébranlable.
+Traitement phrase 1298: Il faut s'arrêter.
+Traitement phrase 1299: Bien menter, je serai de veuille.
+Traitement phrase 1300: Merci Raphaël Glucksman d'être venu au micro d'Inter ce matin.
+Traitement phrase 1301: La revue de presse.
+Traitement phrase 1302: Merci à vous.
+Traitement phrase 1303: Chez Orange Pro, on sait que quand on est pro, il faut toujours rester pro.
+Traitement phrase 1304: Sauf que pour ça, il faut être bien équipé.
+Traitement phrase 1305: Et ça peut vite coûter cher.
+Traitement phrase 1306: C'est pour ça que votre vie de pro mérite Orange Pro.
+Traitement phrase 1307: Avec Open Pro Fibre, faites des économies en regroupant vos services internet fixes et mobiles.
+Traitement phrase 1308: Et quand vous êtes créateur d'entreprise, profitez de moins 30% pendant un an.
+Traitement phrase 1309: Orange est là.
+Traitement phrase 1310: Open Pro avec engagement 24 mois.
+Traitement phrase 1311: Remise réservée aux créateurs d'entreprise de moins de 24 mois en métropole.
+Traitement phrase 1312: Conditions et détails sur orangepro.fr.
+Traitement phrase 1313: 8h48, bienvenue à Nora Hamadi Mathilde Serrel.
+[DÉTECTION] 🔔 Dans l'œil de | VALIDÉ | 08:47 (+1 min)
+Reasoning: La phrase donne l'heure 8h48, coincidant avec la chronique 'Dans l'œil de' programmée à 8h46. Le 'bienvenue à' indique un lancement immédiat, pas une annonce future.
+Traitement phrase 1314: Mozimane et Sonia de Villers qui prend la suite à partir de 9h.
+Traitement phrase 1315: Et vous recevez qui ce matin Sonia ?
+Traitement phrase 1316: Le capitaine Nicolas Bro, ancien commandant des troupes de montagne de la Légion étrangère.
+Traitement phrase 1317: Nouvelle coqueluche des réseaux sociaux.
+Traitement phrase 1318: Son livre s'intitule « Donnez l'ordre, ne suffit pas.
+Traitement phrase 1319: Sa conviction.
+Traitement phrase 1320: Commander n'est pas ordonné.
+Traitement phrase 1321: À grand portrait à 9h.
+Traitement phrase 1322: France Inter.
+Traitement phrase 1323: La grande matinale.
+Traitement phrase 1324: La revue de presse dans l'œil de Nora Hamadi.
+Traitement phrase 1325: Nora, c'est une fronde inhabituelle.
+Traitement phrase 1326: Rue Saint-Guillaume.
+Traitement phrase 1327: Ce vendredi, c'est un Sénat académique convoqué en urgence qui doit se tenir à Sciences Po.
+Traitement phrase 1328: Convoqué par la présidente.
+Traitement phrase 1329: membre du conseil scientifique de l'établissement, cette instance risque d'acter un divorce inédit entre le corps professoral de l'institution de la rue Saint-Guillaume et son directeur Louise Vassi et c'est le monde qui raconte fin avril.
+Traitement phrase 1330: 145 professeurs et chercheurs sur les 272 que compte l'établissement ont adressé un communiqué évoquant une escalade de la répression de la part du directeur et fustigeant son mode de gouvernance unilatérale.
+Traitement phrase 1331: Une réaction à des sanctions inédites vis-à-vis de 76 étudiants condamnés à une contravention de 400 euros, inscrite à leur casier judiciaire.
+Traitement phrase 1332: Suite à une manifestation contre la loi de la députée Renaissance, Caroline Yadan, visant à lutter contre les formes renouvelées de l'antisémitisme.
+Traitement phrase 1333: Le directeur ne comprend pas que gérer des étudiants ce n'est pas comme gérer une manifestation devant le stade de France avec des hooligans, commente un signataire anonyme.
+Traitement phrase 1334: Comme les nombreux interlocuteurs du journal qui disent craindre intimidation et représailles.
+Traitement phrase 1335: Déjà, hier, l'ancien diplomate et énarque issu de la même promotion qu'Emmanuel Macron faisait l'objet d'une enquête dans une double page de libération.
+Traitement phrase 1336: Ça gronde en interne, irrévou sur le
+Traitement phrase 1337: sur le site du journal et pas que chez les étudiants.
+Traitement phrase 1338: Le directeur de Sciences Po contacté, lui, se défend quand vous bloquez un amphithéâtre, vous empêchez les autres de travailler.
+Traitement phrase 1339: Il est de mon devoir de prendre les mesures nécessaires.
+Traitement phrase 1340: On me reproche d'avoir fait mon travail, on veut juste m'atteindre, c'est politique.
+Traitement phrase 1341: D'ailleurs, leur communiqué est radical.
+Traitement phrase 1342: Lisez plutôt les mobilisations sont partie intégrante de la formation intellectuelle et citoyenne des étudiants.
+Traitement phrase 1343: Et c'est une nouvelle secousse tellurique d'un séisme qui agite les institutions universitaires.
+Traitement phrase 1344: En mars 2024, Gabriel Attal, souvenez-vous, s'était invité au conseil d'administration de la Fondation nationale des sciences politiques pour dénoncer une dérive liée à une minorité agissante et dangereuse à Sciences Po.
+Traitement phrase 1345: Après l'occupation d'un amphithéâtre rebaptisé Gaza.
+Traitement phrase 1346: Depuis, les portraits du directeur ont fleuri dans le Figaro, le Point, les Echos et dessinent l'image d'un maître, je cite, selon les termes de l'économiste Julia Cagé, comme si l'institution avait eu besoin d'être reprise en main, dit-elle.
+Traitement phrase 1347: C'est aussi la confrontation de deux visions.
+Traitement phrase 1348: Louise Vassi, qui dispense aussi un cours de diplôme.
+Traitement phrase 1349: nomomatie dont les évaluations sont d'ailleurs excellentes, nous apprend le monde, veut créer un nouveau pôle dédié aux relations internationales.
+Traitement phrase 1350: Quand le CERI, le centre d'étude consacré à ces questions, existe déjà.
+Traitement phrase 1351: Et sur les enjeux internationaux, ce sont deux traditions académiques, voire deux visions du monde qui s'affrontent ici.
+Traitement phrase 1352: Faut-il faire la part belle à la géopolitique qui pense, depuis les nations et leurs décideurs, ou celle plus ancrée à gauche qui laisse la place aux sciences sociales ?
+Traitement phrase 1353: Bertrand Baddy, professeur des universités, est un tenant de la seconde pratique et défend cette tradition française.
+Traitement phrase 1354: L'approche de Louise Vassy est un retour au temps de Raymond Aron et de son diptique, du soldat et du diplomate, dit-il.
+Traitement phrase 1355: On voit aujourd'hui, avec les conflits actuels par exemple en Iran, à quel point ignorer ces paramètres anthropologiques et sociétaux et dévastateurs.
+Traitement phrase 1356: Là encore, le directeur rassure, les deux centres continueront à exister ensemble.
+Traitement phrase 1357: Et puis, comment lire la fin de ce cours intitulé « Comprendre et contenir la guerre totale au XXIe siècle ?
+Traitement phrase 1358: », qui propose une approche critique des questions de défense.
+Traitement phrase 1359: Quand des représentants des…
+Traitement phrase 1360: des industriels français de la défense sont invités en même temps à plancher sur un projet de think tank autour des war studies, l'étude des guerres.
+Traitement phrase 1361: Et tant pis pour le conflit d'intérêt et la dépendance financière.
+Traitement phrase 1362: Ce qu'il faut lire dans cette petite guerre de sécession, c'est aussi le reflet de notre époque.
+Traitement phrase 1363: Une époque où la défiance vis-à-vis des sciences sociales est désormais assumée.
+Traitement phrase 1364: Ces empêcheuses de penser le monde en rond, lirez-vous dans une tribune de Jean-François Bayard, ancien directeur du CERI qui fustige par ailleurs un exercice du pouvoir vertical, étranger au principe de collégialité qui régit l'université.
+Traitement phrase 1365: Nora, on parle aussi d'une affaire de style, de management.
+Traitement phrase 1366: Le style vassy est autoritaire, vertical, hautain, cassant, lirez-vous dans le monde des libérations.
+Traitement phrase 1367: Comme ce jour où il a lancé à ses collègues, quel est votre utilité ?
+Traitement phrase 1368: Raconte une enseignante à Lucas Bretonnier dans Libération.
+Traitement phrase 1369: Pour aller au bout de son projet, le directeur de Sciences Po imposerait des personnalités de son choix et frênerait celle qu'il perçoit comme de possible entrave à sa stratégie, écrit Soisic le Névé dans le Monde.
+Traitement phrase 1370: Ainsi, la directrice du département de Sciences Politiques, Réjeanne Sénac, a dû attendre quatre mois.
+Traitement phrase 1371: mois avant d'être officiellement nommé, mais le très médiatique Hugo Michelon a été désigné professeur associé contre l'avis du conseil scientifique.
+Traitement phrase 1372: En attendant, fin avril, le New York Times vantait l'attractivité de Sciences Po Paris auprès des jeunes américains.
+Traitement phrase 1373: Les mécènes sont revenus, le résultat net de l'école a gagné 2 millions d'euros.
+Traitement phrase 1374: En 2025, Eloise Vassi a touché près de 40 000 euros de primes, 39 899 selon le canard enchaîné cité par Libération.
+Traitement phrase 1375: En plus des 205 000 annuels de salaire fixe, la prime inclut des critères de réputation de l'école et son rayonnement dans la presse.
+Traitement phrase 1376: Nous apprend Libération.
+Traitement phrase 1377: Mais au sein de l'école, les troupes s'épuisent.
+Traitement phrase 1378: Plusieurs cas de burnout ont été recensés.
+Traitement phrase 1379: Selon les salariés et les augmentations ont tardé, 180 employés de l'établissement ont manifesté sous les fenêtres du directeur en avril.
+Traitement phrase 1380: Là aussi, c'est une première dans l'histoire de l'école.
+Traitement phrase 1381: Cela fait presque deux ans que le directeur fait vivre toute la communauté sur le thème de la crise.
+Traitement phrase 1382: Cela n'est pas tenable dans la durée, souffle un salarié.
+Traitement phrase 1383: Et sinon, dans le Parisien ce matin, comme un contrefeu à ces enquêtes qui prennent l'allure d'un mauvais feuilleton, Louise Vassi annonce…
+Traitement phrase 1384: que 25 nouveaux lycées situés en réseau d'éducation prioritaire, intègrent le dispositif CEP, Convention d'éducation prioritaire.
+Traitement phrase 1385: Un dispositif instauré en 2001 par l'ancien directeur Richard Descoins.
+Traitement phrase 1386: Ce programme permet à des élèves issus d'établissements moins favorisés d'intégrer plus facilement l'institution de la rue Saint-Guillaume.
+Traitement phrase 1387: À Libération, le directeur qui comprend mal les critiques se dit satisfait du chemin parcouru et lâche un « bah tout va si bien, peut-être faut-il entendre dans un petit jupitérisme circulé, il n'y a rien à voir ».
+Traitement phrase 1388: Merci Nora Madi et vous voilà.
+Traitement phrase 1389: Mathilde Serrel pour un mot de nouveau ce matin.
+Traitement phrase 1390: Un monde ou un concert, ça se mérite.
+Traitement phrase 1391: Je vais vous raconter l'histoire d'une fausse solution.
+[DÉTECTION] 🔔 Un monde nouveau | VALIDÉ | 08:53 (+1 min)
+Reasoning: Phrase directe annonçant le début d'une chronique, sans référence temporelle future. Le contexte précédent évoque 'Un monde ou un concert, ça se mérite' et 'Mathilde Serrel pour un mot de nouveau', ce qui suggère une transition vers 'Un monde nouveau'.
+Traitement phrase 1392: Sur le diagnostic, tout le monde est d'accord, tenté d'acheter des places pour le concert de son artiste préféré, par exemple Ozyman à l'accord à Rena.
+Traitement phrase 1393: C'est devenu un enfer, une source d'angoisse moderne parce qu'il ne s'agit plus seulement de faire la queue, mais de se battre contre des bots, des robots qui assaillent les sites de billeterie.
+Traitement phrase 1394: Alors les fans humains n'ont plus qu'à se faire enfler dans les circuits de revente.
+Traitement phrase 1395: scandale et désarroi.
+Traitement phrase 1396: Pour mémoire, en France, la file d'attente en ligne pour le concert de Bad Bunny a été prise d'assaut par près de 500 000 connectés.
+Traitement phrase 1397: Pour le retour de Céline Dion à la Défense Arena, c'était jusqu'à 1,9 million.
+Traitement phrase 1398: Simultanément.
+Traitement phrase 1399: Non, ça n'est pas une vie de fan.
+Traitement phrase 1400: Alors qu'on était là à écouter les chansons en boucle et connaître les paroles par cœur, sans parler des faux fans, experts en décrochage de timbales en ligne, avant de frimer à coups de stories Instagram.
+Traitement phrase 1401: Tout ça, c'est fini.
+Traitement phrase 1402: Prenez la plateforme d'écoute Spotify.
+Traitement phrase 1403: Grâce au nouveau système, Reserved, qui vient d'être annoncé lors de la Journée des Investisseurs, avec ce slogan « Vous connaissez chaque chanson, nous vous avons gardé deux billets ».
+Traitement phrase 1404: Et on a envie de savoir comment ça marche.
+Traitement phrase 1405: Je vais dire deux billets pour tous les abonnés.
+Traitement phrase 1406: Ça ne fait pas beaucoup.
+Traitement phrase 1407: Chacun a droit à deux billets.
+Traitement phrase 1408: En fait, les heureux, les heureux élus.
+Traitement phrase 1409: Ils vont avoir des critères de sélection en fonction du nombre d'écoutes d'un artiste, de la diversité des titres streamés dans son répertoire et de ce que cette personne, cet auditeur, a mis de côté dans ses playlists.
+Traitement phrase 1410: ensuite, pendant une heure, vous aurez donc accès en priorité sans galérer à deux billets réservés pour vous, qu'il n'y a plus qu'à acheter sur l'un des prestataires partenaires de Spotify qui en réalité est déjà un opérateur intermédiaire pour les concerts.
+Traitement phrase 1411: Ah, j'oubliais, assurez-vous d'avoir la géolocalisation activée, il faudrait être sur le passage de la tournée de votre artiste préféré pour avoir le droit de prendre vos tickets sur l'une des dates.
+Traitement phrase 1412: Spotify prend les fans par les sentiments et il se sent enfin reconnu, validé, vérifié et ils ont là presque garantie d'être récompensés, slogan numéro 2, vous êtes là pour l'artiste, Spotify est là pour vous.
+Traitement phrase 1413: Sauf qu'il est précisé qu'il n'en aura pas pour tous les superfans et qu'il faut avoir son abonnement premium, bien sûr la passion ça se paye et puis tant pis pour ceux qui écoutent les artistes en dehors de Spotify par exemple, en vinil, en CD, sans parler des autres plateformes qui ne tarderont pas à proposer des systèmes similaires ou bien d'abonnements, faudra-t-il alors pour avoir ce genre d'excès et faut-il écouter un artiste en boucle pour gagner le droit d'élase ?
+Traitement phrase 1414: son concert, quid de la découverte, et qu'est-ce qui garantit que d'autres hordes de bottes ne viendront pas faire tourner des titres en boucle pour obtenir les fameux tickets réservés ?
+Traitement phrase 1415: Pendant ce temps-là, ce sont toutes les données de nos parcours et habitudes d'écoute qui sont valorisées, avec la fonction géolocalisation qui vaut de l'or, il faut le dire, des informations sur les fans les plus engagés, une mine d'or, sous des airs de justicier pour fans, on fait de la donnée personnelle, une monnaie d'échange.
+Traitement phrase 1416: On n'est pas rendu, le fin mot de l'histoire ?
+Traitement phrase 1417: A votre avis dans cette histoire, qui s'en sort le mieux ?
+Traitement phrase 1418: Les artistes, les fans, ou la plateforme ?
+Traitement phrase 1419: Je pense que vous avez la réponse.
+Traitement phrase 1420: Tout à fait, merci Mathilde Serrel.
+Traitement phrase 1421: par WhatsApp Voco en fois deux, mais est-ce qu'on s'écoute encore vraiment ?
+Traitement phrase 1422: Parce qu'au milieu de ce scroll d'infini d'informations, des personnages qu'on finit parfois par fabriquer malgré nous, je crois qu'on n'a jamais eu autant besoin de quelque chose de vrai, d'un ami, quelqu'un capable de voir immédiatement que notre Sava veut pas vraiment dire Sava.
+Traitement phrase 1423: Parce qu'un ami c'est pas quelqu'un qui nous ressemble, c'est même pas forcément quelqu'un qui partage nos goûts ou nos idées, mais quelqu'un qui ose nous dire les choses.
+Traitement phrase 1424: Les choses que personne d'autre nous dit.
+Traitement phrase 1425: Quand on plat et raté, total, quand t'es pas avec la bonne personne, et quand il est temps de se remettre au sport.
+Traitement phrase 1426: Alors moi je pense, vous savez, qu'on devrait avoir tous une carte amie.
+Traitement phrase 1427: Une espèce de carte virtuelle qu'on pourrait sortir à n'importe quel moment.
+Traitement phrase 1428: Alors pas pour avoir des privilèges, mais juste pour dire là, là j'ai besoin de toi.
+Traitement phrase 1429: Ça peut être pour un déménagement dimanche matin, pour garder un chien, nourrir un chat pendant quelques jours, ou même venir nous chercher quelque part sans poser de questions.
+Traitement phrase 1430: Parce qu'au fond, les plus grandes preuves d'amitié sont rarement spectaculaires.
+Traitement phrase 1431: Ce sont souvent juste des gens qui restent.
+Traitement phrase 1432: Et peut-être que c'est pour ça aussi que les ruptures amicales sont devenues un sujet tabou.
+Traitement phrase 1433: comme s'y perdre un ami faisait moins mal que juste une histoire d'amour.
+Traitement phrase 1434: Alors que parfois c'est pire.
+Traitement phrase 1435: On grandit avec des gens qu'on pensait voir vieillir, et puis un jour la vie les éloigne doucement, juste comme ça.
+Traitement phrase 1436: En revanche, là où c'est magique, c'est le jour où sans vraiment savoir pourquoi on se retrouve en FaceTime avec son pote, et on passe de « c'est le copain de papa » à « c'est tonton Mosey ».
+Traitement phrase 1437: Tonton Mosey.
+Traitement phrase 1438: Ce jour-là j'ai compris une chose.
+Traitement phrase 1439: Un vrai ami, c'est juste un frère que le sang a oublié.
+Traitement phrase 1440: Alors ce matin, exceptionnellement pour vous je vais utiliser ma carte ami.
+Traitement phrase 1441: Pas pour demander un service, pas pour un déménagement, ni même pour garder un chien.
+Traitement phrase 1442: Juste pour vous parler d'un artiste que j'aime énormément.
+Traitement phrase 1443: Un artiste qui montra sur la scène de l'Olympia le 17 avril 2027.
+Traitement phrase 1444: Ce matin je vous présente mon ami, Kemler.
+Traitement phrase 1445: Bonjour c'est Mosey Man et je produis le track de vos rêves.
+Traitement phrase 1446: Sur France Inter.
+Traitement phrase 1447: Et vous a reconnu au refrain Moziman, merci, merci Florence, tonton Mozi, tonton Mozi, dans un instant les infos et la suite de la grande matinale.

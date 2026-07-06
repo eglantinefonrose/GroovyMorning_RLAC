@@ -36,3 +36,4 @@ Chaque méthode doit produire un fichier JSON contenant une liste de détections
 - **Latence** : Différence entre le moment de la détection (`detected_at`) et le début réel de la chronique.
 - **Score Global** : Combinaison pondérée de l'IoU et de la Latence.
 
+--label-agnostic

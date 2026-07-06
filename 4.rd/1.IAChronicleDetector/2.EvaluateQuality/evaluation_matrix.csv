@@ -1,6 +1,6 @@
 Method,27-05-2026.m4a,Nom du dossier de résultats
 live_transcription,0.00,6.LiveTranscriptionStartAndEndDetection
-deepseek,0.00,10.DeepSeekChronicleDetector
+deepseek,67.10,10.DeepSeekChronicleDetector
 audio_pretrained,38.09,5.MachineLearningAudio-PretrainedModel
 ml_audio,7.69,1.MachineLearningAudio
 hybrid,29.61,3.MachineLearningTranscription-Hybrid
