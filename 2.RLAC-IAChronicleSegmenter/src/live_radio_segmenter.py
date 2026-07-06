@@ -389,8 +389,8 @@ class UnifiedLiveSegmenter:
                         break
                 
                 # Heartbeat toutes les ~5 secondes (16000 samples/s * 5 / chunk_size)
-                if self.total_samples_processed % (self.sample_rate * 5) < self.chunk_size:
-                    print(f"💓 [Heartbeat] Lecture en cours... (Total: {self.total_samples_processed / self.sample_rate:.1f}s)")
+                # if self.total_samples_processed % (self.sample_rate * 5) < self.chunk_size:
+                #     print(f"💓 [Heartbeat] Lecture en cours... (Total: {self.total_samples_processed / self.sample_rate:.1f}s)")
 
                 chunk = np.frombuffer(raw_data, dtype=np.int16).astype(np.float32) / 32768.0
                 if len(chunk) > 0:
