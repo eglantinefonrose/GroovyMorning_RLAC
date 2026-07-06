@@ -107,6 +107,7 @@ public class RLACServerAPI {
         }));
 
         WebSocketClientService.getInstance(); // Initialize WS connection
+        DynamicRecordingService.getInstance(); // Initialize and trigger startup cleanup
 
         server.start();
         logger.info("========================================");

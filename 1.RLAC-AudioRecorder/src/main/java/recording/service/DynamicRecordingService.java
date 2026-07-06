@@ -27,6 +27,10 @@ public class DynamicRecordingService {
         this.ffmpegService = new FFmpegService();
         this.chroniclesManagerService = ChroniclesManagerService.getInstance();
         
+        // Vider le dossier media/continuous au démarrage (Docker compose)
+        logger.info("🚀 Startup: Clearing media/continuous directory...");
+        ffmpegService.clearContinuousFolder();
+
         // Planifier un nettoyage quotidien 5 minutes avant l'heure de base par défaut (ex: 06:55)
         scheduler.scheduleAtFixedRate(this::checkDailyCleanup, 1, 1, TimeUnit.MINUTES);
     }
