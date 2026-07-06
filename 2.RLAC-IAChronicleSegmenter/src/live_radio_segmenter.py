@@ -172,12 +172,13 @@ class UnifiedLiveSegmenter:
         pcm_chunk = (chunk * 32768).astype(np.int16).tobytes()
         self.whisper_audio_accumulated.extend(pcm_chunk)
         
-        # Réduire l'accumulation à 2s pour Kyutai (plus réactif) au lieu de 5s
-        accumulation_limit = 2 if self.use_kyutai else 5
+        # On envoie l'audio vers la file d'attente de transcription par plus petits blocs (ex: 0.5s)
+        # pour permettre une plus grande réactivité du flux continu
+        accumulation_limit = 0.5
         
         if len(self.whisper_audio_accumulated) >= (accumulation_limit * self.sample_rate * 2):
             start_ts = self.total_samples_processed - (accumulation_limit * self.sample_rate)
-            print(f"📦 [Audio] Bloc de 2s prêt -> Envoi au worker")
+            # print(f"📦 [Audio] Chunk de 0.5s envoyé")
             self.transcription_queue.put((bytes(self.whisper_audio_accumulated), start_ts))
             self.whisper_audio_accumulated = bytearray()
 
@@ -265,52 +266,51 @@ class UnifiedLiveSegmenter:
                 print("🏁 SÉQUENCE TERMINÉE !"); self.running = False
 
     def transcription_worker(self):
-        print(f"🧵 Worker transcription démarré (Provider: {self.transcriber.provider})")
-        while self.running:
-            try:
+        print(f"🧵 Worker transcription démarré (Mode CONTINU, Provider: {self.transcriber.provider})")
+        
+        def audio_stream_generator():
+            """Générateur qui puise dans la queue de transcription"""
+            while self.running:
                 try:
-                    audio_data, start_samples = self.transcription_queue.get(timeout=1)
+                    audio_bytes, start_samples = self.transcription_queue.get(timeout=1)
+                    audio_np = np.frombuffer(audio_bytes, dtype=np.int16).astype(np.float32) / 32768.0
+                    yield audio_np
                 except queue.Empty:
                     continue
 
-                # Conversion des octets en numpy array float32
-                audio_np = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / 32768.0
+        try:
+            # On lance le flux de transcription continu
+            for segment in self.transcriber.stream_transcribe(audio_stream_generator()):
+                text = segment.get("text", "").strip()
+                if not text:
+                    continue
                 
-                # Appel du transcripteur
-                print(f"🎤 [Worker] Début transcription bloc {start_samples/self.sample_rate:.1f}s...")
-                segments = self.transcriber.transcribe(audio_np)
-                print(f"✅ [Worker] Bloc traité ({len(segments)} segments trouvés)")
+                # Le temps actuel est approximatif en mode continu, on utilise le compteur global
+                current_time_sec = self.total_samples_processed / self.sample_rate
+                print(f"💬 Transcription (CONTINUE): \"{text}\"")
                 
-                for segment in segments:
-                    text = segment.get("text", "").strip()
-                    if not text:
-                        continue
-                        
-                    print(f"💬 Transcription ({self.transcriber.provider[0].upper()}): \"{text}\"")
+                if self.detection_mode == "deepseek" and self.deepseek_detector:
+                    # Analyse via DeepSeek
+                    res = self.deepseek_detector.analyze_sentence(text, self.context_buffer, current_time_sec=current_time_sec)
+                    if res.get("detecte"):
+                        chronicle_name = res.get("chronique")
+                        self.on_detected({"name": chronicle_name, "type": "ai"}, exact_time=current_time_sec, trigger_text=text)
                     
-                    if self.detection_mode == "deepseek" and self.deepseek_detector:
-                        # Analyse via DeepSeek
-                        current_time_sec = start_samples / self.sample_rate
-                        res = self.deepseek_detector.analyze_sentence(text, self.context_buffer, current_time_sec=current_time_sec)
-                        if res.get("detecte"):
-                            chronicle_name = res.get("chronique")
-                            self.on_detected({"name": chronicle_name, "type": "ai"}, exact_time=current_time_sec, trigger_text=text)
+                    # Mise à jour du buffer de contexte
+                    self.context_buffer.append(text)
+                    if len(self.context_buffer) > self.max_context:
+                        self.context_buffer.pop(0)
                         
-                        # Mise à jour du buffer de contexte
-                        self.context_buffer.append(text)
-                        if len(self.context_buffer) > self.max_context:
-                            self.context_buffer.pop(0)
-                            
-                    elif self.detection_mode == "legacy":
-                        if self.current_step < len(self.sequence) and self.sequence[self.current_step]["type"] == "keyword":
-                            target = self.normalize_text(self.sequence[self.current_step]["target"])
-                            if target in self.normalize_text(text):
-                                self.on_detected(self.sequence[self.current_step], exact_time=start_samples / self.sample_rate, trigger_text=text)
-            except Exception as e:
-                print(f"❌ Erreur critique dans le worker de transcription: {e}")
-                import traceback
-                traceback.print_exc()
-                continue
+                elif self.detection_mode == "legacy":
+                    if self.current_step < len(self.sequence) and self.sequence[self.current_step]["type"] == "keyword":
+                        target = self.normalize_text(self.sequence[self.current_step]["target"])
+                        if target in self.normalize_text(text):
+                            self.on_detected(self.sequence[self.current_step], exact_time=current_time_sec, trigger_text=text)
+
+        except Exception as e:
+            print(f"❌ Erreur critique dans le worker de transcription continue: {e}")
+            import traceback
+            traceback.print_exc()
 
     def fast_rolling_energy(self, signal_sq, window_len):
         """Calcul de l'énergie glissante optimisé."""

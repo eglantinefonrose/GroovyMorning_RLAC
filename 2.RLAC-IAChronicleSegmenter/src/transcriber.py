@@ -120,6 +120,69 @@ class Transcriber:
                 return str(p)
         return "kyutai-stt-rs" # Espérer qu'il soit dans le PATH
 
+    def stream_transcribe(self, audio_generator, target_sr=24000):
+        """
+        Consomme un générateur d'audio et yield des segments de texte dès qu'ils sont prêts.
+        """
+        if self.provider == "kyutai_stt":
+            import torch
+            import librosa
+            import re
+
+            # On accumule un peu d'audio pour avoir un contexte minimal (ex: 1s)
+            # mais on laisse le modèle gérer la suite
+            pending_audio = np.array([], dtype=np.float32)
+            
+            for chunk in audio_generator:
+                # Chunk est déjà en float32 à 16kHz
+                # Rééchantillonnage si nécessaire
+                if target_sr != 16000:
+                    chunk = librosa.resample(chunk, orig_sr=16000, target_sr=target_sr)
+                
+                pending_audio = np.concatenate([pending_audio, chunk])
+                
+                # On traite par blocs de ~2-3 secondes pour Kyutai STT (Transformers)
+                # car ce modèle spécifique n'est pas "purement" streaming comme la version MLX
+                # mais on peut optimiser en ne le faisant que s'il y a assez de données
+                if len(pending_audio) >= (3 * target_sr):
+                    inputs = self.processor(audio=pending_audio, sampling_rate=target_sr, return_tensors="pt").to(self.device)
+                    
+                    with torch.no_grad():
+                        output_tokens = self.model.generate(**inputs, max_new_tokens=1024, do_sample=False)
+                    
+                    full_text = self.processor.batch_decode(output_tokens, skip_special_tokens=True)[0].strip()
+                    
+                    if full_text:
+                        # On cherche la dernière ponctuation pour garder le reste en contexte
+                        # car la phrase n'est peut-être pas finie
+                        match = re.search(r'([^.!?]+[.!?])\s*([^.!?]*)$', full_text)
+                        if match:
+                            completed_sentence = match.group(1).strip()
+                            remainder = match.group(2).strip()
+                            yield {"text": completed_sentence}
+                            
+                            # On vide le buffer audio proportionnellement à ce qu'on a transcrit
+                            # C'est approximatif mais ça évite les répétitions
+                            # Kyutai STT 1B gère environ 15-20 char/sec
+                            processed_sec = len(completed_sentence) / 15.0
+                            samples_to_keep = int(max(0, len(pending_audio) - (processed_sec * target_sr)))
+                            pending_audio = pending_audio[-samples_to_keep:]
+                        elif len(pending_audio) > (10 * target_sr):
+                            # Si on a 10s sans ponctuation, on force tout et on vide
+                            yield {"text": full_text}
+                            pending_audio = np.array([], dtype=np.float32)
+
+        elif self.provider == "kyutai_mlx":
+            # Le mode MLX est déjà naturellement streaming
+            for chunk in audio_generator:
+                for segment in self._transcribe_kyutai_mlx(chunk):
+                    yield segment
+        else:
+            # Fallback simple pour les autres (Whisper...)
+            for chunk in audio_generator:
+                for segment in self.transcribe(chunk):
+                    yield segment
+
     def transcribe(self, audio_input, language="fr"):
         """
         Transcrit l'audio (chemin de fichier ou numpy array) et renvoie les segments.
