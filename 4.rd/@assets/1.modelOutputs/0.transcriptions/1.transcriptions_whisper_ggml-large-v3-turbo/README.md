@@ -6,7 +6,7 @@ whisper_ggml-large-v3-turbo
 
 ## Command used
 ```bash
-export PRTLABS_HOME=/Users/eglantine/Dev/0.perso/2.Proutechos
+export PRTLABS_HOME=/path/to/your/projects/2.Proutechos
 export MODEL_BASEPATH=${PRTLABS_HOME}/9.GroovyMorning/4.rd/@assets/whisper.cpp/models
 export ASSET_BASEPATH=${PRTLABS_HOME}/9.GroovyMorning/4.rd/@assets
 export TRANSCRIPTION_BASEPATH=${PRTLABS_HOME}/9.GroovyMorning/4.rd/@assets/transcriptions/1.transcriptions_whisper_ggml-large-v3-turbo

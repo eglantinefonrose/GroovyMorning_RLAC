@@ -1,0 +1,37 @@
+name: Docker Build Check
+
+on:
+  push:
+    branches: [ main, master, 2026_07_07_GitHubRelease ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Java Backend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./1.RLAC-AudioRecorder
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build Python Segmenter
+        uses: docker/build-push-action@v4
+        with:
+          context: ./2.RLAC-IAChronicleSegmenter
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Test Docker Compose Build
+        run: |
+          cp .env.example .env
+          docker compose build

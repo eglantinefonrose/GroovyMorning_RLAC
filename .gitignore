@@ -44,3 +44,6 @@
 2.RLAC-IAChronicleSegmenter/.env
 2.RLAC-IAChronicleSegmenter/.env
 .env
+local.properties
+xcuserdata/
+*.xcuserstate

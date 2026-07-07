@@ -3,10 +3,11 @@ import os
 import glob
 
 # Configuration des chemins
-TRANSCRIPT_FILE = "full_show_transcription.txt"
-DETECTIONS_FILE = "detections_live.json"
-GT_DIR = "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/@assets/1.modelOutputs/0.transcriptions/2.transcriptions_kyutai_stt_2.6b_fr/4.franceinter-matin/27-05-2026/chroniques/start_transcription/"
-OUTPUT_HTML = "viz.html"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+TRANSCRIPT_FILE = os.path.join(SCRIPT_DIR, "full_show_transcription.txt")
+DETECTIONS_FILE = os.path.join(SCRIPT_DIR, "detections_live.json")
+GT_DIR = os.path.join(SCRIPT_DIR, "../../../@assets/1.modelOutputs/0.transcriptions/2.transcriptions_kyutai_stt_2.6b_fr/4.franceinter-matin/27-05-2026/chroniques/start_transcription/")
+OUTPUT_HTML = os.path.join(SCRIPT_DIR, "viz.html")
 
 def generate_viz():
     # 1. Lire la transcription

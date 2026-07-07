@@ -105,21 +105,6 @@ services:
     networks:
       - rlac-network
 
-  # --- Cloudflare Tunnel (Accès à Distance) ---
-  # Permet d'accéder à l'API Java depuis n'importe où sans ouvrir de ports
-  # REMPLACEZ 'YOUR_TOKEN' par votre jeton Cloudflare Tunnel
-  tunnel:
-    image: cloudflare/cloudflared:latest
-    container_name: rlac-remote-tunnel
-    command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
-    restart: unless-stopped
-    depends_on:
-      - java-backend
-    profiles:
-      - tunnel
-    networks:
-      - rlac-network
-
 networks:
   rlac-network:
     driver: bridge

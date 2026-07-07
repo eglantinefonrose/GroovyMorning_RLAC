@@ -36,7 +36,7 @@ Le segmenter écoute sur `/tmp/audio_pipe`. Utilisez FFmpeg pour lui envoyer de 
 
 **Depuis un fichier local :**
 ```bash
-ffmpeg -re -i "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/@assets/3.modelEvaluationData/france-inter/audio/27-05-2026.m4a" -f s16le -ac 1 -ar 16000 -y /tmp/audio_pipe
+ffmpeg -re -i "../4.rd/@assets/3.modelEvaluationData/france-inter/audio/27-05-2026.m4a" -f s16le -ac 1 -ar 16000 -y /tmp/audio_pipe
 ```
 
 **Depuis le flux direct :**
