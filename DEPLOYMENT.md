@@ -28,7 +28,7 @@ Ce guide explique comment installer votre serveur GroovyMorning personnel et con
 
 3.  **Lancer le serveur :**
     ```bash
-    docker-compose up -d
+    docker compose up -d
     ```
 
 ## Configuration du Tunnel (Côté Cloudflare)

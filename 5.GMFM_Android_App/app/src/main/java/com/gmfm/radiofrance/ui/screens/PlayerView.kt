@@ -149,12 +149,15 @@ fun PlayerView(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    val progress = if (duration > 0) currentPosition.toFloat() / duration.toFloat() else 0f
+                    val isDurationValid = duration > 0 && duration < 24 * 3600 * 1000 // Less than 24h
+                    val progress = if (isDurationValid) currentPosition.toFloat() / duration.toFloat() else 0f
                     Slider(
                         value = progress,
                         onValueChange = { newProgress ->
-                            val seekPos = (newProgress * duration.toFloat()).toLong()
-                            mediaController?.seekTo(seekPos)
+                            if (isDurationValid) {
+                                val seekPos = (newProgress * duration.toFloat()).toLong()
+                                mediaController?.seekTo(seekPos)
+                            }
                         },
                         colors = SliderDefaults.colors(
                             thumbColor = Color.White,
@@ -167,8 +170,16 @@ fun PlayerView(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(formatTime(currentPosition), color = Color.White.copy(alpha = 0.7f), style = MaterialTheme.typography.labelSmall)
-                        Text(formatTime(duration), color = Color.White.copy(alpha = 0.7f), style = MaterialTheme.typography.labelSmall)
+                        Text(
+                            if (isDurationValid) formatTime(currentPosition) else "", 
+                            color = Color.White.copy(alpha = 0.7f), 
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                        Text(
+                            if (isDurationValid) formatTime(duration) else "", 
+                            color = Color.White.copy(alpha = 0.7f), 
+                            style = MaterialTheme.typography.labelSmall
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -283,16 +294,17 @@ fun PlayerView(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                chronicle.title ?: "", 
+                                chronicle.title ?: "Chronique sans titre", 
                                 color = if (isCurrent) Color.White else Color.White.copy(alpha = 0.9f), 
                                 fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal
                             )
-                            val durationText = chronicle.duration?.let { 
-                                val mins = it / 60
-                                val secs = it % 60
-                                String.format("%02d:%02d", mins, secs)
-                            } ?: "--:--"
-                            Text(durationText, color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                            val durationValue = chronicle.duration ?: -1
+                            if (durationValue >= 0) {
+                                val mins = durationValue / 60
+                                val secs = durationValue % 60
+                                val durationText = String.format("%02d:%02d", mins, secs)
+                                Text(durationText, color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                            }
                         }
                     }
                 }

@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import re
 from dotenv import load_dotenv
 
 # Charger les variables d'environnement depuis .env
@@ -92,22 +93,23 @@ def update_scheduler(hour, minute):
     schedule.clear()
     time_str = f"{int(hour):02d}:{int(minute):02d}"
     schedule.every().day.at(time_str).do(run_segmenter)
-    # On garde l'arrêt à 09:10 même si on change l'heure de début
-    schedule.every().day.at("09:10").do(stop_segmenter)
-    print(f"⏰ [Scheduler] Prochain segmenter programmé à {time_str}")
+    # Utilise END_TIME pour l'arrêt
+    schedule.every().day.at(END_TIME).do(stop_segmenter)
+    print(f"⏰ [Scheduler] Prochain segmenter programmé à {time_str} (Arrêt à {END_TIME})")
 
 # Initialisation du scheduler
-# Lancement à 06:58 et arrêt à 09:10
-schedule.every().day.at("06:58").do(run_segmenter)
-schedule.every().day.at("09:10").do(stop_segmenter)
+START_TIME = os.environ.get('START_TIME', '15:00')
+END_TIME = os.environ.get('END_TIME', '15:30')
+
+print(f"⏰ [Scheduler] Configuration : {START_TIME} -> {END_TIME}")
+print(f"🕒 [System] Heure actuelle du conteneur : {datetime.now().strftime('%H:%M:%S')}")
+
+schedule.every().day.at(START_TIME).do(run_segmenter)
+schedule.every().day.at(END_TIME).do(stop_segmenter)
 
 # Lancement du thread scheduler
+print("⏰ [Scheduler] Démarrage de la boucle de surveillance...")
 threading.Thread(target=scheduler_loop, daemon=True).start()
-
-# SI on est en mode SIMU, on lance une première fois immédiatement pour tester
-if os.environ.get("SIMU", "").lower() == "true":
-    print("🧪 Mode SIMU détecté : Lancement immédiat pour test...")
-    run_segmenter()
 
 @app.route('/api/updateSchedulerTime', methods=['POST'])
 def api_update_scheduler_time():
@@ -231,6 +233,30 @@ def sync_offset():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/api/chronicles', methods=['GET'])
+def get_scraped_chronicles():
+    """Récupère la liste des chroniques scrappées pour une date donnée"""
+    date_str = request.args.get('date')
+    
+    if not date_str:
+        date_str = os.environ.get('TARGET_DATE')
+        # Si c'est le mot-clé par défaut ou vide, on laisse le scraper décider (aujourd'hui)
+        if date_str == "aujourd'hui" or not date_str:
+            date_str = None
+        # Si c'est au format DD-MM-YYYY (format CLI), on convertit en YYYY-MM-DD
+        elif date_str and re.match(r'^\d{2}-\d{2}-\d{4}$', date_str):
+            dt = datetime.strptime(date_str, '%d-%m-%Y')
+            date_str = dt.strftime('%Y-%m-%d')
+            
+    from src.scraper import get_chroniques
+    try:
+        print(f"🔍 [API] Fetching chronicles for date: {date_str or 'today'}")
+        chronicles = get_chroniques(date_str)
+        return jsonify(chronicles)
+    except Exception as e:
+        print(f"⚠️ [API Error] /api/chronicles: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/api/status', methods=['GET'])
 def status():
     """Endpoint de statut"""
@@ -240,5 +266,18 @@ def status():
     })
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8001))
-    socketio.run(app, host='0.0.0.0', port=port, debug=False, allow_unsafe_werkzeug=True)
+    import argparse
+    parser = argparse.ArgumentParser(description="API Server for IA Chronicle Segmenter")
+    parser.add_argument("--date", help="Forcer la date pour le scrap (format: DD-MM-YYYY, ex: 27-05-2026)")
+    parser.add_argument("--simu", action="store_true", help="Activer le mode simulation (SIMU=true)")
+    parser.add_argument("--port", type=int, default=int(os.environ.get('PORT', 8001)), help="Port du serveur (défaut: 8001)")
+    args = parser.parse_args()
+
+    if args.date:
+        os.environ['TARGET_DATE'] = args.date
+        print(f"📅 Date forcée par argument: {args.date}")
+
+    # FORCE REMOVAL: No immediate run_segmenter() here.
+    # The segmenter MUST only start at START_TIME via the scheduler thread.
+
+    socketio.run(app, host='0.0.0.0', port=args.port, debug=False, allow_unsafe_werkzeug=True)

@@ -22,6 +22,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl-dev \
     libffi-dev \
     pkg-config \
+    libsndfile1 \
+    tzdata \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

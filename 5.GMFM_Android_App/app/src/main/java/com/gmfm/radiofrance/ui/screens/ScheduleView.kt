@@ -225,22 +225,23 @@ fun TimelineRow(
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        chronicle.title ?: "", 
+                        chronicle.title ?: "Chronique sans titre", 
                         fontWeight = FontWeight.Bold, 
                         color = Color.White,
                         style = MaterialTheme.typography.bodyLarge,
                         maxLines = 2
                     )
-                    val durationText = chronicle.duration?.let { 
-                        val mins = it / 60
-                        val secs = it % 60
-                        String.format("%02d:%02d", mins, secs)
-                    } ?: "--:--"
-                    Text(
-                        durationText, 
-                        color = Color.Gray, 
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                    val durationValue = chronicle.duration ?: -1
+                    if (durationValue >= 0) {
+                        val mins = durationValue / 60
+                        val secs = durationValue % 60
+                        val durationText = String.format("%02d:%02d", mins, secs)
+                        Text(
+                            durationText, 
+                            color = Color.Gray, 
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
 
                 // Move Controls

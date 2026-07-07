@@ -14,3 +14,6 @@ python-dotenv
 torch
 transformers
 accelerate
+librosa
+soundfile
+faster-whisper

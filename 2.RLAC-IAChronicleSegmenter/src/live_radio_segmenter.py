@@ -23,9 +23,11 @@ from datetime import datetime
 try:
     from src.scraper import get_chroniques
     from src.deepseek_detector import DeepSeekDetector
+    from src.transcriber import Transcriber
 except ImportError:
     from scraper import get_chroniques
     from deepseek_detector import DeepSeekDetector
+    from transcriber import Transcriber
 
 warnings.filterwarnings('ignore')
 
@@ -50,32 +52,8 @@ class UnifiedLiveSegmenter:
             {"type": "jingle",  "name": "L’invite de 7h50", "target": "grande_matinale_jingle_7h50.m4a"}
         ]
 
-        # Initialisation DeepSeek si nécessaire
+        # Initialisation DeepSeek si nécessaire (Déplacée dans run() pour un chargement à l'heure H)
         self.deepseek_detector = None
-        if self.detection_mode == "deepseek":
-            print("🤖 Mode DETECTION: DeepSeek API")
-            api_key = os.environ.get("DEEPSEEK_API_KEY")
-            if not api_key:
-                print("⚠️ [DeepSeek] DEEPSEEK_API_KEY manquante. Repli sur le mode legacy.")
-                self.detection_mode = "legacy"
-            else:
-                target_date = os.environ.get("TARGET_DATE")
-                if target_date:
-                    print(f"🔍 Récupération de la grille pour le {target_date}...")
-                else:
-                    print("🔍 Récupération de la grille du jour...")
-                
-                schedule_data = get_chroniques(target_date)
-                if schedule_data:
-                    print(f"✅ {len(schedule_data)} chroniques trouvées :")
-                    for item in schedule_data:
-                        print(f"   - {item.get('time')} : {item.get('title')}")
-                else:
-                    print("⚠️ Aucune chronique trouvée dans la grille.")
-                
-                self.deepseek_detector = DeepSeekDetector(api_key, schedule=schedule_data, is_simulation=os.environ.get("SIMU", "false").lower() == "true")
-                self.context_buffer = []
-                self.max_context = 5
         
         if self.detection_mode == "legacy":
             print("📻 Mode DETECTION: Legacy (Jingles + Keywords)")
@@ -110,35 +88,10 @@ class UnifiedLiveSegmenter:
         
         # Initialisation du moteur de transcription (Kyutai ou Whisper)
         self.use_kyutai = os.environ.get("USE_KYUTAI", "true").lower() == "true"
+        provider = os.environ.get("TRANSCRIPTION_PROVIDER", "kyutai_stt" if self.use_kyutai else "whisper")
         
-        if self.use_kyutai:
-            print(f"🚀 Chargement Kyutai STT (Streaming Mode)...")
-            try:
-                import torch
-                from transformers import pipeline
-                self.device = "cuda" if torch.cuda.is_available() else "cpu"
-                if self.device == "cpu" and os.uname().sysname == "Darwin": # Optimisation Mac Silicon
-                    self.device = "mps"
-                
-                self.stt_pipeline = pipeline(
-                    "automatic-speech-recognition",
-                    model="kyutai/stt-1b-en_fr",
-                    device=self.device,
-                    torch_dtype=torch.float16 if self.device != "cpu" else torch.float32
-                )
-                print("✅ Kyutai STT prêt.")
-            except ImportError:
-                print("❌ Erreur: Le module 'transformers' est manquant.")
-                print("   Veuillez l'installer avec: pip install transformers accelerate")
-                print("   Ou assurez-vous d'utiliser le bon environnement virtuel (ex: ./.venv/bin/python3)")
-                self.use_kyutai = False
-            except Exception as e:
-                print(f"❌ Erreur chargement Kyutai: {e}. Repli sur Whisper.")
-                self.use_kyutai = False
-
-        if not self.use_kyutai:
-            print(f"🚀 Chargement Whisper '{whisper_model}'...")
-            self.model = whisper.load_model(whisper_model)
+        print(f"🚀 Initialisation du transcripteur (Provider: {provider})...")
+        self.transcriber = Transcriber(model_size=whisper_model, provider=provider)
         
         print(f"✅ Système prêt. Chunk: {self.chunk_size} samples")
 
@@ -195,11 +148,13 @@ class UnifiedLiveSegmenter:
         pcm_chunk = (chunk * 32768).astype(np.int16).tobytes()
         self.whisper_audio_accumulated.extend(pcm_chunk)
         
-        # Réduire l'accumulation à 2s pour Kyutai (plus réactif) au lieu de 5s
-        accumulation_limit = 2 if self.use_kyutai else 5
+        # On envoie l'audio vers la file d'attente de transcription par plus petits blocs (ex: 0.5s)
+        # pour permettre une plus grande réactivité du flux continu
+        accumulation_limit = 0.5
         
         if len(self.whisper_audio_accumulated) >= (accumulation_limit * self.sample_rate * 2):
             start_ts = self.total_samples_processed - (accumulation_limit * self.sample_rate)
+            # print(f"📦 [Audio] Chunk de 0.5s envoyé")
             self.transcription_queue.put((bytes(self.whisper_audio_accumulated), start_ts))
             self.whisper_audio_accumulated = bytearray()
 
@@ -287,52 +242,51 @@ class UnifiedLiveSegmenter:
                 print("🏁 SÉQUENCE TERMINÉE !"); self.running = False
 
     def transcription_worker(self):
-        print(f"🧵 Worker transcription démarré ({'Kyutai' if self.use_kyutai else 'Whisper'})")
-        while self.running:
-            try:
-                audio_data, start_samples = self.transcription_queue.get(timeout=1)
+        print(f"🧵 Worker transcription démarré (Mode CONTINU, Provider: {self.transcriber.provider})")
+        
+        def audio_stream_generator():
+            """Générateur qui puise dans la queue de transcription"""
+            while self.running:
+                try:
+                    audio_bytes, start_samples = self.transcription_queue.get(timeout=1)
+                    audio_np = np.frombuffer(audio_bytes, dtype=np.int16).astype(np.float32) / 32768.0
+                    yield audio_np
+                except queue.Empty:
+                    continue
+
+        try:
+            # On lance le flux de transcription continu
+            for segment in self.transcriber.stream_transcribe(audio_stream_generator()):
+                text = segment.get("text", "").strip()
+                if not text:
+                    continue
                 
-                text = ""
-                if self.use_kyutai:
-                    # Conversion des octets en numpy array float32
-                    audio_np = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / 32768.0
-                    # Appel Kyutai STT
-                    result = self.stt_pipeline(audio_np)
-                    text = result["text"].strip()
-                else:
-                    # Ancien mode Whisper
-                    temp_wav = f"/tmp/wh_{int(time.time())}.wav"
-                    with wave.open(temp_wav, 'wb') as wav:
-                        wav.setnchannels(1); wav.setsampwidth(2); wav.setframerate(self.sample_rate)
-                        wav.writeframes(audio_data)
-                    result = self.model.transcribe(temp_wav, language="fr", fp16=False)
-                    text = result["text"].strip()
-                    os.remove(temp_wav)
+                # Le temps actuel est approximatif en mode continu, on utilise le compteur global
+                current_time_sec = self.total_samples_processed / self.sample_rate
+                print(f"💬 Transcription (CONTINUE): \"{text}\"")
                 
-                if text:
-                    print(f"💬 Transcription ({'K' if self.use_kyutai else 'W'}): \"{text}\"")
+                if self.detection_mode == "deepseek" and self.deepseek_detector:
+                    # Analyse via DeepSeek
+                    res = self.deepseek_detector.analyze_sentence(text, self.context_buffer, current_time_sec=current_time_sec)
+                    if res.get("detecte"):
+                        chronicle_name = res.get("chronique")
+                        self.on_detected({"name": chronicle_name, "type": "ai"}, exact_time=current_time_sec, trigger_text=text)
                     
-                    if self.detection_mode == "deepseek" and self.deepseek_detector:
-                        # Analyse via DeepSeek
-                        current_time_sec = start_samples / self.sample_rate
-                        res = self.deepseek_detector.analyze_sentence(text, self.context_buffer, current_time_sec=current_time_sec)
-                        if res.get("detecte"):
-                            chronicle_name = res.get("chronique")
-                            self.on_detected({"name": chronicle_name, "type": "ai"}, exact_time=current_time_sec, trigger_text=text)
+                    # Mise à jour du buffer de contexte
+                    self.context_buffer.append(text)
+                    if len(self.context_buffer) > self.max_context:
+                        self.context_buffer.pop(0)
                         
-                        # Mise à jour du buffer de contexte
-                        self.context_buffer.append(text)
-                        if len(self.context_buffer) > self.max_context:
-                            self.context_buffer.pop(0)
-                            
-                    elif self.detection_mode == "legacy":
-                        if self.current_step < len(self.sequence) and self.sequence[self.current_step]["type"] == "keyword":
-                            target = self.normalize_text(self.sequence[self.current_step]["target"])
-                            if target in self.normalize_text(text):
-                                self.on_detected(self.sequence[self.current_step], exact_time=start_samples / self.sample_rate, trigger_text=text)
-            except Exception as e:
-                # print(f"Error in transcription worker: {e}")
-                continue
+                elif self.detection_mode == "legacy":
+                    if self.current_step < len(self.sequence) and self.sequence[self.current_step]["type"] == "keyword":
+                        target = self.normalize_text(self.sequence[self.current_step]["target"])
+                        if target in self.normalize_text(text):
+                            self.on_detected(self.sequence[self.current_step], exact_time=current_time_sec, trigger_text=text)
+
+        except Exception as e:
+            print(f"❌ Erreur critique dans le worker de transcription continue: {e}")
+            import traceback
+            traceback.print_exc()
 
     def fast_rolling_energy(self, signal_sq, window_len):
         """Calcul de l'énergie glissante optimisé."""
@@ -374,6 +328,35 @@ class UnifiedLiveSegmenter:
                             self.step_just_changed = False
 
     def run(self, simu=False):
+        # Initialisation du détecteur DeepSeek (chargement de la grille) juste avant de démarrer
+        if self.detection_mode == "deepseek":
+            print("🤖 Mode DETECTION: DeepSeek API")
+            api_key = os.environ.get("DEEPSEEK_API_KEY")
+            if not api_key:
+                print("⚠️ [DeepSeek] DEEPSEEK_API_KEY manquante. Repli sur le mode legacy.")
+                self.detection_mode = "legacy"
+            else:
+                target_date = os.environ.get("TARGET_DATE")
+                if target_date:
+                    print(f"🔍 Récupération de la grille pour le {target_date}...")
+                else:
+                    print("🔍 Récupération de la grille du jour...")
+                
+                schedule_data = get_chroniques(target_date)
+                if schedule_data:
+                    print(f"✅ {len(schedule_data)} chroniques trouvées :")
+                    for item in schedule_data:
+                        print(f"   - {item.get('time')} : {item.get('title')}")
+                else:
+                    print("⚠️ Aucune chronique trouvée dans la grille.")
+                
+                self.deepseek_detector = DeepSeekDetector(api_key, schedule=schedule_data, is_simulation=os.environ.get("SIMU", "false").lower() == "true")
+                self.context_buffer = []
+                self.max_context = 5
+        
+        if self.detection_mode == "legacy":
+            print("📻 Mode DETECTION: Legacy (Jingles + Keywords)")
+
         # Lancement du worker de transcription
         threading.Thread(target=self.transcription_worker, daemon=True).start()
         
@@ -382,9 +365,23 @@ class UnifiedLiveSegmenter:
         try:
             if simu:
                 print(f"📁 Mode SIMULATION : écoute sur {self.pipe_path}")
-                if not os.path.exists(self.pipe_path):
+                
+                # S'assurer que le pipe est bien un FIFO
+                if os.path.exists(self.pipe_path):
+                    import stat
+                    if not stat.S_ISFIFO(os.stat(self.pipe_path).st_mode):
+                        print(f"⚠️ {self.pipe_path} n'est pas un FIFO, suppression...")
+                        os.remove(self.pipe_path)
+                        os.mkfifo(self.pipe_path)
+                    else:
+                        print(f"✅ FIFO existant détecté sur {self.pipe_path}")
+                else:
+                    print(f"🔨 Création du FIFO {self.pipe_path}")
                     os.mkfifo(self.pipe_path)
+                
+                print(f"⏳ Attente d'un flux sur le pipe...")
                 source = open(self.pipe_path, 'rb')
+                print(f"🚀 Pipe ouvert, début de la lecture.")
             else:
                 print("🎤 Mode LIVE : écoute sur le flux radio France Inter")
                 stream_url = "https://stream.radiofrance.fr/franceinter/franceinter_hifi.m3u8"
@@ -410,6 +407,10 @@ class UnifiedLiveSegmenter:
                         print("⚠️ Fin du flux live ou erreur ffmpeg.")
                         break
                 
+                # Heartbeat toutes les ~10 secondes
+                if self.total_samples_processed % (self.sample_rate * 10) < self.chunk_size:
+                    print(f"💓 [Heartbeat] Lecture audio en cours... (Total: {self.total_samples_processed / self.sample_rate:.1f}s)")
+
                 chunk = np.frombuffer(raw_data, dtype=np.int16).astype(np.float32) / 32768.0
                 if len(chunk) > 0:
                     self.process_audio_chunk(chunk)

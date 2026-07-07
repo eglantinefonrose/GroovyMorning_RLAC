@@ -53,9 +53,9 @@ public class ChronicleRecordingIntegrationTest {
         List<Chronicle> allProgramChronicles = RadioProgramService.getAllChronicles();
 
         Chronicle chronicle1 = allProgramChronicles.stream()
-                .filter(c -> c.getNomDeChronique().equals("journal de 7h"))
+                .filter(c -> c.getNomDeChronique().equals("Le journal de 7h"))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("Chronique 'journal de 7h' non trouvée."));
+                .orElseThrow(() -> new AssertionError("Chronique 'Le journal de 7h' non trouvée."));
         chroniclesManagerService.addChronicle(testUserId, new Chronicle(chronicle1.getNomDeChronique(), 0, 10)); // 10 secondes
 
         Chronicle chronicle2 = allProgramChronicles.stream()
@@ -78,7 +78,7 @@ public class ChronicleRecordingIntegrationTest {
         // On simule les appels API dynamic
         recording.service.DynamicRecordingService dynamicService = recording.service.DynamicRecordingService.getInstance();
         
-        String chronicle1 = "journal de 7h";
+        String chronicle1 = "Le journal de 7h";
         String chronicle2 = "Les 80 secondes";
 
         // Start C1
@@ -88,7 +88,8 @@ public class ChronicleRecordingIntegrationTest {
         // End C1 with realDuration
         dynamicService.handleEndNotification(testUserId, chronicle1, "5");
         
-        // C2 starts automatically (chained)
+        // Start C2
+        dynamicService.handleStartNotification(testUserId, chronicle2);
         Thread.sleep(5000); // Record 5 seconds
         
         // End C2
@@ -159,7 +160,7 @@ public class ChronicleRecordingIntegrationTest {
         List<Chronicle> chronicles = chroniclesManagerService.getChronicles(newUser);
         
         assertEquals(13, chronicles.size(), "Un nouvel utilisateur devrait avoir 13 chroniques par défaut");
-        assertEquals("journal de 7h", chronicles.get(0).getNomDeChronique());
+        assertEquals("Le journal de 7h", chronicles.get(0).getNomDeChronique());
         assertEquals("Geopolitique", chronicles.get(12).getNomDeChronique());
     }
 

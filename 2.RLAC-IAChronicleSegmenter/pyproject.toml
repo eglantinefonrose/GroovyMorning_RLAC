@@ -22,4 +22,5 @@ dependencies = [
     "torch",
     "transformers",
     "accelerate",
+    "librosa>=0.11.0",
 ]

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # --- Backend Java (RLAC-AudioRecorder) ---
   # Gère les enregistrements, le planning et l'API pour les apps mobiles
@@ -7,6 +5,8 @@ services:
     build:
       context: ./1.RLAC-AudioRecorder
       dockerfile: Dockerfile
+    image: rlac-java-backend:latest
+    pull_policy: build
     container_name: rlac-java-backend
     ports:
       - "8000:8000"
@@ -18,9 +18,16 @@ services:
       - SERVER_HOST=0.0.0.0
       - DB_PATH=/app/data/rlac.db
       - PYTHON_API_URL=http://python-segmenter:8001
+      - TZ=Europe/Paris
     restart: unless-stopped
     networks:
       - rlac-network
+    develop:
+      watch:
+        - action: rebuild
+          path: ./1.RLAC-AudioRecorder/src
+        - action: rebuild
+          path: ./1.RLAC-AudioRecorder/build.gradle
 
   # --- Segmenter Python (RLAC-IAChronicleSegmenter) ---
   # Gère l'analyse IA et le découpage intelligent
@@ -28,18 +35,73 @@ services:
     build:
       context: ./2.RLAC-IAChronicleSegmenter
       dockerfile: Dockerfile
+    image: rlac-python-segmenter:latest
+    pull_policy: build
     container_name: rlac-python-segmenter
     ports:
       - "8001:8001"
     volumes:
       - ./2.RLAC-IAChronicleSegmenter/data:/app/data
       - ./2.RLAC-IAChronicleSegmenter/assets:/app/assets
+      - shared-pipe:/tmp
     env_file:
       - .env
     environment:
       - JAVA_API_URL=http://java-backend:8000
       - SIMU=${SIMU:-false}
+      - START_TIME=${START_TIME:-21:57}
+      - END_TIME=${END_TIME:-22:00}
+      - TZ=Europe/Paris
     restart: unless-stopped
+    networks:
+      - rlac-network
+    develop:
+      watch:
+        - action: rebuild
+          path: ./2.RLAC-IAChronicleSegmenter
+          ignore:
+            - data/
+            - assets/
+            - .venv/
+            - __pycache__/
+            - "*.db"
+            - "*.html"
+            - "*.txt"
+            - "*.json"
+
+  # --- Simulateur FFmpeg (Mode SIMU uniquement) ---
+  # Envoie le fichier audio dans le pipe pour simuler un flux live
+  ffmpeg-simu:
+    image: rlac-python-segmenter:latest
+    container_name: rlac-ffmpeg-simu
+    volumes:
+      - ./4.rd/@assets:/data
+      - shared-pipe:/tmp
+    env_file:
+      - .env
+    entrypoint: |
+      /bin/bash -c '
+      # S’assurer que le pipe est bien un FIFO et qu’il est vide
+      if [ -e /tmp/audio_pipe ]; then
+        rm -f /tmp/audio_pipe
+      fi
+      mkfifo /tmp/audio_pipe
+      
+      TARGET_FILE="/data/3.modelEvaluationData/france-inter/audio/${SIMU_AUDIO_FILE:-07-07-2026.m4a}"
+      echo "🎬 [Simu] Audio source: $$TARGET_FILE"
+      echo "⏳ [Simu] Waiting for ${START_TIME:-21:57} to start simulation (Current time: $$(date +%H:%M))..."
+      
+      while [ "$$(date +%H:%M)" != "${START_TIME:-21:57}" ]; do
+        sleep 2
+      done
+      
+      echo "🚀 [Simu] Start time reached! Sending audio to pipe..."
+      ffmpeg -re -i "$$TARGET_FILE" -f s16le -ac 1 -ar 16000 -y /tmp/audio_pipe
+      '
+    environment:
+      - TZ=Europe/Paris
+    profiles:
+      - simu
     networks:
       - rlac-network
 
@@ -53,9 +115,14 @@ services:
     restart: unless-stopped
     depends_on:
       - java-backend
+    profiles:
+      - tunnel
     networks:
       - rlac-network
 
 networks:
   rlac-network:
     driver: bridge
+
+volumes:
+  shared-pipe:

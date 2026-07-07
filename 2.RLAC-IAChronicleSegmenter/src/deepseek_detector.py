@@ -173,7 +173,10 @@ Format de réponse attendu :
         best_match = None
         theo_minutes = -1
         
-        for item in self.schedule:
+        # On trie la grille par longueur de titre décroissante pour éviter les conflits de sous-chaînes
+        sorted_schedule = sorted(self.schedule, key=lambda x: len(x.get("title", "")), reverse=True)
+        
+        for item in sorted_schedule:
             theo_time = item.get("time", "00:00")
             theo_title = item.get("title", "").lower()
             
@@ -190,8 +193,8 @@ Format de réponse attendu :
 
         diff = current_minutes - theo_minutes
         
-        # RÈGLE 1 : Trop tôt (> 5 min avant l'horaire théorique)
-        if diff < -5:
+        # RÈGLE 1 : Trop tôt (> 1 min avant l'horaire théorique)
+        if diff < -1:
             time_info = f"{int(current_minutes//60)}h{int(current_minutes%60):02d}"
             print(f"[DeepSeek] Rejeté: '{name}' trop tôt à {time_info} (Prévu: {best_match.get('time')}, Delta: {diff:.1f} min).")
             detection["detecte"] = False

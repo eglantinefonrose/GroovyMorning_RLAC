@@ -26,6 +26,32 @@ public class DynamicRecordingService {
     private DynamicRecordingService() {
         this.ffmpegService = new FFmpegService();
         this.chroniclesManagerService = ChroniclesManagerService.getInstance();
+        
+        // Vider le dossier media/continuous au démarrage (Docker compose)
+        logger.info("🚀 Startup: Clearing media/continuous directory...");
+        ffmpegService.clearContinuousFolder();
+
+        // Planifier un nettoyage quotidien 5 minutes avant l'heure de base par défaut (ex: 06:55)
+        scheduler.scheduleAtFixedRate(this::checkDailyCleanup, 1, 1, TimeUnit.MINUTES);
+    }
+
+    private void checkDailyCleanup() {
+        LocalDateTime now = LocalDateTime.now();
+        // On récupère la config du user par défaut (local)
+        DatabaseService.UserConfig config = DatabaseService.getInstance().getUserConfig(
+            DatabaseService.getInstance().getLocalUserId()
+        );
+        
+        // Si on est à config.baseHour : config.baseMinute - 5
+        LocalDateTime cleanupTime = now.withHour(config.baseHour).withMinute(config.baseMinute).withSecond(0).minusMinutes(5);
+        
+        // Si l'heure actuelle correspond à l'heure de cleanup (à la minute près)
+        if (now.getHour() == cleanupTime.getHour() && now.getMinute() == cleanupTime.getMinute()) {
+            logger.info("⏰ Daily cleanup triggered before baseHour ({}:{})", config.baseHour, config.baseMinute);
+            ffmpegService.stopContinuousRecording();
+            ffmpegService.clearContinuousFolder();
+            // On ne redémarre pas ici, il redémarrera au premier signal START
+        }
     }
 
     public static synchronized DynamicRecordingService getInstance() {
@@ -42,7 +68,15 @@ public class DynamicRecordingService {
     private boolean isChronicleAuthorized(String userId, String chronicleName) {
         List<Chronicle> userChronicles = chroniclesManagerService.getChronicles(userId);
         return userChronicles.stream()
-                .anyMatch(c -> c.getNomDeChronique().equals(chronicleName));
+                .anyMatch(c -> normalize(c.getNomDeChronique()).equals(normalize(chronicleName)));
+    }
+
+    private String normalize(String name) {
+        if (name == null) return "";
+        return name.toLowerCase()
+                .replace("’", "'")
+                .replace(" ", "")
+                .trim();
     }
 
     public void handleStartNotification(String userId, String chronicleName) {

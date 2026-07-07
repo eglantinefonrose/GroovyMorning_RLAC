@@ -150,19 +150,20 @@ fun FeaturedCard(chronicle: Chronicle, onPlayClick: (Chronicle) -> Unit) {
                     .background(Color.Gray)
             )
             Spacer(modifier = Modifier.height(12.dp))
-            Text(chronicle.title ?: "Sans titre", fontWeight = FontWeight.Bold, color = Color.White)
+            Text(chronicle.title ?: "Chronique sans titre", fontWeight = FontWeight.Bold, color = Color.White)
             
-            val durationText = chronicle.duration?.let { 
-                val mins = it / 60
-                val secs = it % 60
-                String.format("%02d:%02d", mins, secs)
-            } ?: "--:--"
-            
-            Text(
-                "Chronique • $durationText", 
-                color = Color.Gray, 
-                style = MaterialTheme.typography.bodySmall
-            )
+            val durationValue = chronicle.duration ?: -1
+            if (durationValue >= 0) {
+                val mins = durationValue / 60
+                val secs = durationValue % 60
+                val durationText = String.format("%02d:%02d", mins, secs)
+                
+                Text(
+                    "Chronique • $durationText", 
+                    color = Color.Gray, 
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
             Spacer(modifier = Modifier.height(12.dp))
             Button(
                 onClick = { 

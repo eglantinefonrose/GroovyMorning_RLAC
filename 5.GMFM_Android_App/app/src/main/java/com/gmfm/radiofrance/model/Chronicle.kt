@@ -3,7 +3,7 @@ package com.gmfm.radiofrance.model
 import com.google.gson.annotations.SerializedName
 
 data class Chronicle(
-    @SerializedName("nomDeChronique")
+    @SerializedName("title")
     val title: String?,
     @SerializedName("startTime")
     val startTime: Int?,

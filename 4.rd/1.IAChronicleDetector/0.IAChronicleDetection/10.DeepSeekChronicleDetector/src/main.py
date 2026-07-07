@@ -43,16 +43,25 @@ signal.signal(signal.SIGINT, signal_handler)
 
 def save_results():
     if ALL_DETECTIONS:
-        # On retourne uniquement la liste d'objets comme demandé
-        output_data = [
-            {
+        output_data = []
+        for i in range(len(ALL_DETECTIONS)):
+            d = ALL_DETECTIONS[i]
+            
+            # Si une chronique suit, sa fin est le début de la suivante
+            if i + 1 < len(ALL_DETECTIONS):
+                end_time = ALL_DETECTIONS[i+1]["start"]
+            else:
+                # Pour la dernière, on garde sa fin initiale (segment_end)
+                end_time = d["end"]
+                
+            output_data.append({
                 "label": d["label"],
                 "start": round(d["start"], 2),
-                "end": round(d["end"], 2),
+                "end": round(end_time, 2),
                 "detected_at": round(d["detected_at"], 2),
                 "confidence": d["confidence"]
-            } for d in ALL_DETECTIONS
-        ]
+            })
+            
         with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
             json.dump(output_data, f, ensure_ascii=False, indent=2)
         print(f"[OK] Résultats au format JSON sauvegardés dans {OUTPUT_JSON}")
@@ -83,6 +92,9 @@ def process_stream(segment_gen, detector, validator, start_time="07:00", is_audi
     if dry_run:
         print("[MODE SIMULATION] La détection DeepSeek est désactivée.")
 
+    # On enregistre le moment où le traitement du flux commence réellement
+    start_wall_time = time.time()
+
     with open(LOG_FILE, "w", encoding="utf-8") as log_f:
         simulated_seconds = 0
         phrase_count = 0
@@ -91,14 +103,19 @@ def process_stream(segment_gen, detector, validator, start_time="07:00", is_audi
             phrase_count += 1
             current_sentence = segment["text"]
             
-            # Si c'est de l'audio, on utilise le timestamp réel, sinon on estime
-            if is_audio and "start" in segment and segment["start"] is not None:
-                simulated_seconds = segment["start"]
+            # Détermination des timestamps (réels ou simulés)
+            if is_audio:
+                current_start = segment.get("start") if segment.get("start") is not None else simulated_seconds
+                current_end = segment.get("end") if segment.get("end") is not None else current_start + 5.0
+                simulated_seconds = current_start # Resynchronisation
             else:
-                simulated_seconds += 5 # Estimation pour le texte
+                # Pour le texte, on utilise le temps simulé qui s'incrémente
+                current_start = simulated_seconds
+                current_end = current_start + 5.0
+                simulated_seconds += 5
 
             # Affichage en temps réel de la phrase avec timestamp
-            time_str = f"[{int(simulated_seconds // 60):02d}:{int(simulated_seconds % 60):02d}]"
+            time_str = f"[{int(current_start // 60):02d}:{int(current_start % 60):02d}]"
             print(f"{time_str} > {current_sentence}")
             log_f.write(f"{time_str} Traitement phrase {phrase_count}: {current_sentence}\n")
             log_f.flush()
@@ -113,10 +130,13 @@ def process_stream(segment_gen, detector, validator, start_time="07:00", is_audi
                 chronique_name = result.get("chronique")
                 reasoning = result.get("raisonnement") or result.get("reasoning")
                 
+                # Moment précis de la détection (wall clock time)
+                detected_at = time.time() - start_wall_time
+
                 # Validation via la grille
                 is_valid, status, wall_time, diff_str = validator.validate(
                     chronique_name, 
-                    simulated_seconds, 
+                    current_start, 
                     start_time
                 )
                 
@@ -126,15 +146,14 @@ def process_stream(segment_gen, detector, validator, start_time="07:00", is_audi
                 log_f.flush()
                 
                 if is_valid:
-                    # 'start' est le début de la phrase qui a déclenché la détection
-                    # 'detected_at' est le moment de la détection (la fin du segment/phrase)
-                    # 'end' est mis par défaut à start + 60s (ou fin du segment) pour représenter un bloc
+                    # 'start' est le timestamp du flux
+                    # 'detected_at' est le temps réel écoulé depuis le début
                     ALL_DETECTIONS.append({
                         "label": chronique_name,
-                        "start": segment.get("start", simulated_seconds),
-                        "end": segment.get("end", simulated_seconds + 5.0),
-                        "detected_at": segment.get("start", simulated_seconds),
-                        "confidence": 1.0 # DeepSeek est considéré comme binaire/confiant ici
+                        "start": current_start,
+                        "end": current_end,
+                        "detected_at": detected_at,
+                        "confidence": 1.0
                     })
             
     if dry_run:
