@@ -34,6 +34,7 @@ import androidx.media3.common.Player
 fun LiveView(
     chronicles: List<Chronicle>,
     isLoading: Boolean,
+    isAudioAvailable: Boolean,
     onRefresh: () -> Unit,
     mediaController: MediaController?,
     onNavigateToSchedule: () -> Unit,
@@ -111,9 +112,11 @@ fun LiveView(
 
                 items(chronicles) { chronicle ->
                     val isCurrent = chronicle.title == currentTitle
+                    val itemHasAudio = isAudioAvailable && chronicle.title != null && (chronicle.duration ?: -1) >= 0 && chronicle.endTime != null
                     LiveChronicleItem(
                         chronicle = chronicle, 
                         isCurrent = isCurrent,
+                        isAudioAvailable = itemHasAudio,
                         isPlaying = isPlaying && isCurrent,
                         onClick = { onChronicleClick(chronicle) }
                     )
@@ -134,22 +137,26 @@ fun LiveView(
 fun LiveChronicleItem(
     chronicle: Chronicle, 
     isCurrent: Boolean,
+    isAudioAvailable: Boolean,
     isPlaying: Boolean,
     onClick: () -> Unit
 ) {
+    val contentColor = if (isAudioAvailable) Color.White else Color.Gray
+    val iconBackground = if (!isAudioAvailable) Color.DarkGray else if (isCurrent) FranceInter else Color.Gray
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .border(
-                width = if (isCurrent) 1.dp else 0.dp,
+                width = if (isCurrent && isAudioAvailable) 1.dp else 0.dp,
                 color = if (isCurrent) FranceInter else Color.Transparent,
                 shape = RoundedCornerShape(16.dp)
             )
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isCurrent) FranceInter.copy(alpha = 0.1f) else Color(0xFF1A1A1A)
+            containerColor = if (isCurrent && isAudioAvailable) FranceInter.copy(alpha = 0.1f) else Color(0xFF1A1A1A)
         )
     ) {
         Row(
@@ -160,10 +167,10 @@ fun LiveChronicleItem(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(if (isCurrent) FranceInter else Color.Gray),
+                    .background(iconBackground),
                 contentAlignment = Alignment.Center
             ) {
-                if (isCurrent && isPlaying) {
+                if (isCurrent && isPlaying && isAudioAvailable) {
                     Icon(
                         Icons.Default.VolumeUp, 
                         null, 
@@ -174,29 +181,30 @@ fun LiveChronicleItem(
                     Icon(
                         Icons.Default.PlayArrow,
                         null,
-                        tint = Color.White
+                        tint = if (isAudioAvailable) Color.White else Color.Gray
                     )
                 }
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    chronicle.title ?: "Sans titre",
-                    fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
-                    color = Color.White
+                    chronicle.title ?: "Chronique sans titre",
+                    fontWeight = if (isCurrent && isAudioAvailable) FontWeight.Bold else FontWeight.Normal,
+                    color = contentColor
                 )
-                val durationText = chronicle.duration?.let {
-                    val mins = it / 60
-                    val secs = it % 60
-                    String.format("%02d:%02d", mins, secs)
-                } ?: "--:--"
-                Text(
-                    durationText,
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.bodySmall
-                )
+                val durationValue = chronicle.duration ?: -1
+                if (durationValue >= 0) {
+                    val mins = durationValue / 60
+                    val secs = durationValue % 60
+                    val durationText = String.format("%02d:%02d", mins, secs)
+                    Text(
+                        durationText,
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
-            if (isCurrent && isPlaying) {
+            if (isCurrent && isPlaying && isAudioAvailable) {
                 Text(
                     "EN LECTURE",
                     color = FranceInter,
@@ -267,23 +275,11 @@ fun FranceInterCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             Row(
-                modifier = Modifier.fillMaxWidth(), 
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Button(
-                    onClick = { /* Contact */ },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(50),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black.copy(alpha = 0.3f), 
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("Contact")
-                }
-                Button(
                     onClick = onNavigateToSchedule,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(50),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Black.copy(alpha = 0.3f), 

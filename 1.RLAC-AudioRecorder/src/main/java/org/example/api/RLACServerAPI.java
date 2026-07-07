@@ -225,8 +225,17 @@ public class RLACServerAPI {
     public Response getUserChronicles() {
         String userId = DatabaseService.getInstance().getLocalUserId();
         try {
+            boolean updated = chroniclesManagerService.syncChroniclesWithExternalApi(userId);
             List<Chronicle> userChronicles = chroniclesManagerService.getChronicles(userId);
-            return Response.ok(userChronicles).build();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("chronicles", userChronicles);
+            response.put("updated", updated);
+            if (updated) {
+                response.put("message", "La liste des chroniques a été mise à jour pour correspondre à la grille du jour.");
+            }
+
+            return Response.ok(response).build();
         } catch (Exception e) {
             logger.error("Erreur lors de la récupération des chroniques", e);
             return createErrorResponse("Erreur interne du serveur: " + e.getMessage());

@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import re
 from dotenv import load_dotenv
 
 # Charger les variables d'environnement depuis .env
@@ -230,6 +231,30 @@ def sync_offset():
         )
         return (resp.content, resp.status_code, resp.headers.items())
     except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/chronicles', methods=['GET'])
+def get_scraped_chronicles():
+    """Récupère la liste des chroniques scrappées pour une date donnée"""
+    date_str = request.args.get('date')
+    
+    if not date_str:
+        date_str = os.environ.get('TARGET_DATE')
+        # Si c'est le mot-clé par défaut ou vide, on laisse le scraper décider (aujourd'hui)
+        if date_str == "aujourd'hui" or not date_str:
+            date_str = None
+        # Si c'est au format DD-MM-YYYY (format CLI), on convertit en YYYY-MM-DD
+        elif date_str and re.match(r'^\d{2}-\d{2}-\d{4}$', date_str):
+            dt = datetime.strptime(date_str, '%d-%m-%Y')
+            date_str = dt.strftime('%Y-%m-%d')
+            
+    from src.scraper import get_chroniques
+    try:
+        print(f"🔍 [API] Fetching chronicles for date: {date_str or 'today'}")
+        chronicles = get_chroniques(date_str)
+        return jsonify(chronicles)
+    except Exception as e:
+        print(f"⚠️ [API Error] /api/chronicles: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/status', methods=['GET'])

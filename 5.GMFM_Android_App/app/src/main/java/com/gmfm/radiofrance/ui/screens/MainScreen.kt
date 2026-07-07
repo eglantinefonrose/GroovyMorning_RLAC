@@ -55,6 +55,8 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     val baseMinute by viewModel.baseMinute.collectAsState()
     val error by viewModel.error.collectAsState()
     val isFirstVisit by viewModel.isFirstVisit.collectAsState()
+    val folderName by viewModel.folderName.collectAsState()
+    val showUpdatePopup by viewModel.showUpdatePopup.collectAsState()
     
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -69,6 +71,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var showOnboarding by remember { mutableStateOf(false) }
+    var showNoAudioAlert by remember { mutableStateOf(false) }
     var hasShownOnboardingThisSession by remember { mutableStateOf(false) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -99,6 +102,19 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     
     var mediaController by remember { mutableStateOf<MediaController?>(null) }
 
+    DisposableEffect(mediaController) {
+        val listener = object : Player.Listener {
+            override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                Log.e("GMFM_Audio", "Player error detected in MainScreen: ${error.message}")
+                showNoAudioAlert = true
+            }
+        }
+        mediaController?.addListener(listener)
+        onDispose {
+            mediaController?.removeListener(listener)
+        }
+    }
+
     LaunchedEffect(Unit) {
         Log.e("GMFM_DEBUG", "🚀🚀🚀 L'ÉCRAN PRINCIPAL EST LANCÉ 🚀🚀🚀")
         viewModel.fetchChronicles()
@@ -123,9 +139,11 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
         try {
             val title = chronicle.title
             val folder = viewModel.folderName.value
+            val isAvailable = folder != null && (chronicle.duration ?: -1) >= 0 && chronicle.endTime != null
             
-            if (title == null) {
-                Log.e("GMFM_Audio", "Impossible de lire la chronique : Titre est NULL")
+            if (title == null || !isAvailable) {
+                Log.e("GMFM_Audio", "Impossible de lire la chronique : Titre=$title, Folder=$folder, Duration=${chronicle.duration}")
+                showNoAudioAlert = true
             } else if (folder == null) {
                 Log.e("GMFM_Audio", "Impossible de lire la chronique : Folder est NULL. Tentative de re-fetch...")
                 viewModel.fetchData()
@@ -253,8 +271,13 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                         viewModel = viewModel,
                         onSettingsClick = { showSettingsDialog = true },
                         onPlayClick = { chronicle ->
+                            val folder = viewModel.folderName.value
+                            val isAvailable = folder != null && (chronicle.duration ?: -1) >= 0 && chronicle.endTime != null && chronicle.title != null
+                            
                             playChronicle(chronicle)
-                            isPlayerOpen = true
+                            if (isAvailable) {
+                                isPlayerOpen = true
+                            }
                         }
                     ) 
                 }
@@ -262,6 +285,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                     LiveView(
                         chronicles = chronicles,
                         isLoading = isLoadingData,
+                        isAudioAvailable = folderName != null,
                         onRefresh = { viewModel.fetchChronicles() },
                         mediaController = mediaController,
                         onNavigateToSchedule = { navController.navigate(Screen.Schedule.route) },
@@ -269,8 +293,13 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                             playLive()
                         },
                         onChronicleClick = { chronicle ->
+                            val folder = viewModel.folderName.value
+                            val isAvailable = folder != null && (chronicle.duration ?: -1) >= 0 && chronicle.endTime != null && chronicle.title != null
+                            
                             playChronicle(chronicle)
-                            isPlayerOpen = true
+                            if (isAvailable) {
+                                isPlayerOpen = true
+                            }
                         }
                     ) 
                 }
@@ -319,26 +348,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                                 modifier = Modifier.size(20.dp)
                             )
                         }
-                        
-                        Text(
-                            "Simu", 
-                            color = MaterialTheme.colorScheme.onBackground, 
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier.padding(end = 4.dp)
-                        )
-                        Switch(
-                            checked = isSimuMode,
-                            onCheckedChange = { viewModel.setSimuMode(it) },
-                            modifier = Modifier.scale(0.7f)
-                        )
-                    }
-                    if (isSimuMode) {
-                        Text(
-                            serverIp, 
-                            color = MaterialTheme.colorScheme.primary, 
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier.padding(end = 12.dp)
-                        )
                     }
                 }
             }
@@ -414,6 +423,32 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                 showOnboarding = false 
                 viewModel.setFirstVisitComplete()
             })
+        }
+
+        if (showNoAudioAlert) {
+            AlertDialog(
+                onDismissRequest = { showNoAudioAlert = false },
+                title = { Text("Contenu indisponible") },
+                text = { Text("Cette chronique n'est pas disponible pour le moment.") },
+                confirmButton = {
+                    TextButton(onClick = { showNoAudioAlert = false }) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+
+        if (showUpdatePopup) {
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissUpdatePopup() },
+                title = { Text("Grille mise à jour") },
+                text = { Text("La grille des chroniques de France Inter a changé. Vous devrez refaire votre programmation dans la grille.") },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.dismissUpdatePopup() }) {
+                        Text("OK")
+                    }
+                }
+            )
         }
 
         // Full Screen Player

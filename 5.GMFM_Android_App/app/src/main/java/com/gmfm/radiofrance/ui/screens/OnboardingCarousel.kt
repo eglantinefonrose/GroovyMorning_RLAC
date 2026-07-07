@@ -39,12 +39,6 @@ fun OnboardingCarousel(
 ) {
     val pages = listOf(
         OnboardingPage(
-            title = "Aucun programme",
-            description = "Vous n'avez pas encore de programmation pour votre réveil Groovy Morning.",
-            icon = Icons.Default.Info,
-            iconColor = Color(0xFFE53935)
-        ),
-        OnboardingPage(
             title = "Réglez l'heure",
             description = "Cliquez sur l'icône horloge en haut à droite pour choisir l'heure de début de vos programmes.",
             icon = Icons.Default.Schedule,

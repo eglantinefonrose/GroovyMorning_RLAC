@@ -1,6 +1,7 @@
 package com.gmfm.radiofrance.api
 
 import com.gmfm.radiofrance.model.Chronicle
+import com.gmfm.radiofrance.model.ChroniclesResponse
 import com.gmfm.radiofrance.model.UserConfig
 import retrofit2.http.*
 
@@ -13,7 +14,7 @@ interface APIService {
     @GET
     suspend fun getUserChronicles(
         @Url url: String
-    ): List<Chronicle>
+    ): ChroniclesResponse
 
     @POST
     suspend fun addChronicle(

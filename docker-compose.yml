@@ -5,6 +5,8 @@ services:
     build:
       context: ./1.RLAC-AudioRecorder
       dockerfile: Dockerfile
+    image: rlac-java-backend:latest
+    pull_policy: build
     container_name: rlac-java-backend
     ports:
       - "8000:8000"
@@ -19,6 +21,12 @@ services:
     restart: unless-stopped
     networks:
       - rlac-network
+    develop:
+      watch:
+        - action: rebuild
+          path: ./1.RLAC-AudioRecorder/src
+        - action: rebuild
+          path: ./1.RLAC-AudioRecorder/build.gradle
 
   # --- Segmenter Python (RLAC-IAChronicleSegmenter) ---
   # Gère l'analyse IA et le découpage intelligent
@@ -26,6 +34,8 @@ services:
     build:
       context: ./2.RLAC-IAChronicleSegmenter
       dockerfile: Dockerfile
+    image: rlac-python-segmenter:latest
+    pull_policy: build
     container_name: rlac-python-segmenter
     ports:
       - "8001:8001"
@@ -44,6 +54,19 @@ services:
     restart: unless-stopped
     networks:
       - rlac-network
+    develop:
+      watch:
+        - action: rebuild
+          path: ./2.RLAC-IAChronicleSegmenter
+          ignore:
+            - data/
+            - assets/
+            - .venv/
+            - __pycache__/
+            - "*.db"
+            - "*.html"
+            - "*.txt"
+            - "*.json"
 
   # --- Simulateur FFmpeg (Mode SIMU uniquement) ---
   # Envoie le fichier audio dans le pipe pour simuler un flux live

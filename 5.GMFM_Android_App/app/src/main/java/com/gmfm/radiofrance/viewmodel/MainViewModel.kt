@@ -41,6 +41,9 @@ class MainViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    private val _showUpdatePopup = MutableStateFlow(false)
+    val showUpdatePopup: StateFlow<Boolean> = _showUpdatePopup
+
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
@@ -124,8 +127,13 @@ class MainViewModel @Inject constructor(
                 Log.i("GMFM_Data", "🌐 Appel API Chroniques: $chroniclesUrl")
                 
                 val response = apiService.getUserChronicles(chroniclesUrl)
-                _chronicles.value = response.filter { (it.startTime ?: -1) >= 0 }
+                _chronicles.value = response.chronicles.filter { (it.startTime ?: -1) >= 0 }
                 Log.i("GMFM_Data", "✅ ${_chronicles.value.size} chroniques filtrées (enregistrables) récupérées")
+                
+                if (response.updated) {
+                    Log.i("GMFM_Data", "⚠️ Grille mise à jour détectée !")
+                    _showUpdatePopup.value = true
+                }
                 
             } catch (e: Exception) {
                 Log.e("GMFM_Data", "Error fetching data: ${e.message}", e)
@@ -139,6 +147,10 @@ class MainViewModel @Inject constructor(
 
     fun clearError() {
         _error.value = null
+    }
+
+    fun dismissUpdatePopup() {
+        _showUpdatePopup.value = false
     }
 
     fun moveChronicle(fromIndex: Int, toIndex: Int) {
