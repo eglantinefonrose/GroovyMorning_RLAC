@@ -1,7 +1,9 @@
 import os
 import re
 
-core_path = "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.r&d/0.IAAdsDetector/1.TrainedModel/env/lib/python3.12/site-packages/adetector/core.py"
+# Get the directory where the script is located
+base_dir = os.path.dirname(os.path.abspath(__file__))
+core_path = os.path.join(base_dir, "env/lib/python3.12/site-packages/adetector/core.py")
 
 with open(core_path, 'r') as f:
     content = f.read()

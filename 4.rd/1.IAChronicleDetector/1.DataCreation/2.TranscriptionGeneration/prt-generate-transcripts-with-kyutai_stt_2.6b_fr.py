@@ -25,8 +25,12 @@ from datetime import timedelta
 # from moshi_mlx import models, utils
 
 # Configuration par défaut
-DEFAULT_MEDIA_BASE_DIR = "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/@assets/0.media"
-DEFAULT_TRANSCRIPTION_OUTPUT_DIR = "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/@assets/1.modelOutputs/0.transcriptions/2.transcriptions_kyutai_stt_2.6b_fr"
+SCRIPT_DIR = Path(__file__).resolve().parent
+RD_DIR = SCRIPT_DIR.parent.parent.parent
+ASSETS_DIR = RD_DIR / "@assets"
+
+DEFAULT_MEDIA_BASE_DIR = str(ASSETS_DIR / "0.media")
+DEFAULT_TRANSCRIPTION_OUTPUT_DIR = str(ASSETS_DIR / "1.modelOutputs/0.transcriptions/2.transcriptions_kyutai_stt_2.6b_fr")
 DEFAULT_MODEL_ID = "kyutai/stt-1b-en_fr-mlx"
 
 def parse_arguments():

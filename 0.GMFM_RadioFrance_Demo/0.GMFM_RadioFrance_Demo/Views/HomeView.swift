@@ -79,7 +79,7 @@ struct SettingsView: View {
                     }
                     
                     Button("Réinitialiser par défaut") {
-                        customIPAddress = "http://10.155.210.134:8000"
+                        customIPAddress = "http://YOUR_SERVER_IP:8000"
                     }
                     .foregroundColor(.red)
                 }

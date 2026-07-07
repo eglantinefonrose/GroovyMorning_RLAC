@@ -10,10 +10,14 @@ import subprocess
 import shutil
 import argparse
 from pathlib import Path
-
 # Configuration par défaut
-DEFAULT_MEDIA_BASE_DIR = "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/@assets/0.media"
-DEFAULT_TRANSCRIPTION_OUTPUT_DIR = "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/@assets/1.modelOutputs/0.transcriptions/1.transcriptions_whisper_ggml-large-v3-turbo"
+SCRIPT_DIR = Path(__file__).resolve().parent
+RD_DIR = SCRIPT_DIR.parent.parent.parent
+ASSETS_DIR = RD_DIR / "@assets"
+
+DEFAULT_MEDIA_BASE_DIR = str(ASSETS_DIR / "0.media")
+DEFAULT_TRANSCRIPTION_OUTPUT_DIR = str(ASSETS_DIR / "1.modelOutputs/0.transcriptions/1.transcriptions_whisper_ggml-large-v3-turbo")
+DEFAULT_MODEL_ID = "large-v3-turbo"
 DEFAULT_WHISPER_CLI_PATH = "/opt/homebrew/bin/whisper-cli"
 DEFAULT_MODEL_PATH = "/Applications/DevTools/AI/whisper.cpp/models/ggml-large-v3-turbo.bin"
 

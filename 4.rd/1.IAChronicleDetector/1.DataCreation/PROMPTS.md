@@ -142,11 +142,11 @@ Audited 46 packages in 1ms
 (base) eglantine@macbook-pro-6 2.TranscriptionGeneration % 
 (base) eglantine@macbook-pro-6 2.TranscriptionGeneration % uv run ./prt-generate-transcripts-with-kyutai_stt_2.6b_fr.py
 Traceback (most recent call last):
-  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/1.DataCreation/2.TranscriptionGeneration/./prt-generate-transcripts-with-kyutai_stt_2.6b_fr.py", line 243, in <module>
+  File "./4.rd/1.IAChronicleDetector/1.DataCreation/2.TranscriptionGeneration/./prt-generate-transcripts-with-kyutai_stt_2.6b_fr.py", line 243, in <module>
     main()
-  File "/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/1.DataCreation/2.TranscriptionGeneration/./prt-generate-transcripts-with-kyutai_stt_2.6b_fr.py", line 190, in main
+  File "./4.rd/1.IAChronicleDetector/1.DataCreation/2.TranscriptionGeneration/./prt-generate-transcripts-with-kyutai_stt_2.6b_fr.py", line 190, in main
     from moshi_mlx.models import loaders
-ImportError: cannot import name 'loaders' from 'moshi_mlx.models' (/Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/1.IAChronicleDetector/1.DataCreation/2.TranscriptionGeneration/.venv/lib/python3.12/site-packages/moshi_mlx/models/__init__.py)
+ImportError: cannot import name 'loaders' from 'moshi_mlx.models' (./4.rd/1.IAChronicleDetector/1.DataCreation/2.TranscriptionGeneration/.venv/lib/python3.12/site-packages/moshi_mlx/models/__init__.py)
 (base) eglantine@macbook-pro-6 2.TranscriptionGeneration % 
 ```
 
@@ -169,7 +169,7 @@ Ok nickel, ça fonctionne. Mais il y a un truc bizarre dans le texte généré. 
 Tu penses que c'est un problème du modèle où un truc bizarre dans le code
 
 ```
-uv run ./prt-generate-transcripts-with-kyutai_stt_2.6b_fr.py -i /Users/eglantine/Dev/0.perso/2.Proutechos/9.GroovyMorning/4.rd/@assets/0.media/audio/1.rtl-matin/06-04-2026/chroniques/angle-eco.mp3  --stdout
+uv run ./prt-generate-transcripts-with-kyutai_stt_2.6b_fr.py -i ./4.rd/@assets/0.media/audio/1.rtl-matin/06-04-2026/chroniques/angle-eco.mp3  --stdout
 1                                                                                                                                                                                                                                                             
 00:00:01,660 --> 00:00:02,060
 RTLmatin.

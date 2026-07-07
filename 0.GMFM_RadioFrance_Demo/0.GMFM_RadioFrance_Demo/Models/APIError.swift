@@ -68,7 +68,7 @@ class APIService {
     
     var customIPAddress: String {
         get {
-            UserDefaults.standard.string(forKey: "customIPAddress") ?? "http://10.155.210.134:8000"
+            UserDefaults.standard.string(forKey: "customIPAddress") ?? "http://YOUR_SERVER_IP:8000"
         }
         set {
             UserDefaults.standard.set(newValue, forKey: "customIPAddress")
