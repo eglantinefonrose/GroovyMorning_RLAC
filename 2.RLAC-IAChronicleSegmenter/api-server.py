@@ -98,8 +98,8 @@ def update_scheduler(hour, minute):
     print(f"⏰ [Scheduler] Prochain segmenter programmé à {time_str} (Arrêt à {END_TIME})")
 
 # Initialisation du scheduler
-START_TIME = os.environ.get('START_TIME', '21:57')
-END_TIME = os.environ.get('END_TIME', '09:10')
+START_TIME = os.environ.get('START_TIME', '15:00')
+END_TIME = os.environ.get('END_TIME', '15:30')
 
 print(f"⏰ [Scheduler] Configuration : {START_TIME} -> {END_TIME}")
 print(f"🕒 [System] Heure actuelle du conteneur : {datetime.now().strftime('%H:%M:%S')}")

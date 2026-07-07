@@ -24,7 +24,7 @@ FROM amazoncorretto:21-alpine
 # Install runtime dependencies: FFmpeg, curl, and bash
 # FFmpeg is required for recording and extraction
 # Curl is required for sending audio chunks to the external API (localhost:8001)
-RUN apk add --no-cache ffmpeg curl bash
+RUN apk add --no-cache ffmpeg curl bash tzdata
 
 WORKDIR /app
 

@@ -365,9 +365,23 @@ class UnifiedLiveSegmenter:
         try:
             if simu:
                 print(f"📁 Mode SIMULATION : écoute sur {self.pipe_path}")
-                if not os.path.exists(self.pipe_path):
+                
+                # S'assurer que le pipe est bien un FIFO
+                if os.path.exists(self.pipe_path):
+                    import stat
+                    if not stat.S_ISFIFO(os.stat(self.pipe_path).st_mode):
+                        print(f"⚠️ {self.pipe_path} n'est pas un FIFO, suppression...")
+                        os.remove(self.pipe_path)
+                        os.mkfifo(self.pipe_path)
+                    else:
+                        print(f"✅ FIFO existant détecté sur {self.pipe_path}")
+                else:
+                    print(f"🔨 Création du FIFO {self.pipe_path}")
                     os.mkfifo(self.pipe_path)
+                
+                print(f"⏳ Attente d'un flux sur le pipe...")
                 source = open(self.pipe_path, 'rb')
+                print(f"🚀 Pipe ouvert, début de la lecture.")
             else:
                 print("🎤 Mode LIVE : écoute sur le flux radio France Inter")
                 stream_url = "https://stream.radiofrance.fr/franceinter/franceinter_hifi.m3u8"
@@ -393,9 +407,9 @@ class UnifiedLiveSegmenter:
                         print("⚠️ Fin du flux live ou erreur ffmpeg.")
                         break
                 
-                # Heartbeat toutes les ~5 secondes (16000 samples/s * 5 / chunk_size)
-                # if self.total_samples_processed % (self.sample_rate * 5) < self.chunk_size:
-                #     print(f"💓 [Heartbeat] Lecture en cours... (Total: {self.total_samples_processed / self.sample_rate:.1f}s)")
+                # Heartbeat toutes les ~10 secondes
+                if self.total_samples_processed % (self.sample_rate * 10) < self.chunk_size:
+                    print(f"💓 [Heartbeat] Lecture audio en cours... (Total: {self.total_samples_processed / self.sample_rate:.1f}s)")
 
                 chunk = np.frombuffer(raw_data, dtype=np.int16).astype(np.float32) / 32768.0
                 if len(chunk) > 0:

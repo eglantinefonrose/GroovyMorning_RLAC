@@ -18,6 +18,7 @@ services:
       - SERVER_HOST=0.0.0.0
       - DB_PATH=/app/data/rlac.db
       - PYTHON_API_URL=http://python-segmenter:8001
+      - TZ=Europe/Paris
     restart: unless-stopped
     networks:
       - rlac-network
@@ -71,18 +72,32 @@ services:
   # --- Simulateur FFmpeg (Mode SIMU uniquement) ---
   # Envoie le fichier audio dans le pipe pour simuler un flux live
   ffmpeg-simu:
-    image: jrottenberg/ffmpeg:latest
+    image: rlac-python-segmenter:latest
     container_name: rlac-ffmpeg-simu
     volumes:
       - ./4.rd/@assets:/data
       - shared-pipe:/tmp
-    entrypoint: >
-      /bin/sh -c "
-      echo '⏳ [Simu] Attente de ${START_TIME:-21:57} pour lancer la simulation...';
-      while [ \"\$(date +%H:%M)\" != \"${START_TIME:-21:57}\" ]; do sleep 2; done;
-      echo '🚀 [Simu] Heure atteinte ! Lancement du flux audio...';
-      ffmpeg -re -i /data/3.modelEvaluationData/france-inter/audio/27-05-2026.m4a -f s16le -ac 1 -ar 16000 -y /tmp/audio_pipe
-      "
+    env_file:
+      - .env
+    entrypoint: |
+      /bin/bash -c '
+      # S’assurer que le pipe est bien un FIFO et qu’il est vide
+      if [ -e /tmp/audio_pipe ]; then
+        rm -f /tmp/audio_pipe
+      fi
+      mkfifo /tmp/audio_pipe
+      
+      TARGET_FILE="/data/3.modelEvaluationData/france-inter/audio/${SIMU_AUDIO_FILE:-07-07-2026.m4a}"
+      echo "🎬 [Simu] Audio source: $$TARGET_FILE"
+      echo "⏳ [Simu] Waiting for ${START_TIME:-21:57} to start simulation (Current time: $$(date +%H:%M))..."
+      
+      while [ "$$(date +%H:%M)" != "${START_TIME:-21:57}" ]; do
+        sleep 2
+      done
+      
+      echo "🚀 [Simu] Start time reached! Sending audio to pipe..."
+      ffmpeg -re -i "$$TARGET_FILE" -f s16le -ac 1 -ar 16000 -y /tmp/audio_pipe
+      '
     environment:
       - TZ=Europe/Paris
     profiles:

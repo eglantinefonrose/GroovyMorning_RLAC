@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libffi-dev \
     pkg-config \
     libsndfile1 \
+    tzdata \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
