@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.gmfm.radiofrance.api.APIService
 import com.gmfm.radiofrance.data.PreferencesManager
 import com.gmfm.radiofrance.model.Chronicle
+import com.gmfm.radiofrance.model.ChronicleRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -86,9 +87,9 @@ class MainViewModel @Inject constructor(
         fetchData()
     }
 
-    fun fetchData() {
+    fun fetchData(showPopupIfUpdated: Boolean = true) {
         viewModelScope.launch {
-            Log.i("GMFM_Data", "🚀 Démarrage de fetchData...")
+            Log.i("GMFM_Data", "🚀 Démarrage de fetchData (showPopup=$showPopupIfUpdated)...")
             _isLoading.value = true
             _error.value = null
             try {
@@ -97,7 +98,7 @@ class MainViewModel @Inject constructor(
                 // 1. Fetch Folder Name
                 try {
                     val folderUrl = "${apiBaseUrl}api/findTodayFolder"
-                    val folderResponse = apiService.findTodayFolder(folderUrl)
+                    val folderResponse = apiService.findTodayFolder(folderUrl, "8dcb13c3")
                     _folderName.value = folderResponse["folderName"]
                     Log.i("GMFM_Data", "📂 Dossier du jour trouvé: ${_folderName.value}")
                 } catch (e: Exception) {
@@ -126,11 +127,13 @@ class MainViewModel @Inject constructor(
                 val chroniclesUrl = "${apiBaseUrl}api/getUserChronicles"
                 Log.i("GMFM_Data", "🌐 Appel API Chroniques: $chroniclesUrl")
                 
-                val response = apiService.getUserChronicles(chroniclesUrl)
-                _chronicles.value = response.chronicles.filter { (it.startTime ?: -1) >= 0 }
-                Log.i("GMFM_Data", "✅ ${_chronicles.value.size} chroniques filtrées (enregistrables) récupérées")
+                val response = apiService.getUserChronicles(chroniclesUrl, "8dcb13c3")
+                _chronicles.value = response.chronicles.filter { 
+                    (it.startTime ?: -1) >= 0 && !it.title.isNullOrBlank() 
+                }
+                Log.i("GMFM_Data", "✅ ${_chronicles.value.size} chroniques valides récupérées")
                 
-                if (response.updated) {
+                if (response.updated && showPopupIfUpdated) {
                     Log.i("GMFM_Data", "⚠️ Grille mise à jour détectée !")
                     _showUpdatePopup.value = true
                 }
@@ -170,25 +173,36 @@ class MainViewModel @Inject constructor(
                 
                 // 1. Remove existing chronicles
                 val removeUrl = "${apiBaseUrl}api/removeChronicles"
-                apiService.removeChronicles(removeUrl)
+                apiService.removeChronicles(removeUrl, "8dcb13c3")
                 
                 // 2. Add each chronicle in the new order
                 val addUrl = "${apiBaseUrl}api/addChronicle"
                 val programsToSave = _chronicles.value
+                Log.d("GMFM_Data", "Saving ${programsToSave.size} chronicles...")
+                
                 for (chronicle in programsToSave) {
+                    val title = chronicle.title
+                    if (title.isNullOrBlank()) {
+                        Log.w("GMFM_Data", "Skipping chronicle with empty title: $chronicle")
+                        continue
+                    }
+                    
+                    Log.d("GMFM_Data", "Adding chronicle: $title")
                     apiService.addChronicle(
                         url = addUrl,
-                        title = chronicle.title ?: "",
+                        name = title,
                         startTime = chronicle.startTime ?: 0,
-                        duration = chronicle.duration ?: 300
+                        duration = chronicle.duration ?: 300,
+                        userId = "8dcb13c3"
                     )
                 }
                 
                 // 3. Refresh data
-                fetchData()
+                fetchData(showPopupIfUpdated = false)
                 Log.d("GMFM_Data", "Successfully saved programming")
             } catch (e: Exception) {
                 Log.e("GMFM_Data", "Error saving programming: ${e.message}", e)
+                _error.value = "Erreur lors de la sauvegarde : ${e.message}"
             } finally {
                 _isProgramming.value = false
             }
@@ -203,7 +217,7 @@ class MainViewModel @Inject constructor(
             try {
                 val apiBaseUrl = if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/"
                 val url = "${apiBaseUrl}api/setUserBaseTime"
-                apiService.setUserBaseTime(url, hour, minute)
+                apiService.setUserBaseTime(url, hour, minute, "8dcb13c3")
                 _baseHour.value = hour
                 _baseMinute.value = minute
                 Chronicle.updateGlobalStartTime(hour, minute)

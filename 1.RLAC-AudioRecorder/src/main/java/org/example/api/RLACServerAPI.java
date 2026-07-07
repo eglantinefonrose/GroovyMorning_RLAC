@@ -197,8 +197,14 @@ public class RLACServerAPI {
                 return createErrorResponse("Le realTimecode de la chronique ne peut pas être nul.");
             }
 
+            // Le chroniqueRealTimecode fourni est relatif à l'heure de base de l'utilisateur.
+            // On le convertit en offset relatif à REFERENCE_SECONDS (07h00) pour le stockage interne.
+            DatabaseService.UserConfig config = DatabaseService.getInstance().getUserConfig(userId);
+            int userBaseSeconds = config.baseHour * 3600 + config.baseMinute * 60;
+            int storageStartTime = (userBaseSeconds + chroniqueRealTimecode) - ChroniclesManagerService.REFERENCE_SECONDS;
+
             int effectiveDuration = (duration != null) ? duration : 300; // 5 minutes par défaut
-            Chronicle chronicle = new Chronicle(nomDeChronique, chroniqueRealTimecode, chroniqueRealTimecode + effectiveDuration);
+            Chronicle chronicle = new Chronicle(nomDeChronique, storageStartTime, storageStartTime + effectiveDuration);
                     
             chroniclesManagerService.addChronicle(userId, chronicle);
             Map<String, Object> response = new HashMap<>();
@@ -206,8 +212,9 @@ public class RLACServerAPI {
             response.put("message", "Chronique ajoutée avec succès.");
             response.put("chronicle", Map.of(
                     "nomDeChronique", chronicle.getNomDeChronique(),
-                    "startTime", chronicle.getStartTime(),
-                    "endTime", chronicle.getEndTime()
+                    "startTimeRelativeToBase", chroniqueRealTimecode,
+                    "startTimeInternal", chronicle.getStartTime(),
+                    "endTimeInternal", chronicle.getEndTime()
             ));
             return Response.ok(response).build();
         } catch (Exception e) {

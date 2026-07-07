@@ -88,7 +88,8 @@ public class ChronicleRecordingIntegrationTest {
         // End C1 with realDuration
         dynamicService.handleEndNotification(testUserId, chronicle1, "5");
         
-        // C2 starts automatically (chained)
+        // Start C2
+        dynamicService.handleStartNotification(testUserId, chronicle2);
         Thread.sleep(5000); // Record 5 seconds
         
         // End C2

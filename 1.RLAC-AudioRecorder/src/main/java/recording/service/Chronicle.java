@@ -66,7 +66,7 @@ public class Chronicle {
             int minute = Integer.parseInt(parts[1]);
             int totalSeconds = hour * 3600 + minute * 60;
             // Référence théorique : La matinale commence à 07:00:00 sur France Inter
-            this.startTime = totalSeconds - (7 * 3600);
+            this.startTime = totalSeconds - ChroniclesManagerService.REFERENCE_SECONDS;
         }
     }
 
