@@ -55,3 +55,5 @@ Simulation of a live radio stream via Docker and Unix pipes to validate the comp
 ### 9. Dataset Creation and Ground Truth
 Methodology for mathematical alignment between official podcasts and the live stream to automatically generate labeled training data.
 [Access the article](7.articles/en/9.creation-donnees-ia.md)
+
+Version française : [Access the article](7.articles/fr/0.introduction-generale.md)
