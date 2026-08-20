@@ -22,36 +22,36 @@ La série est structurée en neuf chapitres abordant chacun une facette spécifi
 
 ### 1. Détection de chroniques par IA
 Analyse des différentes méthodes d'identification (LLM, Machine Learning, Analyse spectrale) et mise en place d'un standard d'interopérabilité JSON pour les détecteurs.
-[Accéder à l'article](./1.detection-chroniques.md)
+[Accéder à l'article](7.articles/fr/1.detection-chroniques.md)
 
 ### 2. Recalibrage et synchronisation audio
 Gestion de la latence entre le serveur de détection (Python) et le serveur d'enregistrement (Java). Utilisation des liens physiques (hard links) pour une correction rétroactive sans surcoût disque.
-[Accéder à l'article](./2.recalibrage-audio.md)
+[Accéder à l'article](7.articles/fr/2.recalibrage-audio.md)
 
 ### 3. Framework d'évaluation de la qualité
 Mise en place d'un système de benchmarking pour mesurer la précision des modèles de segmentation et leur capacité à respecter les contraintes du temps réel.
-[Accéder à l'article](./3.evaluation-qualite.md)
+[Accéder à l'article](7.articles/fr/3.evaluation-qualite.md)
 
 ### 4. Calcul de la latence et Master Sync
 Utilisation du fingerprinting audio pour calculer et compenser le décalage entre deux flux HTTP distants.
-[Accéder à l'article](./4.calcul-latence.md)
+[Accéder à l'article](7.articles/fr/4.calcul-latence.md)
 
 ### 5. Transcription et Analyse Sémantique
 Mise en oeuvre des pipelines STT (Speech-To-Text) avec Whisper et Kyutai. Analyse sémantique via DeepSeek pour extraire le sens des transitions radio.
-[Accéder à l'article](./5.transcription-analyse-semantique.md)
+[Accéder à l'article](7.articles/fr/5.transcription-analyse-semantique.md)
 
 ### 6. Architecture Globale du pipeline
 Vue d'ensemble de l'orchestration système. Schéma logique de circulation des données entre la capture, le moteur d'IA et l'API de distribution.
-[Accéder à l'article](./6.architecture-globale.md)
+[Accéder à l'article](7.articles/fr/6.architecture-globale.md)
 
 ### 7. Capture Audio Haute Disponibilité
 Focus sur le module Java/Spring Boot. Gestion de FFmpeg, threads de capture et concept de "Master Stream" pour permettre le rembobinage dynamique.
-[Accéder à l'article](./7.capture-audio-java.md)
+[Accéder à l'article](7.articles/fr/7.capture-audio-java.md)
 
 ### 8. Validation par Tests End-to-End
 Simulation d'un flux radio en direct via Docker et des pipes Unix pour valider la chaîne de traitement complète sans dépendre de la diffusion réelle.
-[Accéder à l'article](./8.tests-e2e-simulation.md)
+[Accéder à l'article](7.articles/fr/8.tests-e2e-simulation.md)
 
 ### 9. Création de Datasets et Ground Truth
 Méthodologie d'alignement mathématique entre les podcasts officiels et le flux live pour générer automatiquement des données d'entraînement labellisées.
-[Accéder à l'article](./9.creation-donnees-ia.md)
+[Accéder à l'article](7.articles/fr/9.creation-donnees-ia.md)
