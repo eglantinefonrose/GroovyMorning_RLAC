@@ -1,57 +1,57 @@
 ---
 ---
 
-# Introduction à GroovyMorning : Personnalisation du flux radio en temps réel
+# Introduction to GroovyMorning: Real-Time Radio Stream Personalization
 
-Cette série d'articles documente les défis techniques et les solutions architecturales mis en oeuvre pour assurer la capture, l'analyse et la distribution automatisée des chroniques radio.
+This series of articles documents the technical challenges and architectural solutions implemented to ensure the automated capture, analysis, and distribution of radio segments.
 
-## Les piliers du système
+## The Pillars of the System
 
-Pour passer d'un signal audio brut à une application mobile fonctionnelle, GroovyMorning repose sur les quatre piliers suivants :
+To go from a raw audio signal to a functional mobile application, GroovyMorning relies on the following four pillars:
 
-1.  **La Capture (RLAC-AudioRecorder)** : Un module Java haute disponibilité assurant l'enregistrement continu et la segmentation HLS.
-2.  **L'Intelligence (IAChronicleDetector)** : Un moteur d'analyse Python exploitant de l'intelligence artificielle pour identifier les différentes chroniques en live.
-3.  **La Synchronisation** : Un mécanisme de correction temporelle et de fingerprinting pour aligner les flux distribués.
-4.  **L'Infrastructure de Données** : Un pipeline de création de datasets pour l'entraînement et l'évaluation des modèles.
+1.  **Capture (RLAC-AudioRecorder)**: A high-availability Java module ensuring continuous recording and HLS segmentation.
+2.  **Intelligence (IAChronicleDetector)**: A Python analysis engine using artificial intelligence to identify various radio segments in real-time.
+3.  **Synchronization**: A temporal correction and fingerprinting mechanism to align distributed streams.
+4.  **Data Infrastructure**: A dataset creation pipeline for model training and evaluation.
 
 ---
 
-## Structure de la série technique
+## Structure of the Technical Series
 
-La série est structurée en neuf chapitres abordant chacun une facette spécifique du pipeline de traitement.
+The series is structured into nine chapters, each addressing a specific aspect of the processing pipeline.
 
-### 1. Détection de chroniques par IA
-Analyse des différentes méthodes d'identification (LLM, Machine Learning, Analyse spectrale) et mise en place d'un standard d'interopérabilité JSON pour les détecteurs.
-[Accéder à l'article](7.articles/fr/1.detection-chroniques.md)
+### 1. AI-Powered Segment Detection
+Analysis of different identification methods (LLM, Machine Learning, Spectral Analysis) and the implementation of a JSON interoperability standard for detectors.
+[Access the article](7.articles/en/1.detection-chroniques.md)
 
-### 2. Recalibrage et synchronisation audio
-Gestion de la latence entre le serveur de détection (Python) et le serveur d'enregistrement (Java). Utilisation des liens physiques (hard links) pour une correction rétroactive sans surcoût disque.
-[Accéder à l'article](7.articles/fr/2.recalibrage-audio.md)
+### 2. Audio Recalibration and Synchronization
+Management of latency between the detection server (Python) and the recording server (Java). Use of physical links (hard links) for retroactive correction without disk overhead.
+[Access the article](7.articles/en/2.recalibrage-audio.md)
 
-### 3. Framework d'évaluation de la qualité
-Mise en place d'un système de benchmarking pour mesurer la précision des modèles de segmentation et leur capacité à respecter les contraintes du temps réel.
-[Accéder à l'article](7.articles/fr/3.evaluation-qualite.md)
+### 3. Quality Evaluation Framework
+Implementation of a benchmarking system to measure the accuracy of segmentation models and their ability to meet real-time constraints.
+[Access the article](7.articles/en/3.evaluation-qualite.md)
 
-### 4. Calcul de la latence et Master Sync
-Utilisation du fingerprinting audio pour calculer et compenser le décalage entre deux flux HTTP distants.
-[Accéder à l'article](7.articles/fr/4.calcul-latence.md)
+### 4. Latency Calculation and Master Sync
+Use of audio fingerprinting to calculate and compensate for the offset between two distant HTTP streams.
+[Access the article](7.articles/en/4.calcul-latence.md)
 
-### 5. Transcription et Analyse Sémantique
-Mise en oeuvre des pipelines STT (Speech-To-Text) avec Whisper et Kyutai. Analyse sémantique via DeepSeek pour extraire le sens des transitions radio.
-[Accéder à l'article](7.articles/fr/5.transcription-analyse-semantique.md)
+### 5. Transcription and Semantic Analysis
+Implementation of STT (Speech-To-Text) pipelines with Whisper and Kyutai. Semantic analysis via DeepSeek to extract meaning from radio transitions.
+[Access the article](7.articles/en/5.transcription-analyse-semantique.md)
 
-### 6. Architecture Globale du pipeline
-Vue d'ensemble de l'orchestration système. Schéma logique de circulation des données entre la capture, le moteur d'IA et l'API de distribution.
-[Accéder à l'article](7.articles/fr/6.architecture-globale.md)
+### 6. Global Pipeline Architecture
+Overview of system orchestration. Logical diagram of data flow between capture, the AI engine, and the distribution API.
+[Access the article](7.articles/en/6.architecture-globale.md)
 
-### 7. Capture Audio Haute Disponibilité
-Focus sur le module Java/Spring Boot. Gestion de FFmpeg, threads de capture et concept de "Master Stream" pour permettre le rembobinage dynamique.
-[Accéder à l'article](7.articles/fr/7.capture-audio-java.md)
+### 7. High-Availability Audio Capture
+Focus on the Java/Spring Boot module. Management of FFmpeg, capture threads, and the "Master Stream" concept to allow dynamic rewinding.
+[Access the article](7.articles/en/7.capture-audio-java.md)
 
-### 8. Validation par Tests End-to-End
-Simulation d'un flux radio en direct via Docker et des pipes Unix pour valider la chaîne de traitement complète sans dépendre de la diffusion réelle.
-[Accéder à l'article](7.articles/fr/8.tests-e2e-simulation.md)
+### 8. End-to-End Test Validation
+Simulation of a live radio stream via Docker and Unix pipes to validate the complete processing chain without depending on real broadcasting.
+[Access the article](7.articles/en/8.tests-e2e-simulation.md)
 
-### 9. Création de Datasets et Ground Truth
-Méthodologie d'alignement mathématique entre les podcasts officiels et le flux live pour générer automatiquement des données d'entraînement labellisées.
-[Accéder à l'article](7.articles/fr/9.creation-donnees-ia.md)
+### 9. Dataset Creation and Ground Truth
+Methodology for mathematical alignment between official podcasts and the live stream to automatically generate labeled training data.
+[Access the article](7.articles/en/9.creation-donnees-ia.md)
