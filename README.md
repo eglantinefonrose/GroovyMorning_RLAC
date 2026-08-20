@@ -1,4 +1,4 @@
-# 🌅 GroovyMorning
+# GroovyMorning
 
 **GroovyMorning** is a personal radio assistant that allows you to schedule, record, and intelligently segment radio chronicles (focusing on France Inter) to listen to them whenever you want, even offline.
 
@@ -6,7 +6,7 @@ It consists of a Java backend for recording, a Python service for AI-powered seg
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 - **Intelligent Scheduling**: Schedule your favorite radio chronicles based on the official program grid.
 - **AI-Powered Segmentation**: Automatic detection of chronicle starts and ends using jingle recognition or DeepSeek LLM analysis of transcriptions.
@@ -16,7 +16,7 @@ It consists of a Java backend for recording, a Python service for AI-powered seg
 
 ---
 
-## 🛠 Architecture
+## Architecture
 
 The project is divided into several modules:
 
@@ -27,7 +27,7 @@ The project is divided into several modules:
 
 ---
 
-## 📦 Quick Start with Docker
+## Quick Start with Docker
 
 The easiest way to run the entire system is using Docker Compose.
 
@@ -60,7 +60,7 @@ This will start:
 
 ---
 
-## 📱 Mobile App Connection
+## Mobile App Connection
 
 1.  Ensure your phone is on the same Wi-Fi as your server.
 2.  Open the GroovyMorning app.
@@ -70,7 +70,7 @@ This will start:
 
 ---
 
-## 🧪 Testing
+## Testing
 
 We have a complete end-to-end (E2E) testing pipeline to validate the workflow.
 
@@ -82,7 +82,7 @@ See [TESTING.md](./TESTING.md) for more details.
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License** - see the [LICENSE](./LICENSE) file for details.
 
