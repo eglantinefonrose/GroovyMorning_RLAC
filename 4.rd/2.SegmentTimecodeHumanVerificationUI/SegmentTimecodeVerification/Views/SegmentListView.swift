@@ -9,10 +9,8 @@ struct SegmentListView: View {
 
     var body: some View {
         VStack {
-            if viewModel.availableMediaFiles.isEmpty {
-                ContentUnavailableView("No Media Files", systemImage: "music.note.list", description: Text("Set the media folder and ensure it contains .mp3 files."))
-            } else if viewModel.selectedMediaURL == nil {
-                ContentUnavailableView("No Media Selected", systemImage: "play.circle", description: Text("Select a media file from the dropdown above."))
+            if viewModel.selectedMediaURL == nil {
+                ContentUnavailableView("No Media Selected", systemImage: "play.circle", description: Text("Open an audio file from the header to begin."))
             } else {
                 ScrollViewReader { proxy in
                     List(selection: $viewModel.selectedSegmentId) {
@@ -20,9 +18,9 @@ struct SegmentListView: View {
                             ContentUnavailableView {
                                 Label("No Segments Found", systemImage: "text.badge.xmark")
                             } description: {
-                                Text("Could not find a .txt file matching this audio.")
+                                Text("Open a .txt file to load chroniques, or add one manually.")
                             } actions: {
-                                Button("Select TXT Manually") {
+                                Button("Open TXT File") {
                                     selectFile(extensions: ["txt"]) { url in
                                         viewModel.loadManualTXT(url: url)
                                     }

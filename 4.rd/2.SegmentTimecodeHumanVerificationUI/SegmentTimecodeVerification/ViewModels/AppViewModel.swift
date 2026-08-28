@@ -6,12 +6,29 @@ import Combine
 class AppViewModel: ObservableObject {
     @Published var config = AppConfig()
     @Published var availableMediaFiles: [URL] = []
+    
     @Published var selectedMediaURL: URL? {
         didSet {
             if let url = selectedMediaURL {
                 triggerLoad(for: url)
             } else {
                 clearData()
+            }
+        }
+    }
+    
+    @Published var selectedSRTURL: URL? {
+        didSet {
+            if let url = selectedSRTURL {
+                loadSRT(from: url)
+            }
+        }
+    }
+    
+    @Published var selectedTXTURL: URL? {
+        didSet {
+            if let url = selectedTXTURL {
+                loadTXT(from: url)
             }
         }
     }
@@ -37,7 +54,6 @@ class AppViewModel: ObservableObject {
     
     init() {
         loadConfig()
-        refreshMediaFiles()
     }
     
     func loadConfig() {
@@ -50,24 +66,6 @@ class AppViewModel: ObservableObject {
     func saveConfig() {
         if let encoded = try? JSONEncoder().encode(config) {
             UserDefaults.standard.set(encoded, forKey: "AppConfig")
-        }
-    }
-    
-    func refreshMediaFiles() {
-        guard let path = config.mediaDirectoryPath, !path.isEmpty else { return }
-        let expandedPath = (path as NSString).expandingTildeInPath
-        let url = URL(fileURLWithPath: expandedPath)
-        
-        do {
-            let files = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
-            let mp3s = files.filter { $0.pathExtension.lowercased() == "mp3" }
-                .sorted(by: { $0.lastPathComponent.localizedStandardCompare($1.lastPathComponent) == .orderedAscending })
-            
-            self.availableMediaFiles = mp3s
-            print("DEBUG: Refreshed media files, found \(mp3s.count) MP3s in \(expandedPath)")
-        } catch {
-            print("ERROR: Could not refresh media files at \(expandedPath): \(error)")
-            self.errorMessage = "Impossible de lire le dossier média : \(error.localizedDescription)"
         }
     }
     
@@ -88,87 +86,46 @@ class AppViewModel: ObservableObject {
     }
     
     private func loadData(for mediaURL: URL) async {
-        let baseName = mediaURL.deletingPathExtension().lastPathComponent
-        print("DEBUG: === Starting loadData for \(baseName) ===")
+        print("DEBUG: === Loading Media: \(mediaURL.lastPathComponent) ===")
         
         await MainActor.run {
             self.isLoading = true
-            self.clearData()
+            audioPlayer.stop()
         }
         
-        // Ensure audio is loaded on MainActor
         await MainActor.run {
             audioPlayer.load(url: mediaURL)
-        }
-        
-        if Task.isCancelled { return }
-
-        // Load SRT
-        if let srtURL = findRelatedFile(for: baseName, in: config.transcriptionDirectoryPath, extensions: ["srt"]) {
-            do {
-                let content = try String(contentsOf: srtURL, encoding: .utf8)
-                let blocks = SRTParser.parse(content: content)
-                await MainActor.run {
-                    self.srtBlocks = blocks
-                    print("DEBUG: Loaded \(blocks.count) SRT blocks from \(srtURL.lastPathComponent)")
-                    if blocks.isEmpty {
-                        self.errorMessage = "Le fichier SRT est vide ou mal formaté (\(srtURL.lastPathComponent))."
-                    }
-                }
-            } catch {
-                await MainActor.run {
-                    self.errorMessage = "Erreur lecture SRT : \(error.localizedDescription)"
-                }
-            }
-        } else {
-            print("DEBUG: No SRT found for \(baseName)")
-        }
-
-        if Task.isCancelled { return }
-
-        // Load Timecodes
-        if let txtURL = findRelatedFile(for: baseName, in: config.timecodeDirectoryPath, extensions: ["txt"]) {
-            let loadedSegments = FileService.shared.loadSegments(from: txtURL)
-            await MainActor.run {
-                self.segments = loadedSegments
-                self.currentTimecodeURL = txtURL
-                print("DEBUG: Loaded \(loadedSegments.count) segments from \(txtURL.lastPathComponent)")
-            }
-        } else {
-            print("DEBUG: No TXT found, preparing default path")
-            if let timecodePath = config.timecodeDirectoryPath, !timecodePath.isEmpty {
-                let expandedPath = (timecodePath as NSString).expandingTildeInPath
-                let dirURL = URL(fileURLWithPath: expandedPath)
-                await MainActor.run {
-                    self.currentTimecodeURL = dirURL.appendingPathComponent("\(baseName)_transcription_chronique.txt")
-                }
-            }
         }
         
         await MainActor.run {
             self.isLoading = false
         }
     }
-    
-    private func findRelatedFile(for baseName: String, in directoryPath: String?, extensions: [String]) -> URL? {
-        guard let path = directoryPath, !path.isEmpty else { return nil }
-        let expandedPath = (path as NSString).expandingTildeInPath
-        let dirURL = URL(fileURLWithPath: expandedPath)
-        
+
+    private func loadSRT(from url: URL) {
         do {
-            let files = try FileManager.default.contentsOfDirectory(at: dirURL, includingPropertiesForKeys: nil)
-            return files.first { fileURL in
-                let fileName = fileURL.lastPathComponent.lowercased()
-                let baseLower = baseName.lowercased()
-                // Be flexible: starts with baseName AND has correct extension
-                return fileName.hasPrefix(baseLower) && extensions.contains(fileURL.pathExtension.lowercased())
+            let content = try String(contentsOf: url, encoding: .utf8)
+            let blocks = SRTParser.parse(content: content)
+            self.srtBlocks = blocks
+            print("DEBUG: Loaded \(blocks.count) SRT blocks from \(url.lastPathComponent)")
+            if blocks.isEmpty {
+                self.errorMessage = "Le fichier SRT est vide ou mal formaté."
+            } else {
+                self.errorMessage = nil
             }
         } catch {
-            print("DEBUG: Error searching in \(expandedPath): \(error)")
-            return nil
+            self.errorMessage = "Erreur lecture SRT : \(error.localizedDescription)"
         }
     }
 
+    private func loadTXT(from url: URL) {
+        let loadedSegments = FileService.shared.loadSegments(from: url)
+        self.segments = loadedSegments
+        self.currentTimecodeURL = url
+        print("DEBUG: Loaded \(loadedSegments.count) segments from \(url.lastPathComponent)")
+        self.errorMessage = nil
+    }
+    
     func refreshCurrentMedia() {
         if let url = selectedMediaURL {
             triggerLoad(for: url)
@@ -231,16 +188,11 @@ class AppViewModel: ObservableObject {
     }
     
     func loadManualSRT(url: URL) {
-        if let content = try? String(contentsOf: url, encoding: .utf8) {
-            srtBlocks = SRTParser.parse(content: content)
-            errorMessage = srtBlocks.isEmpty ? "Fichier SRT mal formaté ou vide." : nil
-        }
+        selectedSRTURL = url
     }
     
     func loadManualTXT(url: URL) {
-        currentTimecodeURL = url
-        segments = FileService.shared.loadSegments(from: url)
-        selectedSegmentId = nil
+        selectedTXTURL = url
     }
     
     func syncOffset() {
@@ -273,7 +225,12 @@ class AppViewModel: ObservableObject {
         
         selectedSegmentId = newSegment.id
         isEditingMode = true
-        saveSegments()
+        
+        if currentTimecodeURL == nil {
+            errorMessage = "Veuillez charger ou enregistrer un fichier TXT d'abord."
+        } else {
+            saveSegments()
+        }
     }
 
     func renameSegment(id: UUID, newTitle: String) {
@@ -319,5 +276,10 @@ class AppViewModel: ObservableObject {
             print("Error saving segments: \(error)")
             errorMessage = "Erreur sauvegarde : \(error.localizedDescription)"
         }
+    }
+
+    func saveSegmentsAs(url: URL) {
+        currentTimecodeURL = url
+        saveSegments()
     }
 }

@@ -30,7 +30,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideAPIService(okHttpClient: OkHttpClient): APIService {
-        val baseUrl = "http://10.0.2.2:3000/"
+        val baseUrl = "http://192.168.1.85:8100/"
         Log.d("GMFM_Network", "Initializing Retrofit with base URL: $baseUrl")
         return Retrofit.Builder()
             .baseUrl(baseUrl)

@@ -67,15 +67,131 @@ task runLocal(type: Exec) {
     commandLine 'docker',  'compose', 'up', '-d'
 }
 
-task deployRemote(type: Exec) {
-    def remoteIp = project.findProperty('remoteIp') ?: "MISSING_IP"
-    commandLine 'bash', '-c', "scp docker-compose.yaml remote-user@${remoteIp}: && ssh remote-user@${remoteIp} 'docker-compose pull && docker-compose up -d'"
+task deployOnLinuxServer(type: Exec) {
+    group = 'deployment'
+    description = 'Deploys the application to the Linux server (192.168.1.85) and sets it up as a systemd service.'
+
+    def remoteUser = 'teevity'
+    def remoteIp = '192.168.1.85'
+    def remoteKey = '~/.ssh/id_ed25519_ptitserverlinuxduhaut_teevity'
+    def remoteDir = '/opt/prtlabs/rlac-grvmfm'
+    def sshBase = "ssh -i ${remoteKey} ${remoteUser}@${remoteIp}"
+    // Utilisation de sudo pour rsync sur le serveur
+    def rsyncArgs = "-avz --delete -e \"ssh -i ${remoteKey}\" --rsync-path=\"sudo rsync\""
 
     doFirst {
-        if (!project.hasProperty('remoteIp')) {
-            throw new InvalidUserDataException("Please provide the remote IP address using -PremoteIp=<ip-address>")
-        }
+        println "🚀 Deploying GroovyMorning to ${remoteIp}..."
+        println "📂 Target directory: ${remoteDir}"
     }
+
+    commandLine 'bash', '-c', """
+        set -e # S'arrêter immédiatement en cas d'erreur
+        
+        # 0. Vérifier l'accès sudo sans mot de passe
+        echo "🛡️  Checking sudo access..."
+        if ! ${sshBase} "sudo -n true" 2>/dev/null; then
+            echo "❌ ERROR: 'teevity' cannot run sudo without password on the server."
+            echo "Please run this on the server first:"
+            echo "echo 'teevity ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/teevity"
+            exit 1
+        fi
+
+        # 1. Create target directories with sudo
+        echo "📁 Creating remote directories..."
+        ${sshBase} "sudo mkdir -p ${remoteDir}/bin ${remoteDir}/data/database ${remoteDir}/data/media && sudo chown -R ${remoteUser}:${remoteUser} ${remoteDir}"
+
+        # 2. Sync Java Backend
+        echo "📦 Syncing Java Backend..."
+        rsync ${rsyncArgs} --exclude='build' --exclude='.gradle' --exclude='data' --exclude='media' ./ ${remoteUser}@${remoteIp}:${remoteDir}/bin/1.RLAC-AudioRecorder/
+
+        # 3. Sync Python Segmenter
+        echo "📦 Syncing Python Segmenter..."
+        rsync ${rsyncArgs} --exclude='.venv' --exclude='__pycache__' --exclude='data' ../2.RLAC-IAChronicleSegmenter/ ${remoteUser}@${remoteIp}:${remoteDir}/bin/2.RLAC-IAChronicleSegmenter/
+
+        # 4. Sync .env.example
+        echo "⚙️  Configuring environment..."
+        rsync ${rsyncArgs} ../.env.example ${remoteUser}@${remoteIp}:${remoteDir}/.env.example
+        ${sshBase} "sudo cp ${remoteDir}/.env.example ${remoteDir}/.env && sudo chown ${remoteUser}:${remoteUser} ${remoteDir}/.env"
+
+        # 5. Generate Docker Compose
+        echo "📝 Generating remote docker-compose.yml..."
+        ${sshBase} "sudo bash -c 'cat <<EOF > ${remoteDir}/docker-compose.yml
+services:
+  java-backend:
+    build:
+      context: ./bin/1.RLAC-AudioRecorder
+      dockerfile: Dockerfile
+    image: rlac-java-backend:latest
+    container_name: rlac-java-backend
+    ports:
+      - \"8100:8000\"
+    volumes:
+      - ./data/database:/app/data
+      - ./data/media:/app/media
+    environment:
+      - SERVER_PORT=8000
+      - SERVER_HOST=0.0.0.0
+      - DB_PATH=/app/data/rlac.db
+      - PYTHON_API_URL=http://python-segmenter:8001
+      - TZ=Europe/Paris
+    restart: unless-stopped
+    networks:
+      - rlac-network
+
+  python-segmenter:
+    build:
+      context: ./bin/2.RLAC-IAChronicleSegmenter
+      dockerfile: Dockerfile
+    image: rlac-python-segmenter:latest
+    container_name: rlac-python-segmenter
+    ports:
+      - \"8001:8001\"
+    volumes:
+      - ./data/database:/app/data
+      - ./bin/2.RLAC-IAChronicleSegmenter/assets:/app/assets
+      - shared-pipe:/tmp
+    env_file:
+      - .env
+    environment:
+      - JAVA_API_URL=http://java-backend:8000
+      - TZ=Europe/Paris
+    restart: unless-stopped
+    networks:
+      - rlac-network
+
+networks:
+  rlac-network:
+    driver: bridge
+
+volumes:
+  shared-pipe:
+EOF'"
+
+        # 6. Build and Start containers
+        echo "🛠️  Building and starting containers..."
+        ${sshBase} "cd ${remoteDir} && sudo docker compose build && sudo docker compose up -d"
+
+        # 7. Install as systemd service
+        echo "🔧 Installing systemd service..."
+        ${sshBase} "echo '[Unit]
+Description=RLAC GroovyMorning Service
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=${remoteDir}
+ExecStart=/usr/bin/docker compose up -d
+ExecStop=/usr/bin/docker compose down
+
+[Install]
+WantedBy=multi-user.target' | sudo tee /etc/systemd/system/rlac-grvmfm.service > /dev/null && \
+        sudo systemctl daemon-reload && \
+        sudo systemctl enable rlac-grvmfm.service"
+
+        echo "✅ Deployment successful!"
+    """
 }
 
 task prtHelp {
@@ -99,7 +215,7 @@ task prtHelp {
        -  Containerization and Remote Deploy:
            -> Build local Docker image                 gradle buildDockerImage
            -> Push to registry (Jib)                   gradle pushDockerImage
-           -> Deploy to remote server                  gradle deployRemote -PremoteIp=<ip-address>
+           -> Deploy to Linux Server (192.168.1.85)    gradle deployOnLinuxServer
 
 
     Using the classical Gradle commands works too

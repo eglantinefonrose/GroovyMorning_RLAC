@@ -16,7 +16,7 @@ class SRTParser {
             if trimmed.isEmpty { continue }
             
             // Try to match the time range in the line: [HH:mm:ss.SSS --> HH:mm:ss.SSS] Text
-            if let range = trimmed.range(of: #"(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\s*-->\s*(\d{1,2}:\d{2}:\d{2}[.,]\d{3})"#, options: .regularExpression) {
+            if let range = trimmed.range(of: #"(\d{1,2}:\d{2}:\d{2}[.,]\d{1,3})\s*-->\s*(\d{1,2}:\d{2}:\d{2}[.,]\d{1,3})"#, options: .regularExpression) {
                 
                 let timePart = String(trimmed[range])
                 let times = extractTimes(from: timePart)
@@ -53,7 +53,7 @@ class SRTParser {
     }
     
     private static func extractTimes(from text: String) -> [TimeInterval] {
-        let pattern = #"(\d{1,2}:\d{2}:\d{2}[.,]\d{3})"#
+        let pattern = #"(\d{1,2}:\d{2}:\d{2}[.,]\d{1,3})"#
         let regex = try? NSRegularExpression(pattern: pattern)
         let matches = regex?.matches(in: text, range: NSRange(text.startIndex..., in: text)) ?? []
         

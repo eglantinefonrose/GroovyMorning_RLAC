@@ -51,7 +51,7 @@ class MainViewModel @Inject constructor(
     private val _isSimuMode = MutableStateFlow(false)
     val isSimuMode: StateFlow<Boolean> = _isSimuMode
 
-    private val _serverIp = MutableStateFlow("http://10.0.2.2:8000")
+    private val _serverIp = MutableStateFlow("http://192.168.1.85:8100")
     val serverIp: StateFlow<String> = _serverIp
 
     private val _folderName = MutableStateFlow<String?>(null)
@@ -66,13 +66,13 @@ class MainViewModel @Inject constructor(
     val baseUrl: String
         get() {
             return if (_isSimuMode.value) {
-                "http://10.0.2.2:8000"
+                "http://192.168.1.85:8100"
             } else {
                 val ip = _serverIp.value
                 when {
                     ip.startsWith("http") -> ip.removeSuffix("/")
                     ip.contains(":") -> "http://$ip"
-                    else -> "http://$ip:8000"
+                    else -> "http://$ip:8100"
                 }
             }
         }

@@ -110,8 +110,8 @@ Une couche Conditional Random Field garantit que la séquence de labels prédite
 L'entraînement utilise une Focal Loss pour surmonter le déséquilibre des classes (les débuts de chroniques étant des événements rares).
 
 #### Observations et Résultats
- Lien vers le modèle :  
- Limites :   
+Lien vers le modèle :  
+Limites :   
 Note du modèle : 
 
 ### Fine-tuner le modèle sémantique BERT
@@ -140,6 +140,80 @@ Filtre de durée : Seuls les blocs continus de plus de 30 secondes sont conserv�
 #### Observations et Résultats
  Lien vers le modèle :  
  Limites :  
+Note du modèle : 
+
+### Fine-tuner le modèle sémantique BERT pour détecter le début d'une chronique
+
+Cette approche utilise un modèle **CamemBERT** (via Hugging Face Transformers) pour détecter automatiquement le début des chroniques au sein de transcriptions d'émissions de radio (STT).
+
+#### Entraînement du modèle
+Le script train_camembert.py permet d'entraîner le modèle sur vos propres données.
+Données : Le script récupère des fichiers .txt contenant la transcription des 10 premières secondes des chroniques et extrait la première phrase (les mots jusqu'au premier point).
+Sortie : Le modèle entraîné est sauvegardé dans le dossier ./camembert_chronicle_start.
+
+#### Inférence
+Le script affiche une liste numérotée des phrases identifiées comme étant des débuts de chronique.
+
+**Amélioration**
+Au moment de l'inférence, on choisit d'afficher les 3 premières phrases de la chronique au lieu d'uniquement la première phrase de la chronique. On constate que la détection est souvent faite légèrement trop tôt.
+
+#### Observations et Résultats
+- Note du modèle : 28.2/100
+
+**Amélioration 2**
+- Gestion des Transitions : Le modèle apprend enfin à gérer le passage d'un segment à l'autre. On génère des exemples mixtes (ex: [Dernière phrase de la chronique A, Phrase de transition, Première phrase de la chronique B]) étiquetés comme début de chronique.
+- Suppression du Biais de Longueur : Tous les exemples font désormais exactement 3 phrases. Le modèle ne peut plus tricher en associant "texte court" à "début de chronique".
+- Élimination de la Fuite de Données : Le découpage Train/Validation se fait par Épisode complet (GroupShuffleSplit). Le modèle ne peut plus "apprendre par cœur" une transition qu'il retrouverait en validation sous une forme presque identique.
+- Prise en compte de la transcription complète de l'émission pour intégrer plus de phrases "négatives" (non début de chroniques).
+
+NB : Les entraînements ont été faits en améliorant un modèle déjà entrainé (avec les premières améliorations), un modèle n'a pas été re-généré de 0.
+
+#### Observations et Résultats
+Lien vers le modèle : 
+Note du modèle : 22.4/100
+
+### Utiliser un LLM pour détecter juste le début des chroniques
+Après découverte que Claude arrive à extraire parfaitement les phrases de début de chroniques, utilisation de Qwen pour essayer d'extraire les phrases de début de chroniques.
+
+#### Entraînement du modèle
+On demande à Qwen de détecter les phrases correspond au début des chroniques. Il ne voit que les phrases au fur et à mesure (comme dans un flux live).
+On utilise le few-shot prompting pour lui donner des exemples directement dans le prompt (des exemples de phrases de début de chroniques).
+
+#### Inférence
+Le script observe le flux et signale quand il détecte le début d'une chronique.
+
+#### Observations et Résultats
+Lien vers le modèle : 
+Limites : 
+Note du modèle : 
+
+### Utiliser Claude pour détecter juste le début des chroniques
+Après découverte que Claude arrive à extraire parfaitement les phrases de début de chroniques, utilisation de l'API de Claude pour essayer d'extraire les phrases de début de chroniques.
+
+#### Entraînement du modèle
+On appelle l'API de Claude pour détecter les phrases correspond au début des chroniques, en lui donnant la liste des chroniques à détecter (dans l'ordre). Il ne voit que les phrases au fur et à mesure (comme dans un flux live).
+On utilise le few-shot prompting pour lui donner des exemples directement dans le prompt (des exemples de phrases de début de chroniques).
+
+#### Inférence
+Le script observe le flux et signale quand il détecte le début d'une chronique et son nom.
+
+#### Observations et Résultats
+Note du modèle :
+
+### Utiliser DeepSeek pour détecter juste le début des chroniques
+Pour des raisons de performances du modèle de Claude et économiques, on utilise l'API de DeepSeek pour détecter les chroniques dans le flux live.
+
+#### Entraînement du modèle
+On appelle l'API de DeepSeek (deepseek-v4-flash) pour détecter les phrases correspond au début des chroniques, en lui donnant la liste des chroniques à détecter (dans l'ordre). Il ne voit que les phrases au fur et à mesure (comme dans un flux live).
+On utilise le few-shot prompting pour lui donner des exemples directement dans le prompt (des exemples de phrases de début de chroniques).
+
+**Améliorations**
+Afin d'éviter les erreurs grossières, les chroniques sont comparées avec leur horaire théorique. On ignore également une chronique détectée qui est déjà passée. 
+
+**Inférence**
+Le script observe le flux et signale quand il détecte le début d'une chronique et son nom.
+
+**Observations et Résultats**
 Note du modèle : 
 
 ## Détection de chroniques à partir des audios des émissions de radio
@@ -171,7 +245,7 @@ Pour chaque segment de 3 secondes, le système extrait une signature acoustique 
 - RMS (Root Mean Square) : Mesure l'intensité sonore.
 - Caractéristiques Spectrales : Centroid, Rolloff et Bandwidth pour analyser la "brillance" du son.
 
-### Observations et Résultats
+#### Observations et Résultats
 Lien vers le modèle :  
 Limites :  
 Note du modèle : 
@@ -199,17 +273,17 @@ Afin d'essayer de détecter correctement les chroniques, les valeurs des paramè
 
 Même en jouant sur ces différents paramètres, aucun résultat satisfaisant lors de l'inférence n'a été obtenu.
 
-### Équilibrage du jeu de données
+#### Équilibrage du jeu de données
 Un des soucis qui fait que les chroniques ne sont pas détectées correctement est le déséquilibre dans le jeu de données : il y a beaucoup plus de "chroniques" que de "background" dans une radio, ce qui va créer des faux positifs.
 
 La méthode la plus précise est le levier de pourcentage. Le script génère les données, puis effectue un **sous-échantillonnage (downsampling)** automatique pour atteindre le ratio exact demandé.
 
 - **Principe** : Si on demande 80%, le script calculera combien de segments de chaque classe garder pour que le background représente exactement 80% du total.
 
-### Détection binaire (chronique ou non)
+#### Détection binaire (chronique ou non)
 Afin de simplifier et d'améliorer la détection des chroniques, on demande au modèle de détecter seulement les périodes où il y a des chroniques dans le code (sans les nommer).
 
-### Observations et Résultats
+#### Observations et Résultats
 - Lien vers le modèle : 
 - Limites : 
 - Note du modèle : 
@@ -279,7 +353,7 @@ Le script d'entraînement crée un modèle binaire (Jingle vs Background) optimi
 #### Modèle utilisé
   Utilise AST (Audio Spectrogram Transformer) (MIT/ast-finetuned-audioset), car sa capacité à analyser l'audio comme une image (via spectrogrammes) est supérieure pour reconnaître des motifs musicaux répétitifs comme les jingles. 
   
-### Inférence Hybride
+#### Inférence Hybride
 Ce script combine les deux modèles pour une segmentation précise.
 
 #### Algorithme
@@ -294,33 +368,36 @@ Ce script combine les deux modèles pour une segmentation précise.
  Limites : 
 Note du modèle : 
 
-Finetuning de différents modèles
+### Finetuning de différents modèles
 
 Bien que le modèle `facebook/wav2vec2-large-xlsr-53-french` soit excellent pour la reconnaissance vocale (ASR), il présente des limites pour la classification de segments :
 
-Biais linguistique : Wav2Vec2 est optimisé pour reconnaître des phonèmes et des mots. Or, une chronique se détecte souvent par sa texture sonore (jingles, musique de fond, qualité acoustique) que Wav2Vec2 peut avoir tendance à ignorer.
-Lourdeur vs Tâche : La version `large` (300M+ paramètres) est lourde pour une classification binaire ou multi-classes simple. Cela ralentit l'inférence et nécessite plus de données pour éviter le sur-apprentissage (overfitting).
-Analyse Locale : Le traitement séquentiel de l'onde brute peut manquer de vision "globale" sur un segment de 10s, notamment pour identifier des motifs musicaux complexes (jingles).
+- **Biais linguistique** : Wav2Vec2 est optimisé pour reconnaître des phonèmes et des mots. Or, une chronique se détecte souvent par sa texture sonore (jingles, musique de fond, qualité acoustique) que Wav2Vec2 peut avoir tendance à ignorer.
+- **Lourdeur vs Tâche** : La version `large` (300M+ paramètres) est lourde pour une classification binaire ou multi-classes simple. Cela ralentit l'inférence et nécessite plus de données pour éviter le sur-apprentissage (overfitting).
+- **Analyse Locale** : Le traitement séquentiel de l'onde brute peut manquer de vision "globale" sur un segment de 10s, notamment pour identifier des motifs musicaux complexes (jingles).
 
 On a donc cherché à utiliser d'autres modèles pour la détection des chroniques à partir du son de l'émission.
 
-Modèle AST
-Description : Convertit l'audio en spectrogramme (image) et utilise un Transformer (ViT) pour l'analyse.
-Avantages : Excellent pour capturer les signatures acoustiques et les jingles. C'est souvent le meilleur compromis pour la classification de scènes sonores.
-Modèle utilisé : `MIT/ast-finetuned-audioset-10-10-0.4593`
+**Inférences**
+Timecodes des chroniques (sans les nommer)
 
-Observations et Résultats
- Lien vers le modèle : 
- Limites : 
-Note du modèle : 
+**Modèle AST**    
+**Description** : Convertit l'audio en spectrogramme (image) et utilise un Transformer (ViT) pour l'analyse.   
+**Avantages** : Excellent pour capturer les signatures acoustiques et les jingles. C'est souvent le meilleur compromis pour la classification de scènes sonores.   
+**Modèle utilisé** : `MIT/ast-finetuned-audioset-10-10-0.4593`
+
+**Observations et Résultats**     
+ Lien vers le modèle :    
+ Limites :    
+Note du modèle : 2.9/100
 
 
-Modèle BEATS
-Description : Un des modèles pour la classification sonore générale.
-Avantages : Entraîné pour capturer à la fois la parole et les sons environnementaux/musicaux. Très robuste au bruit et aux mélanges sonores.
-Modèle utilisé : `microsoft/beats-base`
+**Modèle BEATS**.   
+**Description** : Un des modèles pour la classification sonore générale.   
+**Avantages** : Entraîné pour capturer à la fois la parole et les sons environnementaux/musicaux. Très robuste au bruit et aux mélanges sonores.   
+**Modèle utilisé** : `microsoft/beats-base`
 
-Observations et Résultats
+**Observations et Résultats**.   
  Lien vers le modèle : 
  Limites : 
 Note du modèle : 

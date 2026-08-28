@@ -16,10 +16,14 @@ class FileService {
         print("DEBUG: Found \(lines.count) lines in file")
         var segments: [Segment] = []
         
-        // Regex pour le nouveau format : [HH:mm:ss.SSS] - [HH:mm:ss.SSS] Titre - Chroniqueur
-        // On capture : 1 -> Start, 2 -> End, 3 -> Titre complet
-        let timestampPattern = #"\[(\d{1,2}:\d{2}:\d{2}(?:[.,]\d+)?)\]"#
-        let pattern = #"^\s*"# + timestampPattern + #"\s*-\s*"# + timestampPattern + #"\s*(.*)$"#
+        // Pattern flexible:
+        // 1. Timestamp optionnellement entre crochets
+        // 2. Séparateur entre les temps (tireur ou espace)
+        // 3. Deuxième timestamp optionnellement entre crochets
+        // 4. Séparateur optionnel (: ou -) avant le titre
+        let ts = #"\[?(\d{1,2}:\d{2}:\d{2}(?:[.,]\d+)?)\]?"#
+        let pattern = #"^\s*"# + ts + #"\s*(?:-|\s+)\s*"# + ts + #"\s*(?:[:\-]\s*)?(.*)$"#
+        
         print("DEBUG: Using regex pattern: \(pattern)")
         
         let regex = try? NSRegularExpression(pattern: pattern, options: [])
@@ -30,12 +34,15 @@ class FileService {
             
             if let match = regex?.firstMatch(in: trimmed, range: NSRange(trimmed.startIndex..., in: trimmed)) {
                 if let startRange = Range(match.range(at: 1), in: trimmed),
-                   let endRange = Range(match.range(at: 2), in: trimmed),
-                   let titleRange = Range(match.range(at: 3), in: trimmed) {
+                   let endRange = Range(match.range(at: 2), in: trimmed) {
                     
                     let startStr = String(trimmed[startRange])
                     let endStr = String(trimmed[endRange])
-                    let title = String(trimmed[titleRange]).trimmingCharacters(in: .whitespacesAndNewlines)
+                    
+                    var title = ""
+                    if match.numberOfRanges > 3, let titleRange = Range(match.range(at: 3), in: trimmed) {
+                        title = String(trimmed[titleRange]).trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
                     
                     if let start = parseTimestamp(startStr), let end = parseTimestamp(endStr) {
                         segments.append(Segment(startTime: start, endTime: end, title: title.isEmpty ? "Untitled" : title))

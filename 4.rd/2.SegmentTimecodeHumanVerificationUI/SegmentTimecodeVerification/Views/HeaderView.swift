@@ -1,35 +1,68 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct HeaderView: View {
     @ObservedObject var viewModel: AppViewModel
     
     var body: some View {
-        HStack(spacing: 20) {
-            Picker("Media File", selection: $viewModel.selectedMediaURL) {
-                Text("Select a file").tag(nil as URL?)
-                ForEach(viewModel.availableMediaFiles, id: \.self) { url in
-                    Text(url.lastPathComponent).tag(url as URL?)
+        HStack(spacing: 15) {
+            // Media Selection
+            VStack(alignment: .leading, spacing: 2) {
+                Button {
+                    selectFile(extensions: ["mp3", "wav", "m4a"]) { url in
+                        viewModel.selectedMediaURL = url
+                    }
+                } label: {
+                    Label(viewModel.selectedMediaURL?.lastPathComponent ?? "Open Audio", systemImage: "music.note")
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            
+            // SRT Selection
+            VStack(alignment: .leading, spacing: 2) {
+                Button {
+                    selectFile(extensions: ["srt"]) { url in
+                        viewModel.selectedSRTURL = url
+                    }
+                } label: {
+                    Label(viewModel.selectedSRTURL?.lastPathComponent ?? "Open SRT", systemImage: "captions.bubble")
                 }
             }
-            .frame(width: 300)
             
-            HStack {
-                Text("Start X:")
-                TextField("X", value: $viewModel.config.defaultXSeconds, formatter: NumberFormatter())
-                    .frame(width: 40)
-                    .textFieldStyle(.roundedBorder)
-                Text("s")
+            // TXT Selection
+            VStack(alignment: .leading, spacing: 2) {
+                Button {
+                    selectFile(extensions: ["txt"]) { url in
+                        viewModel.selectedTXTURL = url
+                    }
+                } label: {
+                    Label(viewModel.selectedTXTURL?.lastPathComponent ?? "Open TXT", systemImage: "doc.text")
+                }
             }
-            
-            HStack {
-                Text("End Y:")
-                TextField("Y", value: $viewModel.config.defaultYSeconds, formatter: NumberFormatter())
-                    .frame(width: 40)
-                    .textFieldStyle(.roundedBorder)
-                Text("s")
+
+            Divider().frame(height: 30)
+
+            // Settings
+            Group {
+                HStack(spacing: 5) {
+                    Text("X:")
+                    TextField("X", value: $viewModel.config.defaultXSeconds, formatter: NumberFormatter())
+                        .frame(width: 35)
+                        .textFieldStyle(.roundedBorder)
+                    Text("s")
+                }
+                
+                HStack(spacing: 5) {
+                    Text("Y:")
+                    TextField("Y", value: $viewModel.config.defaultYSeconds, formatter: NumberFormatter())
+                        .frame(width: 35)
+                        .textFieldStyle(.roundedBorder)
+                    Text("s")
+                }
+                
+                Toggle("Auto", isOn: $viewModel.config.autoPlay)
+                    .toggleStyle(.checkbox)
             }
-            
-            Toggle("Autoplay", isOn: $viewModel.config.autoPlay)
             
             Picker("Mode", selection: $viewModel.config.validationMode) {
                 ForEach(ValidationMode.allCases, id: \.self) { mode in
@@ -37,35 +70,17 @@ struct HeaderView: View {
                 }
             }
             .pickerStyle(.segmented)
-            .frame(width: 120)
+            .frame(width: 100)
             
-            HStack(spacing: 5) {
-                Text("Offset:")
-                TextField("Offset", value: $viewModel.config.timeOffset, formatter: NumberFormatter())
-                    .frame(width: 60)
-                    .textFieldStyle(.roundedBorder)
-                Text("s")
-                Button {
-                    viewModel.config.timeOffset = 0
-                    viewModel.saveConfig()
-                } label: {
-                    Image(systemName: "arrow.counterclockwise")
-                }
-                .buttonStyle(.plain)
-                .help("Reset Offset to 0")
-            }
-            
-            Divider().frame(height: 20)
+            Divider().frame(height: 30)
             
             Toggle(isOn: $viewModel.isEditingMode) {
-                Label("Edit Mode", systemImage: "pencil.and.outline")
+                Image(systemName: "pencil.and.outline")
             }
             .toggleStyle(.button)
             .help("Toggle edit mode")
             
-            Divider().frame(height: 20)
-            
-            HStack(spacing: 10) {
+            HStack(spacing: 5) {
                 Button {
                     if viewModel.audioPlayer.isPlaying {
                         viewModel.audioPlayer.pause()
@@ -79,72 +94,30 @@ struct HeaderView: View {
                 Button {
                     viewModel.playCurrentSegment()
                 } label: {
-                    Label("Preview", systemImage: "play.circle")
+                    Image(systemName: "play.circle")
                 }
+                .help("Preview segment")
             }
             
             Spacer()
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Button {
-                    selectDirectory { path in
-                        viewModel.config.mediaDirectoryPath = path
-                        viewModel.saveConfig()
-                        viewModel.refreshMediaFiles()
-                    }
-                } label: {
-                    Label("Media Folder", systemImage: "folder.fill")
-                }
-                if let path = viewModel.config.mediaDirectoryPath {
-                    Text(URL(fileURLWithPath: path).lastPathComponent).font(.system(size: 9)).foregroundColor(.secondary)
-                }
-            }
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Button {
-                    selectDirectory { path in
-                        viewModel.config.transcriptionDirectoryPath = path
-                        viewModel.saveConfig()
-                        viewModel.refreshCurrentMedia()
-                    }
-                } label: {
-                    Label("SRT Folder", systemImage: "captions.bubble.fill")
-                }
-                if let path = viewModel.config.transcriptionDirectoryPath {
-                    Text(URL(fileURLWithPath: path).lastPathComponent).font(.system(size: 9)).foregroundColor(.secondary)
-                }
-            }
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Button {
-                    selectDirectory { path in
-                        viewModel.config.timecodeDirectoryPath = path
-                        viewModel.saveConfig()
-                        viewModel.refreshCurrentMedia()
-                    }
-                } label: {
-                    Label("TXT Folder", systemImage: "doc.text.fill")
-                }
-                if let path = viewModel.config.timecodeDirectoryPath {
-                    Text(URL(fileURLWithPath: path).lastPathComponent).font(.system(size: 9)).foregroundColor(.secondary)
-                }
-            }
         }
         .buttonStyle(.bordered)
-        .padding()
+        .padding(10)
         .background(Color(NSColor.windowBackgroundColor))
     }
     
-    private func selectDirectory(completion: @escaping (String) -> Void) {
+    private func selectFile(extensions: [String], completion: @escaping (URL) -> Void) {
         let panel = NSOpenPanel()
-        panel.canChooseFiles = false
-        panel.canChooseDirectories = true
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = extensions.compactMap { UTType(filenameExtension: $0) }
         
         if panel.runModal() == .OK {
             if let url = panel.url {
-                completion(url.path)
+                completion(url)
             }
         }
     }
 }
+
