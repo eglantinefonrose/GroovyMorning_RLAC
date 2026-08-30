@@ -88,7 +88,7 @@ See [TESTING.md](./TESTING.md) for more details.
 
 ## Documentation
 
-To view the project in greater detail, take a look at the series of articles at [this link](7.articles/en/0.introduction-generale.md) ([french version](7.articles/fr/0.introduction-generale.md))
+To view the project in greater detail, take a look at the series of articles at [this link](7.articles/en/0.general-introduction.md) ([french version](7.articles/fr/0.introduction-generale.md))
 
 ---
 
