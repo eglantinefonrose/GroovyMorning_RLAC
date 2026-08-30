@@ -97,7 +97,7 @@ L'utilisation d'un seuil unique crée des **oscillations**. Nous utilisons déso
 ### Prédiction lisse
 Cette version simplifiée se concentre uniquement sur le **lissage temporel** par **moyenne mobile** pour stabiliser les détections sans utiliser la complexité de l'hystérésis ou du score compétitif.
 
-### Principe du Lissage (Moving Average)
+#### Principe du Lissage (Moving Average)
 Dans une prédiction classique, chaque fenêtre est traitée **indépendamment**. Si le modèle a une **micro-hésitation**, la chronique est **coupée**.  
 
 *L'approche lisse* fonctionne ainsi :
@@ -150,7 +150,6 @@ Bien que le modèle `facebook/wav2vec2-large-xlsr-53-french` soit excellent pour
 - **Lourdeur vs Tâche** : La version `large` (300M+ paramètres) est **lourde** pour une classification binaire ou multi-classes simple. Cela **ralentit l'inférence** et nécessite plus de données pour éviter le sur-apprentissage (overfitting).
 - **Analyse Locale** : Le **traitement séquentiel** de l'onde brute peut manquer de **vision "globale"** sur un segment de 10s, notamment pour identifier des motifs musicaux complexes (jingles).
 
-On a donc cherché à utiliser d'**autres modèles** pour la détection des chroniques à partir du son de l'émission.
 
 **Inférences**  
 Timecodes des chroniques (**sans les nommer**)
