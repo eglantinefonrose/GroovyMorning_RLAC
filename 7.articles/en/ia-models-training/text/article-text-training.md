@@ -203,7 +203,7 @@ Here are the main steps of the method:
 * **Acoustic** (Novelty): It detects **abrupt changes** in the sound texture (rhythm break, change in atmosphere).
 * **Audio Events**: It searches for the **presence of music** (often used for transitions) vs. speech.
 * **Diarization**: It detects if the **speaker changes** (transition from presenter to chronicler).
-* **Semantic (LLM)**: The system **transcribes** the audio into text via Whisper (STT) and sends the text to a **language model** (like Llama 3) via Ollama. The IA analyzes if the **words used** resemble a chronicle introduction (e.g., "Hello everyone, today we're going to talk about...").
+* **Semantic (LLM)**: The system **transcribes** the audio into text via Whisper (STT) and sends the text to a **language model** (like Llama 3) via Ollama. L'IA analyzes if the **words used** resemble a chronicle introduction (e.g., "Hello everyone, today we're going to talk about...").
 
 **4. Score Fusion**   
    Each sensor gives a **score**. The system makes a **weighted average**:
@@ -214,3 +214,5 @@ Here are the main steps of the method:
    As soon as a chronicle is detected with **certainty**, the system records the **sound fingerprint** of that moment. If it was a jingle, it will recognize it even faster next time thanks to the *Fast Path*.
 
 > Model score: *0.00/100*
+
+[Version Française](../../../fr/ia-models-training/text/ARTICLE_TEXT_TRAINING.md)

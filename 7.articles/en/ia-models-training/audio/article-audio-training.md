@@ -97,7 +97,7 @@ Using a single threshold creates **oscillations**. We now use **two thresholds**
 ### Smooth Prediction
 This simplified version focuses solely on **temporal smoothing** via a **moving average** to stabilize detections without using the complexity of hysteresis or competitive scoring.
 
-### Principle of Smoothing (Moving Average)
+#### Principle of Smoothing (Moving Average)
 In classic prediction, each window is treated **independently**. If the model has a **micro-hesitation**, the chronicle is **cut**.  
 
 *The smooth approach* works like this:
@@ -150,7 +150,6 @@ Although the `facebook/wav2vec2-large-xlsr-53-french` model is excellent for **A
 - **Heaviness vs. Task**: The `large` version (300M+ parameters) is **heavy** for simple binary or multi-class classification. This **slows down inference** and requires more data to avoid overfitting.
 - **Local Analysis**: **Sequential processing** of the raw wave may lack a **"global" vision** over a 10s segment, especially for identifying complex musical patterns (jingles).
 
-We therefore sought to use **other models** for chronicle detection based on the broadcast sound.
 
 **Inferences**  
 Chronicle timecodes (**without naming them**)
@@ -198,12 +197,14 @@ If it's not a known jingle, it activates **4 different sensors**:
 * **Acoustic** (Novelty): It detects **abrupt changes** in the sound texture (break in rhythm, change in atmosphere).
 * **Audio Events**: It searches for the **presence of music** (often used for transitions) vs. speech.
 * **Diarization**: It detects if the **speaker changes** (transition from presenter to chronicler).
-* **Semantic (LLM)**: The system **transcribes** the audio into text via Whisper (STT) and sends the text to a **language model** (like Llama 3) via Ollama. The IA analyzes if the **words used** resemble a chronicle introduction (e.g., "Hello everyone, today we're going to talk about...").
+* **Semantic (LLM)**: The system **transcribes** the audio into text via Whisper (STT) and sends the text to a **language model** (like Llama 3) via Ollama. The AI analyzes if the **words used** resemble a chronicle introduction (e.g., "Hello everyone, today we're going to talk about...").
 
 **4. Score Fusion**   
 Each sensor gives a **score**. The system makes a **weighted average**:
-- **Semantics** (IA) has the most weight (**40%**).
+- **Semantics** (AI) has the most weight (**40%**).
 - The **other criteria** (acoustic, music, speaker) share the rest (**20% each**).
 
 **5. Learning (Feedback Loop)**  
 As soon as a chronicle is detected with **certainty**, the system records the **sound fingerprint** of that moment. If it was a jingle, it will recognize it even faster next time thanks to the *Fast Path*.
+
+[Version Française](../../../fr/ia-models-training/audio/ARTICLE_AUDIO_TRAINING.md)

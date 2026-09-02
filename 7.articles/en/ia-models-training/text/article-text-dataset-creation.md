@@ -34,3 +34,5 @@ The technique currently used is 100% automatic and requires no human interventio
 We then created a second dataset containing the opening sentences of the chronicles.  
 We extract the first 10 seconds of each chronicle, transcribe them, and extract the first sentence of the chronicle (via punctuation analysis).
 This first sentence, marking the beginning of the chronicle, constitutes a dataset of chronicle opening sentences.
+
+[Version Française](../../../fr/ia-models-training/text/ARTICLE_TEXT_DATASET_CREATION.md)

@@ -19,3 +19,5 @@ Model quality is not limited to simple statistical precision. We have implemente
 
 ### Publication and Deployment
 All models are published on the project's Hugging Face space.
+
+[Version Française](../../../fr/ia-models-training/audio/ARTICLE_INTRO_AUDIO.md)

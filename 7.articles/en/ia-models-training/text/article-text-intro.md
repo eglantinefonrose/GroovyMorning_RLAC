@@ -35,3 +35,5 @@ The quality of text models is subject to the same demanding scoring system as th
 ### Publication and Deployment
 All text classification and chronicle start detection models are published on the project's Hugging Face
 space.
+
+[Version Française](../../../fr/ia-models-training/text/ARTICLE_TEXT_INTRO.md)
