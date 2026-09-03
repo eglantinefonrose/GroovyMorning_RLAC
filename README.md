@@ -27,7 +27,10 @@ The project is divided into several modules:
 1.  **[Backend Java (1.RLAC-AudioRecorder)](./1.RLAC-AudioRecorder)**: Manages recording jobs (Quartz), interacts with FFmpeg, and provides the REST API for mobile apps.
 2.  **[AI Segmenter (2.RLAC-IAChronicleSegmenter)](./2.RLAC-IAChronicleSegmenter)**: Analyzes the live stream, performs Speech-To-Text (Kyutai or Whisper), and uses AI (DeepSeek) to detect segments.
 3.  **[Android App (5.GMFM_Android_App)](./5.GMFM_Android_App)**: A modern Jetpack Compose application to manage your chronicles and listen to them.
+![](7.articles/en/assets/schema-global-projet.png)
+
 4.  **[iOS App Demo (0.GMFM_RadioFrance_Demo)](./0.GMFM_RadioFrance_Demo)**: A SwiftUI prototype demonstrating the iOS experience.
+![](7.articles/en/assets/appli-demo.gif)
 
 ---
 
