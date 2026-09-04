@@ -8,6 +8,8 @@ Segment start times are identified by the RLAC (Radio Live à la Carte) system, 
 
 It consists of a Java backend for recording, a Python service for AI-powered segmentation (using DeepSeek or jingle detection), and mobile applications (Android/iOS) for a seamless user experience.
 
+![](7.articles/en/assets/appli-demo.gif)
+
 ---
 
 ## Key Features
@@ -30,7 +32,6 @@ The project is divided into several modules:
 ![](7.articles/en/assets/schema-global-projet.png)
 
 4.  **[iOS App Demo (0.GMFM_RadioFrance_Demo)](./0.GMFM_RadioFrance_Demo)**: A SwiftUI prototype demonstrating the iOS experience.
-![](7.articles/en/assets/appli-demo.gif)
 
 ---
 
