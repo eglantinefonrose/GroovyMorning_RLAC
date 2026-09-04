@@ -1,12 +1,12 @@
 # GroovyMorning
 
-**GroovyMorningFM** is a radio app that allows users to customize their chosen station's schedule by swapping out specific segments—whether live or on-demand—for others.
+**GroovyMorningFM** is a **radio app** that allows users to **customize their chosen station's schedule** by swapping out specific segments—whether live or on-demand—for others.
 
-For instance, a user can replace a segment airing at 7:50 AM with any other segment, regardless of whether it originates from the same station.
+For instance, a user can replace a **segment airing at 7:50 AM with any other segment**, regardless of whether it originates from the same station.
 
-Segment start times are identified by the RLAC (Radio Live à la Carte) system, which employs artificial intelligence to accurately detect the beginning and end of programs, thereby accounting for the unpredictability of live broadcasting.
+Segment start times are identified by the RLAC (Radio Live à la Carte) system, which employs **artificial intelligence** to accurately **detect the beginning and end of programs**, thereby accounting for the unpredictability of **live broadcasting**.
 
-It consists of a Java backend for recording, a Python service for AI-powered segmentation (using DeepSeek or jingle detection), and mobile applications (Android/iOS) for a seamless user experience.
+It consists of a Java backend for **recording**, a Python service for **AI-powered segmentation** (using DeepSeek or jingle detection), and **mobile applications** (Android/iOS) for a **seamless** user experience.
 
 ![](7.articles/en/assets/appli-demo.gif)
 
