@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 # Charger les variables d'environnement depuis .env
 load_dotenv()
 
-import glob
 from scipy import signal
 import warnings
 import requests
@@ -14,9 +13,7 @@ import subprocess
 import threading
 import queue
 import whisper
-import wave
 import unicodedata
-from flask import Flask, request, jsonify
 from datetime import datetime
 
 # Nouveaux imports pour DeepSeek
