@@ -14,18 +14,99 @@ L'application Android "GMFM Radio France Demo" doit être une réplique exacte d
 - **Chargement d'images** : Coil
 - **Injection de dépendances** : Hilt ou Koin
 
-## 2. Thème et Design (AppTheme)
-L'application utilise un **thème sombre permanent**.
-- **Couleurs de base** :
-    - Fond : `#000000` (Noir)
-    - Cartes : `#1A1A1A` (Gris foncé)
-    - Texte principal : `#FFFFFF` (Blanc)
-    - Texte secondaire : `#808080` (Gris)
-- **Couleurs de stations** :
-    - France Inter : `#E2001A`
-    - France Info : `#FFD000`
-    - France Culture : `#75338E`
-    - France Musique : `#E5007D`
+## 2. Design System
+
+Cette section détaille les tokens de configuration et les composants visuels extraits directement du code source. Les valeurs doivent être respectées à l'identique pour garantir la cohérence visuelle.
+
+### 2.1. Palette de couleurs
+L'application utilise un thème sombre permanent (`DarkColorScheme`). Les couleurs des stations de Radio France sont utilisées comme accents.
+
+**Fichier : `com/gmfm/radiofrance/ui/theme/Theme.kt`**
+```kotlin
+val Black = Color(0xFF000000)
+val DarkGray = Color(0xFF1A1A1A)
+val Gray = Color(0xFF808080)
+val White = Color(0xFFFFFFFF)
+
+val FranceInter = Color(0xFFE2001A)
+val FranceInfo = Color(0xFFFFD000)
+val FranceCulture = Color(0xFF75338E)
+val FranceMusique = Color(0xFFE5007D)
+
+private val DarkColorScheme = darkColorScheme(
+    primary = White,
+    secondary = Gray,
+    background = Black,
+    surface = DarkGray,
+    onPrimary = Black,
+    onSecondary = White,
+    onBackground = White,
+    onSurface = White
+)
+```
+
+### 2.2. Typographie
+L'application s'appuie sur les styles Material3 avec des poids et tailles spécifiques pour structurer l'information.
+
+**Fichier : `com/gmfm/radiofrance/ui/theme/Type.kt` (ou équivalent via MaterialTheme)**
+- **Grands titres :** `MaterialTheme.typography.displaySmall` + `FontWeight.Bold` (Bonjour, Directs).
+- **Titres de sections :** `MaterialTheme.typography.titleLarge` + `FontWeight.Bold` (À la une, Chroniques).
+- **Titres d'items :** `MaterialTheme.typography.bodyLarge` ou `MaterialTheme.typography.titleMedium` + `FontWeight.Bold`.
+- **Légendes / Durées :** `MaterialTheme.typography.bodySmall`, couleur `Color.Gray`.
+- **Badges / MiniPlayer :** `MaterialTheme.typography.labelSmall`.
+
+### 2.3. Formes et espacements (Shapes & Spacing)
+L'interface privilégie des arrondis prononcés pour un aspect moderne.
+
+**Rayons de coins (Shapes) :**
+- **Cartes & Overlays :** `RoundedCornerShape(24.dp)`
+- **MiniPlayer & Items de liste :** `RoundedCornerShape(16.dp)`
+- **Thumbnails & Images :** `RoundedCornerShape(12.dp)` ou `8.dp`
+- **Boutons :** `RoundedCornerShape(50)` (Style pilule)
+
+**Espacements récurrents :**
+- **Marges écrans :** `16.dp` ou `20.dp`
+- **Gutter entre titres et contenu :** `24.dp`
+- **Espacement entre items :** `16.dp`
+
+### 2.4. Composants réutilisables custom
+
+#### `MiniPlayer`
+*Barre de lecture persistante au-dessus de la BottomBar.*
+- **Conteneur :** `Surface` avec `FranceInter` color, height `64.dp`, shape `16.dp`, elevation `8.dp`.
+- **Interaction :** `clickable` pour ouvrir le `PlayerView`.
+
+#### `FeaturedCard`
+*Utilisé pour le carrousel horizontal de l'accueil.*
+- **Dimensions :** width `280.dp`.
+- **Style :** `Card` avec background `0xFF1A1A1A` (DarkGray), shape `24.dp`.
+
+#### `FranceInterCard`
+*Composant héroïque de l'écran Direct.*
+- **Style :** `Card` avec background `FranceInter`, shape `24.dp`.
+- **Contenu :** Avatar circulaire (`CircleShape`) avec bordure blanche 2dp (alpha 0.5), logo Radio.
+
+#### `LiveChronicleItem`
+*Item de liste pour les chroniques.*
+- **États :** Bordure de `1.dp` couleur `FranceInter` si en lecture. Opacité réduite (`Color.Gray`) si le contenu est indisponible.
+
+### 2.5. Animations et transitions
+- **Apparition du Player :** `AnimatedVisibility` avec `slideInVertically(initialOffsetY = { it })` (glissement depuis le bas).
+- **Transitions d'écran :** Transition en fondu de `500ms` via `tween` (notamment sur le Splash).
+- **Onboarding :** Glissement horizontal fluide entre les pages via `HorizontalPager` et `animateScrollToPage`.
+
+### 2.6. Références Visuelles (Screenshots)
+Les captures d'écran de référence se trouvent dans le dossier `app_screens_screenshots/`.
+
+| Écran / Composant | Fichier PNG |
+| :--- | :--- |
+| Splash Screen | `SplashScreen.png` |
+| Accueil (Home) | `HomeView.png` |
+| Directs (Live) | `LiveView.png` |
+| Mini Player | `MiniPlayer.png` |
+| Lecteur (Player) | `PlayerView.png` |
+| Grille (Schedule) | `ScheduleView.png` |
+| Onboarding | *Non disponible* |
 
 ## 3. Écrans et Navigation
 
