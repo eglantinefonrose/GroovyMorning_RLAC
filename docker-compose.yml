@@ -18,6 +18,7 @@ services:
       - SERVER_HOST=0.0.0.0
       - DB_PATH=/app/data/rlac.db
       - PYTHON_API_URL=http://python-segmenter:8001
+      - SIMU=${SIMU:-false}
       - TZ=Europe/Paris
     restart: unless-stopped
     networks:

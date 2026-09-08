@@ -68,9 +68,14 @@ public class RLACService {
     }
 
     public static Map<String, Object> findTodayFolder(String userID) throws Exception {
+        boolean isSimu = Boolean.parseBoolean(System.getenv().getOrDefault("SIMU", "false"));
+
         // Générer le timestamp du jour
         String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String prefix = "session_" + dateStr;
+
+        // En mode SIMU, on cherche n'importe quel dossier de session (le plus récent), pas forcément celui du jour
+        String searchPrefix = isSimu ? "session_" : prefix;
 
         // Chercher dans le dossier media
         File mediaDir = new File("media");
@@ -91,15 +96,18 @@ public class RLACService {
         }
 
         Optional<File> latestFolder = Arrays.stream(files)
-                .filter(file -> file.isDirectory() && file.getName().startsWith(prefix))
+                .filter(file -> file.isDirectory() && file.getName().startsWith(searchPrefix))
                 .max(Comparator.comparing(File::getName));
 
         Map<String, Object> result = new HashMap<>();
 
         if (latestFolder.isEmpty()) {
             result.put("found", false);
-            result.put("message", "Aucun dossier trouvé pour aujourd'hui avec le préfixe: " + prefix);
-            result.put("searchPattern", prefix + "*");
+            String message = isSimu
+                    ? "Aucun dossier de session trouvé (Mode SIMU)."
+                    : "Aucun dossier trouvé pour aujourd'hui avec le préfixe: " + prefix;
+            result.put("message", message);
+            result.put("searchPattern", searchPrefix + "*");
             return result;
         }
 
@@ -107,8 +115,9 @@ public class RLACService {
 
         result.put("found", true);
         result.put("folderName", "userID_" + userID + "/" + foundFolder.getName());
+        result.put("simu", isSimu);
 
-        logger.info("📁 Dossier le plus récent trouvé : {}", foundFolder.getName());
+        logger.info("📁 Dossier {} trouvé (Mode SIMU: {}) : {}", isSimu ? "le plus récent" : "du jour", isSimu, foundFolder.getName());
 
         return result;
     }
