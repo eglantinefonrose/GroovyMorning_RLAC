@@ -27,11 +27,9 @@ Le système est composé de trois briques logicielles interagissant principaleme
 ## 2. Contrats d'échange
 
 ### A. Flux Configuration (Android → Java → Python)
-Lorsque l'utilisateur change son heure de réveil (`baseHour`, `baseMinute`) :
-1.  **Android → Java** (`POST /api/setUserBaseTime?baseHour=H&baseMinute=M`)
-2.  **Java → Python** (`POST /api/updateSchedulerTime?hour=H&minute=M`)
-    - *Format* : Query parameters uniquement.
-    - *Action* : Python reprogramme son `scheduler` pour démarrer/arrêter la capture audio.
+Le système utilise une heure de référence fixe à 07:00 pour la matinale de France Inter.
+1.  **Configuration** : Plus de changement dynamique de l'heure de réveil par l'utilisateur.
+2.  **Synchronisation** : Le Java et le Python se synchronisent sur l'heure de référence 07:00.
 
 ### B. Flux Détection (Python → Java)
 Lorsqu'une chronique est détectée (Début ou Fin) :
@@ -45,7 +43,7 @@ Lorsqu'une chronique est détectée (Début ou Fin) :
 Le Java rafraîchit sa liste de chroniques pour correspondre à la grille de France Inter :
 1.  **Java → Python** (`GET /api/chronicles`)
     - *Réponse* : Liste JSON d'objets `Chronicle` (`nomDeChronique`, `startTime`).
-2.  **Calcul interne Java** : Java calcule les `endTime` théoriques et filtre les chroniques antérieures à l'heure de base de l'utilisateur.
+2.  **Calcul interne Java** : Java calcule les `endTime` théoriques. Plus de filtrage par heure de base.
 
 ---
 
@@ -63,11 +61,10 @@ Le système actuel est conçu pour un usage privé ou en réseau local restreint
 ## 4. Parcours utilisateur critiques (Bout-en-bout)
 
 ### P1 : Initialisation de la matinale
-1.  L'utilisateur ouvre l'app Android et configure son réveil à **07:30**.
-2.  **Android** envoie l'heure au **Java**.
-3.  **Java** stocke en SQLite et notifie le **Python**.
-4.  **Python** programme son scheduler pour 07:30.
-5.  À 07:30, **Python** lance le thread de capture audio et commence l'analyse.
+1.  L'utilisateur ouvre l'app Android. Le système est déjà prêt pour la matinale commençant à **07:00**.
+2.  **Java** est prêt avec les chroniques par défaut.
+3.  **Python** est prêt pour la capture audio et l'analyse dès 07:00.
+4.  À 07:00, **Python** lance le thread de capture audio et commence l'analyse.
 
 ### P2 : Détection et Enregistrement d'une chronique
 1.  Le **Segmenter Python** détecte le jingle de "La revue de presse".

@@ -60,12 +60,17 @@ The easiest way to run the entire system is using Docker Compose.
 
 3.  **Launch the services**:
     ```bash
-    docker compose up --build
+    docker compose up
     ```
 
 This will start:
 -   The **Java Backend** on port `8000`.
 -   The **Python Segmenter** on port `8001`.
+
+If you want to test *simulation mode* and see the **live splitting** on a **simulated radio stream** as if it were live, use
+```bash
+docker compose --profile simu up
+```
 
 ---
 
@@ -74,7 +79,7 @@ This will start:
 1.  Ensure your phone is on the same Wi-Fi as your server.
 2.  Open the GroovyMorning app.
 3.  Go to **Settings** (gear icon).
-4.  Enter your server's local IP (e.g., `http://192.168.1.15:8000`).
+4.  Enter your server's local IP (e.g., `http://192.168.1.15:8000`) (if you are on an *Android phone emulator*, use `http://10.0.2.2:8000`)
 5.  The app will automatically sync with your personal server.
 
 ---

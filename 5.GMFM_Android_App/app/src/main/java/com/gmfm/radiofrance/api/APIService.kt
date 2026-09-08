@@ -2,7 +2,6 @@ package com.gmfm.radiofrance.api
 
 import com.gmfm.radiofrance.model.Chronicle
 import com.gmfm.radiofrance.model.ChroniclesResponse
-import com.gmfm.radiofrance.model.UserConfig
 import retrofit2.http.*
 
 interface APIService {
@@ -32,17 +31,4 @@ interface APIService {
         @Url url: String,
         @Query("userId") userId: String = "8dcb13c3"
     )
-
-    @POST
-    suspend fun setUserBaseTime(
-        @Url url: String,
-        @Query("baseHour") hour: Int,
-        @Query("baseMinute") minute: Int,
-        @Query("userId") userId: String = "8dcb13c3"
-    )
-
-    @GET
-    suspend fun getUserBaseTime(
-        @Url url: String
-    ): UserConfig
 }

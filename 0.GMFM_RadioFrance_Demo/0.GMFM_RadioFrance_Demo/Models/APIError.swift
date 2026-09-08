@@ -217,50 +217,6 @@ class APIService {
         }
     }
     
-    func setUserBaseTime(hour: Int, minute: Int) async throws {
-        let urlString = "\(baseURL)/api/setUserBaseTime?baseHour=\(hour)&baseMinute=\(minute)"
-        print("🌐 API Call: \(urlString)")
-        guard let url = URL(string: urlString) else { throw APIError.invalidURL }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        
-        let (data, response) = try await session.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError.invalidResponse
-        }
-        
-        print("📡 Status: \(httpResponse.statusCode)")
-        if let body = String(data: data, encoding: .utf8) {
-            print("📦 Body: \(body)")
-        }
-        
-        guard httpResponse.statusCode == 200 else {
-            throw APIError.httpError(httpResponse.statusCode)
-        }
-        print("✅ Base time set to \(hour)h\(minute)")
-    }
-    
-    func getUserBaseTime() async throws -> (hour: Int, minute: Int) {
-        let urlString = "\(baseURL)/api/getUserBaseTime"
-        print("🌐 API Call: \(urlString)")
-        guard let url = URL(string: urlString) else { throw APIError.invalidURL }
-        
-        let (data, response) = try await session.data(from: url)
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw APIError.invalidResponse
-        }
-        
-        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw APIError.invalidResponse
-        }
-        
-        let hour = json["baseHour"] as? Int ?? 7
-        let minute = json["baseMinute"] as? Int ?? 0
-        
-        return (hour, minute)
-    }
-    
     func addChronicle(program: Program) async throws {
         let nameEncoded = program.title.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let urlString = "\(baseURL)/api/addChronicle?nomDeChroniques=\(nameEncoded)&chroniqueRealTimecode=\(program.startTime)&duration=\(program.duration)"
@@ -288,7 +244,7 @@ class APIService {
     }
     
     func scheduleAllUserChronicles() async throws {
-        let urlString = "\(baseURL)/api/scheduleAllUserChronicles?baseHour=7&baseMinute=0"
+        let urlString = "\(baseURL)/api/scheduleAllUserChronicles"
         print("🌐 API Call: \(urlString)")
         
         guard let url = URL(string: urlString) else { throw APIError.invalidURL }

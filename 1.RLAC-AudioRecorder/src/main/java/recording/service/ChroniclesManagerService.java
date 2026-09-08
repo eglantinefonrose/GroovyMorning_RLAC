@@ -85,25 +85,17 @@ public class ChroniclesManagerService {
                     }
                 }
 
-                // Récupérer la config du user pour filtrer
-                DatabaseService.UserConfig config = dbService.getUserConfig(userID);
-                int userBaseSeconds = config.baseHour * 3600 + config.baseMinute * 60;
+                // On prend toute la grille
+                List<Chronicle> filteredDaily = dailyChronicles;
 
-                // Filtrer la grille du jour pour ne garder que ce qui est après l'heure de base
-                List<Chronicle> filteredDaily = dailyChronicles.stream()
-                        .filter(c -> (REFERENCE_SECONDS + c.getStartTime()) >= userBaseSeconds)
-                        .collect(Collectors.toList());
-
-                // Filtrer les chroniques actuelles en base pour la comparaison
-                List<Chronicle> currentChronicles = dbService.getChronicles(userID).stream()
-                        .filter(c -> (REFERENCE_SECONDS + c.getStartTime()) >= userBaseSeconds)
-                        .collect(Collectors.toList());
+                // Récupérer les chroniques actuelles en base pour la comparaison
+                List<Chronicle> currentChronicles = dbService.getChronicles(userID);
 
                 if (!areChroniclesListsEqual(filteredDaily, currentChronicles)) {
                     logDifferences(filteredDaily, currentChronicles);
-                    logger.info("🔄 Différence détectée avec la grille du jour (après baseHour). Mise à jour pour l'utilisateur {}.", userID);
+                    logger.info("🔄 Différence détectée avec la grille du jour. Mise à jour pour l'utilisateur {}.", userID);
                     
-                    // On remplace par la nouvelle version filtrée
+                    // On remplace par la nouvelle version
                     dbService.removeChroniclesForUser(userID);
                     for (int i = 0; i < filteredDaily.size(); i++) {
                         dbService.addChronicle(userID, filteredDaily.get(i), i + 1);
@@ -111,7 +103,7 @@ public class ChroniclesManagerService {
                     dbService.setUserHasCustomList(userID, true);
                     return true;
                 } else {
-                    logger.info("✅ La grille de l'utilisateur {} est déjà à jour (après baseHour).", userID);
+                    logger.info("✅ La grille de l'utilisateur {} est déjà à jour.", userID);
                 }
             } else {
                 logger.warn("⚠️ Impossible de récupérer la grille du jour (Status: {}).", response.statusCode());
@@ -188,25 +180,7 @@ public class ChroniclesManagerService {
             chronicles = RadioProgramService.getAllChronicles();
         }
 
-        // Récupérer l'heure de début de l'utilisateur (base time)
-        DatabaseService.UserConfig config = dbService.getUserConfig(userID);
-        int userBaseSeconds = config.baseHour * 3600 + config.baseMinute * 60;
-        
-        return chronicles.stream()
-                .filter(c -> (REFERENCE_SECONDS + c.getStartTime()) >= userBaseSeconds)
-                .map(c -> {
-                    // Normaliser les offsets pour qu'ils soient relatifs à l'heure de base de l'utilisateur
-                    int absoluteStart = REFERENCE_SECONDS + c.getStartTime();
-                    int originalEndTime = c.getEndTime() != null ? c.getEndTime() : c.getStartTime() + 600;
-                    int absoluteEnd = REFERENCE_SECONDS + originalEndTime;
-                    
-                    return new Chronicle(
-                        c.getNomDeChronique(),
-                        absoluteStart - userBaseSeconds,
-                        absoluteEnd - userBaseSeconds
-                    );
-                })
-                .collect(Collectors.toList());
+        return chronicles;
     }
 
     public void removeChroniclesForUser(String userID) {

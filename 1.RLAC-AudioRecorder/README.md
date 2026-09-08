@@ -26,7 +26,7 @@ Le système permet aux utilisateurs de programmer l'enregistrement de leurs chro
     *   Utilise Quartz pour planifier et gérer les jobs d'enregistrement.
     *   Méthodes principales :
         *   `start(String userID, Integer hour, Integer minute, Integer duration, String chronicleName, String folderName)`: Planifie un `RadioRecordingJob` unique à une heure et minute spécifiques, avec une durée, un nom de chronique et un nom de dossier optionnels.
-        *   `scheduleChronicles(String userID, int baseHour, int baseMinute, List<Chronicle> chronicles)`: La méthode clé qui prend une liste de chroniques pour un utilisateur et les planifie séquentiellement. Elle calcule l'heure de début absolue de chaque chronique en ajoutant son `startTime` à une `baseHour` et `baseMinute` de référence, puis appelle `start` pour chaque chronique.
+        *   `scheduleChronicles(String userID, List<Chronicle> chronicles)`: La méthode clé qui prend une liste de chroniques pour un utilisateur et les planifie séquentiellement. Elle calcule l'heure de début absolue de chaque chronique en ajoutant son `startTime` à l'heure de référence 07:00, puis appelle `start` pour chaque chronique.
 
 *   **`RadioRecordingJob.java`**:
     *   C'est un `org.quartz.Job` qui est exécuté par le `RecordingScheduler`.
@@ -39,7 +39,7 @@ Le système permet aux utilisateurs de programmer l'enregistrement de leurs chro
 *   **`RLACService.java`**:
     *   Fournit la logique métier générale.
     *   Injecte `RecordingScheduler` et `ChroniclesManagerService`.
-    *   Méthode clé ajoutée : `scheduleAllUserChronicles(String userID, int baseHour, int baseMinute)`: Récupère toutes les chroniques pour l'utilisateur via `ChroniclesManagerService` et les passe à `RecordingScheduler.scheduleChronicles`.
+    *   Méthode clé ajoutée : `scheduleAllUserChronicles(String userID)`: Récupère toutes les chroniques pour l'utilisateur via `ChroniclesManagerService` et les passe à `RecordingScheduler.scheduleChronicles`.
 
 *   **`RLACServerAPI.java`**:
     *   Le point d'entrée REST API du serveur (Jersey/Jetty).
@@ -48,16 +48,16 @@ Le système permet aux utilisateurs de programmer l'enregistrement de leurs chro
         *   `POST /api/addChronicle`: Permet d'ajouter une chronique spécifique à un utilisateur.
             *   Paramètres: `userId`, `nomDeChroniques`, `chroniqueRealTimecode` (startTime).
         *   `POST /api/scheduleAllUserChronicles`: Déclenche la programmation de **toutes** les chroniques associées à un `userId`.
-            *   Paramètres: `userId`, `baseHour`, `baseMinute`. Les `baseHour` et `baseMinute` servent de point de départ pour calculer les heures de début réelles de chaque chronique.
+            *   Paramètres: `userId`. Le système utilise 07:00 comme heure de référence.
 
 ### 3. Flux de Travail pour la Programmation des Chroniques
 
 1.  **Ajout de chroniques à un utilisateur (optionnel)**: Un utilisateur peut ajouter des chroniques personnalisées via l'endpoint `POST /api/addChronicle`. Ces chroniques sont stockées dans `ChroniclesManagerService`.
-2.  **Déclenchement de la programmation**: L'utilisateur appelle l'endpoint `POST /api/scheduleAllUserChronicles` avec son `userId`, une `baseHour` et une `baseMinute`.
+2.  **Déclenchement de la programmation**: L'utilisateur appelle l'endpoint `POST /api/scheduleAllUserChronicles` avec son `userId`.
 3.  **Récupération des chroniques**: `RLACService` récupère la liste des chroniques pour cet `userId` depuis `ChroniclesManagerService`.
 4.  **Planification des jobs**: `RLACService` passe cette liste à `RecordingScheduler.scheduleChronicles`.
 5.  **Calcul des heures de début**: `RecordingScheduler` itère sur chaque chronique :
-    *   Il calcule l'heure de début absolue de chaque chronique en ajoutant son `startTime` (offset en secondes) à la `baseHour` et `baseMinute` fournies.
+    *   Il calcule l'heure de début absolue de chaque chronique en ajoutant son `startTime` (offset en secondes) à l'heure de référence 07:00.
     *   Il détermine la durée de l'enregistrement (`endTime - startTime`).
     *   Il génère un nom de dossier de session unique (`session_YYYYMMDD_HHmmss`) pour regrouper tous les enregistrements de cette session de planification.
 6.  **Création et planification du Job Quartz**: Pour chaque chronique, un `JobDetail` de type `RadioRecordingJob` est créé et configuré avec les données de la chronique (userID, nomDeChronique, heure, minute, durée, nom du dossier de session). Un `CronTrigger` est créé pour déclencher le job à l'heure calculée.
@@ -76,9 +76,9 @@ Le système permet aux utilisateurs de programmer l'enregistrement de leurs chro
     ```
     (Note: `endTime` n'est pas utilisé dans `addChronicle` pour l'instant, mais il est dans l'objet `Chronicle`.)
 
-2.  **Programmer toutes les chroniques pour l'utilisateur `testUser` à partir de 7h00 du matin**:
+2.  **Programmer toutes les chroniques pour l'utilisateur `testUser`**:
     ```bash
-    curl -X POST "http://localhost:8000/api/scheduleAllUserChronicles?userId=testUser&baseHour=7&baseMinute=0"
+    curl -X POST "http://localhost:8000/api/scheduleAllUserChronicles?userId=testUser"
     ```
 
 Ceci planifiera les enregistrements en respectant l'ordre et les durées définies dans les chroniques de l'utilisateur `testUser`, en commençant à 7h00. Chaque enregistrement sera nommé d'après la chronique correspondante.

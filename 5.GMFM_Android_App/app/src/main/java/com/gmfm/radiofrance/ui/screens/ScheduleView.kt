@@ -39,8 +39,6 @@ fun ScheduleView(
     val chronicles by viewModel.chronicles.collectAsState()
     val isProgramming by viewModel.isProgramming.collectAsState()
     val isLoadingData by viewModel.isLoading.collectAsState()
-    val baseHour by viewModel.baseHour.collectAsState()
-    val baseMinute by viewModel.baseMinute.collectAsState()
 
     val pullToRefreshState = rememberPullToRefreshState()
 

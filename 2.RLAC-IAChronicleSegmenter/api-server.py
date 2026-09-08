@@ -88,18 +88,9 @@ def scheduler_loop():
         schedule.run_pending()
         time.sleep(1)
 
-def update_scheduler(hour, minute):
-    """Met à jour l'heure de lancement du segmenter"""
-    schedule.clear()
-    time_str = f"{int(hour):02d}:{int(minute):02d}"
-    schedule.every().day.at(time_str).do(run_segmenter)
-    # Utilise END_TIME pour l'arrêt
-    schedule.every().day.at(END_TIME).do(stop_segmenter)
-    print(f"⏰ [Scheduler] Prochain segmenter programmé à {time_str} (Arrêt à {END_TIME})")
-
 # Initialisation du scheduler
-START_TIME = os.environ.get('START_TIME', '15:00')
-END_TIME = os.environ.get('END_TIME', '15:30')
+START_TIME = os.environ.get('START_TIME', '07:00')
+END_TIME = os.environ.get('END_TIME', '09:00')
 
 print(f"⏰ [Scheduler] Configuration : {START_TIME} -> {END_TIME}")
 print(f"🕒 [System] Heure actuelle du conteneur : {datetime.now().strftime('%H:%M:%S')}")
@@ -110,26 +101,6 @@ schedule.every().day.at(END_TIME).do(stop_segmenter)
 # Lancement du thread scheduler
 print("⏰ [Scheduler] Démarrage de la boucle de surveillance...")
 threading.Thread(target=scheduler_loop, daemon=True).start()
-
-@app.route('/api/updateSchedulerTime', methods=['POST'])
-def api_update_scheduler_time():
-    """Met à jour l'heure du scheduler via API"""
-    data = request.args
-    hour = data.get('hour')
-    minute = data.get('minute')
-
-    if hour is None or minute is None:
-        return jsonify({"status": "error", "message": "Paramètres 'hour' et 'minute' requis"}), 400
-
-    try:
-        update_scheduler(hour, minute)
-        return jsonify({
-            "status": "success", 
-            "message": f"Scheduler mis à jour pour {int(hour):02d}:{int(minute):02d}"
-        })
-    except Exception as e:
-        print(f"⚠️ [Scheduler Error] {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/realChronicleStartTime', methods=['POST'])
 def chronicle_start():

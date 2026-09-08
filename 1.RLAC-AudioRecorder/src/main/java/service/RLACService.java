@@ -30,10 +30,6 @@ public class RLACService {
         logger.info("Chronicles for user {} are now handled dynamically by Python notifications.", userID);
     }
 
-    public void scheduleAllUserChronicles(String userID, int baseHour, int baseMinute) throws SchedulerException {
-        logger.info("Chronicles for user {} are now handled dynamically (Base time: {}:{}).", userID, baseHour, baseMinute);
-    }
-
     public void removeUserChronicles(String userID) throws SchedulerException {
         logger.info("Attempting to remove all chronicles and schedules for user: {}", userID);
         // 1. Annuler les jobs Quartz actifs et nettoyer ScheduleStorage

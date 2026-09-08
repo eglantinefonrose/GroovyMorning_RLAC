@@ -67,7 +67,7 @@ Pour assurer que le flux continu est prêt et que le chunk de calage est envoyé
 
 ## Configuration Utilisateur
 
-Le système utilise la table `users` de la base de données SQLite pour récupérer le décalage (baseHour/baseMinute).
+Le système utilise la table `users` de la base de données SQLite pour gérer les utilisateurs. L'heure de référence pour tous les calculs est fixée à 07:00.
 
 ## Commandes de Test (CURL)
 

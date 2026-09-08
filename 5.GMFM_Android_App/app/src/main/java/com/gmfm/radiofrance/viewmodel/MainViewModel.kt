@@ -57,12 +57,6 @@ class MainViewModel @Inject constructor(
     private val _folderName = MutableStateFlow<String?>(null)
     val folderName: StateFlow<String?> = _folderName
 
-    private val _baseHour = MutableStateFlow(7)
-    val baseHour: StateFlow<Int> = _baseHour
-
-    private val _baseMinute = MutableStateFlow(0)
-    val baseMinute: StateFlow<Int> = _baseMinute
-
     val baseUrl: String
         get() {
             return if (_isSimuMode.value) {
@@ -104,23 +98,6 @@ class MainViewModel @Inject constructor(
                 } catch (e: Exception) {
                     Log.e("GMFM_Data", "❌ Erreur dossier: ${e.message}")
                     // Don't fail the whole thing yet, but could be a sign of server down
-                }
-
-                // 1b. Fetch User Base Time
-                try {
-                    val baseTimeUrl = "${apiBaseUrl}api/getUserBaseTime"
-                    Log.i("GMFM_Data", "🌐 Appel API Heure: $baseTimeUrl")
-                    val baseTimeResponse = apiService.getUserBaseTime(baseTimeUrl)
-                    Log.i("GMFM_Data", "📦 Réponse Heure: $baseTimeResponse")
-                    
-                    val hour = baseTimeResponse.baseHour ?: 7
-                    val minute = baseTimeResponse.baseMinute ?: 0
-                    _baseHour.value = hour
-                    _baseMinute.value = minute
-                    Chronicle.updateGlobalStartTime(hour, minute)
-                    Log.i("GMFM_Data", "✅ Heure de base appliquée: $hour h $minute")
-                } catch (e: Exception) {
-                    Log.e("GMFM_Data", "❌ Erreur heure: ${e.message}")
                 }
 
                 // 2. Fetch Chronicles
@@ -210,25 +187,4 @@ class MainViewModel @Inject constructor(
     }
 
     fun fetchChronicles() = fetchData()
-
-    fun setUserBaseTime(hour: Int, minute: Int) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                val apiBaseUrl = if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/"
-                val url = "${apiBaseUrl}api/setUserBaseTime"
-                apiService.setUserBaseTime(url, hour, minute, "8dcb13c3")
-                _baseHour.value = hour
-                _baseMinute.value = minute
-                Chronicle.updateGlobalStartTime(hour, minute)
-                Log.d("GMFM_Data", "Successfully set base time to ${hour}h${minute}")
-                // Refresh data to update program times
-                fetchData()
-            } catch (e: Exception) {
-                Log.e("GMFM_Data", "Error setting base time: ${e.message}", e)
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
 }

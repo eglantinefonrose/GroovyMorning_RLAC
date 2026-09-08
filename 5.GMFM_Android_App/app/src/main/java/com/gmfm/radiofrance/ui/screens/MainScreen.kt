@@ -51,8 +51,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     val isSimuMode by viewModel.isSimuMode.collectAsState()
     val serverIp by viewModel.serverIp.collectAsState()
     val chronicles by viewModel.chronicles.collectAsState()
-    val baseHour by viewModel.baseHour.collectAsState()
-    val baseMinute by viewModel.baseMinute.collectAsState()
     val error by viewModel.error.collectAsState()
     val isFirstVisit by viewModel.isFirstVisit.collectAsState()
     val folderName by viewModel.folderName.collectAsState()
@@ -69,7 +67,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
 
     var isPlayerOpen by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
-    var showTimePicker by remember { mutableStateOf(false) }
     var showOnboarding by remember { mutableStateOf(false) }
     var showNoAudioAlert by remember { mutableStateOf(false) }
     var hasShownOnboardingThisSession by remember { mutableStateOf(false) }
@@ -329,16 +326,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                             )
                         }
 
-                        // Clock Icon Button
-                        IconButton(onClick = { showTimePicker = true }) {
-                            Icon(
-                                Icons.Default.Schedule, 
-                                contentDescription = "Réglage heure de base", 
-                                tint = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-
                         // Gear Icon Button
                         IconButton(onClick = { showSettingsDialog = true }) {
                             Icon(
@@ -382,37 +369,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                 dismissButton = {
                     TextButton(onClick = { showSettingsDialog = false }) {
                         Text("Annuler")
-                    }
-                }
-            )
-        }
-
-        if (showTimePicker) {
-            val timePickerState = rememberTimePickerState(
-                initialHour = baseHour,
-                initialMinute = baseMinute,
-                is24Hour = true
-            )
-            
-            AlertDialog(
-                onDismissRequest = { showTimePicker = false },
-                confirmButton = {
-                    TextButton(onClick = {
-                        viewModel.setUserBaseTime(timePickerState.hour, timePickerState.minute)
-                        showTimePicker = false
-                    }) {
-                        Text("Valider")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showTimePicker = false }) {
-                        Text("Annuler")
-                    }
-                },
-                title = { Text("Début de l'enregistrement") },
-                text = {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        TimePicker(state = timePickerState)
                     }
                 }
             )

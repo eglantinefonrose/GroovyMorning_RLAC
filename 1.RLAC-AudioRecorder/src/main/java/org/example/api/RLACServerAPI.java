@@ -197,11 +197,8 @@ public class RLACServerAPI {
                 return createErrorResponse("Le realTimecode de la chronique ne peut pas être nul.");
             }
 
-            // Le chroniqueRealTimecode fourni est relatif à l'heure de base de l'utilisateur.
-            // On le convertit en offset relatif à REFERENCE_SECONDS (07h00) pour le stockage interne.
-            DatabaseService.UserConfig config = DatabaseService.getInstance().getUserConfig(userId);
-            int userBaseSeconds = config.baseHour * 3600 + config.baseMinute * 60;
-            int storageStartTime = (userBaseSeconds + chroniqueRealTimecode) - ChroniclesManagerService.REFERENCE_SECONDS;
+            // Le chroniqueRealTimecode fourni est supposé relatif à REFERENCE_SECONDS (07h00).
+            int storageStartTime = chroniqueRealTimecode;
 
             int effectiveDuration = (duration != null) ? duration : 300; // 5 minutes par défaut
             Chronicle chronicle = new Chronicle(nomDeChronique, storageStartTime, storageStartTime + effectiveDuration);
@@ -212,7 +209,6 @@ public class RLACServerAPI {
             response.put("message", "Chronique ajoutée avec succès.");
             response.put("chronicle", Map.of(
                     "nomDeChronique", chronicle.getNomDeChronique(),
-                    "startTimeRelativeToBase", chroniqueRealTimecode,
                     "startTimeInternal", chronicle.getStartTime(),
                     "endTimeInternal", chronicle.getEndTime()
             ));
@@ -286,9 +282,6 @@ public class RLACServerAPI {
             
             rlacService.clearUserConfiguration(userId);
             
-            // Revenir à l'heure par défaut (07:00) pour le scheduler Python
-            notifyPythonScheduler(7, 0);
-            
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("message", "La liste des chroniques et l'heure de programmation ont été supprimées (remises à zéro).");
@@ -297,90 +290,6 @@ public class RLACServerAPI {
         } catch (Exception e) {
             logger.error("Erreur lors du nettoyage de la configuration", e);
             return createErrorResponse("Erreur interne du serveur: " + e.getMessage());
-        }
-    }
-
-    /**
-     * curl "http://localhost:8000/api/getUserBaseTime"
-     */
-    @GET
-    @Path("/getUserBaseTime")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserBaseTime() {
-        String userId = DatabaseService.getInstance().getLocalUserId();
-        try {
-            DatabaseService.UserConfig config = DatabaseService.getInstance().getUserConfig(userId);
-            Map<String, Object> response = new HashMap<>();
-            response.put("userId", userId);
-            response.put("baseHour", config.baseHour);
-            response.put("baseMinute", config.baseMinute);
-            return Response.ok(response).build();
-        } catch (Exception e) {
-            logger.error("Erreur lors de la récupération de l'heure de base", e);
-            return createErrorResponse("Erreur: " + e.getMessage());
-        }
-    }
-
-    /**
-     * curl -X POST "http://localhost:8000/api/setUserBaseTime?baseHour=8&baseMinute=30"
-     */
-    @POST
-    @Path("/setUserBaseTime")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response setUserBaseTime(
-            @QueryParam("baseHour") int baseHour,
-            @QueryParam("baseMinute") int baseMinute) {
-
-        String userId = DatabaseService.getInstance().getLocalUserId();
-        if (baseHour < 0 || baseHour > 23 || baseMinute < 0 || baseMinute > 59) {
-            return createErrorResponse("Heure ou minute invalide.");
-        }
-
-        try {
-            DatabaseService.getInstance().updateUserBaseTime(userId, baseHour, baseMinute);
-            
-            // Notification au scheduler Python
-            notifyPythonScheduler(baseHour, baseMinute);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "Heure de base mise à jour : " + String.format("%02d:%02d", baseHour, baseMinute));
-            return Response.ok(response).build();
-        } catch (Exception e) {
-            logger.error("Erreur lors de la mise à jour de l'heure de base", e);
-            return createErrorResponse("Erreur: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Notifie le segmenter Python pour mettre à jour son scheduler
-     */
-    private void notifyPythonScheduler(int hour, int minute) {
-        String pythonApiUrl = System.getenv().getOrDefault("PYTHON_API_URL", "http://localhost:8001");
-        String url = pythonApiUrl + "/api/updateSchedulerTime?hour=" + hour + "&minute=" + minute;
-        
-        logger.info("Notification du scheduler Python à l'URL : {}", url);
-        
-        try (HttpClient client = HttpClient.newHttpClient()) {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .POST(HttpRequest.BodyPublishers.noBody())
-                    .build();
-            
-            client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                    .thenAccept(response -> {
-                        if (response.statusCode() == 200) {
-                            logger.info("Scheduler Python mis à jour avec succès : {}", response.body());
-                        } else {
-                            logger.warn("Échec de la mise à jour du scheduler Python. Status code : {}", response.statusCode());
-                        }
-                    })
-                    .exceptionally(ex -> {
-                        logger.error("Erreur lors de la notification du scheduler Python", ex);
-                        return null;
-                    });
-        } catch (Exception e) {
-            logger.error("Erreur lors de la création du client HTTP pour notifier Python", e);
         }
     }
 

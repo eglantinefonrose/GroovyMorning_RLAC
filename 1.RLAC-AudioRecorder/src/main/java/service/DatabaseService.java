@@ -34,9 +34,7 @@ public class DatabaseService {
 
         String createUsersTableSQL = "CREATE TABLE IF NOT EXISTS users (" +
                 "user_id TEXT PRIMARY KEY," +
-                "username TEXT," +
-                "base_hour INTEGER DEFAULT 7," +
-                "base_minute INTEGER DEFAULT 0" +
+                "username TEXT" +
                 ");";
 
         String createTableSQL = "CREATE TABLE IF NOT EXISTS user_chronicles (" +
@@ -59,14 +57,6 @@ public class DatabaseService {
             stmt.execute(createConfigTableSQL);
             stmt.execute(createUsersTableSQL);
             
-            // Migration for existing databases
-            try {
-                stmt.execute("ALTER TABLE users ADD COLUMN base_hour INTEGER DEFAULT 7");
-                stmt.execute("ALTER TABLE users ADD COLUMN base_minute INTEGER DEFAULT 0");
-            } catch (SQLException e) {
-                // Columns might already exist
-            }
-
             stmt.execute(createTableSQL);
             stmt.execute(createStatusTableSQL);
             logger.info("Base de données SQLite initialisée à l'emplacement : {}", DB_URL);
@@ -112,8 +102,8 @@ public class DatabaseService {
                 
                 // Copier la config utilisateur
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "INSERT OR IGNORE INTO users (user_id, username, base_hour, base_minute) " +
-                        "SELECT ?, username, base_hour, base_minute FROM users WHERE user_id = 'testUser'")) {
+                        "INSERT OR IGNORE INTO users (user_id, username) " +
+                        "SELECT ?, username FROM users WHERE user_id = 'testUser'")) {
                     ps.setString(1, localId);
                     ps.executeUpdate();
                 }
@@ -157,31 +147,14 @@ public class DatabaseService {
     }
 
     public void addUser(String userId, String username) {
-        String sql = "INSERT OR IGNORE INTO users(user_id, username, base_hour, base_minute) VALUES(?,?,?,?)";
+        String sql = "INSERT OR IGNORE INTO users(user_id, username) VALUES(?,?)";
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, userId);
             pstmt.setString(2, username);
-            pstmt.setInt(3, 7); // Default hour
-            pstmt.setInt(4, 0); // Default minute
             pstmt.executeUpdate();
         } catch (SQLException e) {
             logger.error("Erreur lors de l'ajout de l'utilisateur {}", userId, e);
-        }
-    }
-
-    public void updateUserBaseTime(String userId, int hour, int minute) {
-        String sql = "INSERT INTO users(user_id, base_hour, base_minute) VALUES(?,?,?) " +
-                "ON CONFLICT(user_id) DO UPDATE SET base_hour=excluded.base_hour, base_minute=excluded.base_minute";
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, userId);
-            pstmt.setInt(2, hour);
-            pstmt.setInt(3, minute);
-            pstmt.executeUpdate();
-            logger.info("Base time upserted for user {}: {}:{}", userId, hour, minute);
-        } catch (SQLException e) {
-            logger.error("Erreur lors de la mise à jour du base time pour l'utilisateur {}", userId, e);
         }
     }
 
@@ -194,34 +167,6 @@ public class DatabaseService {
             logger.info("User config deleted for user {}", userId);
         } catch (SQLException e) {
             logger.error("Erreur lors de la suppression de la config pour l'utilisateur {}", userId, e);
-        }
-    }
-
-    public UserConfig getUserConfig(String userId) {
-        String querySQL = "SELECT base_hour, base_minute FROM users WHERE user_id = ?";
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement pstmt = conn.prepareStatement(querySQL)) {
-            pstmt.setString(1, userId);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                logger.info("Infos sur le user récupérées");
-                System.out.println(rs.getInt("base_hour"));
-                System.out.println(rs.getInt("base_minute"));
-                return new UserConfig(rs.getInt("base_hour"), rs.getInt("base_minute"));
-            }
-        } catch (SQLException e) {
-            logger.error("Erreur lors de la récupération de la config pour l'utilisateur {}", userId, e);
-        }
-        return new UserConfig(7, 0); // Default values to 07:00
-    }
-
-    public static class UserConfig {
-        public final int baseHour;
-        public final int baseMinute;
-
-        public UserConfig(int baseHour, int baseMinute) {
-            this.baseHour = baseHour;
-            this.baseMinute = baseMinute;
         }
     }
 

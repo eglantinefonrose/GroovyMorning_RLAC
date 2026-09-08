@@ -14,9 +14,9 @@ data class Chronicle(
     val duration: Int?
         get() = if (startTime != null && endTime != null) endTime - startTime else null
 
-    fun getFormattedTime(baseHour: Int, baseMinute: Int, offsetSeconds: Int? = null): String {
+    fun getFormattedTime(offsetSeconds: Int? = null): String {
         val effectiveOffset = offsetSeconds ?: startTime ?: 0
-        val baseSeconds = (baseHour * 3600) + (baseMinute * 60)
+        val baseSeconds = 7 * 3600 // Fixed to 07:00
         val totalSeconds = baseSeconds + effectiveOffset
         
         val hour = (totalSeconds / 3600) % 24
@@ -26,15 +26,11 @@ data class Chronicle(
     }
 
     val formattedTime: String
-        get() = getFormattedTime(globalBaseHour, globalBaseMinute)
+        get() = getFormattedTime()
 
     companion object {
-        var globalBaseHour: Int = 7
-        var globalBaseMinute: Int = 0
-
         fun updateGlobalStartTime(hour: Int, minute: Int) {
-            globalBaseHour = hour
-            globalBaseMinute = minute
+            // No longer used, but kept for compatibility if needed or removed
         }
     }
 }

@@ -37,17 +37,10 @@ public class DynamicRecordingService {
 
     private void checkDailyCleanup() {
         LocalDateTime now = LocalDateTime.now();
-        // On récupère la config du user par défaut (local)
-        DatabaseService.UserConfig config = DatabaseService.getInstance().getUserConfig(
-            DatabaseService.getInstance().getLocalUserId()
-        );
         
-        // Si on est à config.baseHour : config.baseMinute - 5
-        LocalDateTime cleanupTime = now.withHour(config.baseHour).withMinute(config.baseMinute).withSecond(0).minusMinutes(5);
-        
-        // Si l'heure actuelle correspond à l'heure de cleanup (à la minute près)
-        if (now.getHour() == cleanupTime.getHour() && now.getMinute() == cleanupTime.getMinute()) {
-            logger.info("⏰ Daily cleanup triggered before baseHour ({}:{})", config.baseHour, config.baseMinute);
+        // Nettoyage quotidien à 06:55 (5 minutes avant l'heure de référence 07:00)
+        if (now.getHour() == 6 && now.getMinute() == 55) {
+            logger.info("⏰ Daily cleanup triggered at 06:55");
             ffmpegService.stopContinuousRecording();
             ffmpegService.clearContinuousFolder();
             // On ne redémarre pas ici, il redémarrera au premier signal START
@@ -94,8 +87,7 @@ public class DynamicRecordingService {
         // Démarrer l'enregistrement continu s'il n'est pas déjà lancé
         ffmpegService.startContinuousRecording();
 
-        DatabaseService.UserConfig config = DatabaseService.getInstance().getUserConfig(userId);
-        int currentOffset = calculateCurrentOffset(config);
+        int currentOffset = calculateCurrentOffset();
         
         // On récupère l'offset de synchronisation maître
         double masterOffset = ffmpegService.getMasterOffsetSeconds();
@@ -197,9 +189,10 @@ public class DynamicRecordingService {
         }
     }
 
-    private int calculateCurrentOffset(DatabaseService.UserConfig config) {
+    private int calculateCurrentOffset() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime baseTime = now.withHour(config.baseHour).withMinute(config.baseMinute).withSecond(0).withNano(0);
+        // Base time fixe à 07:00
+        LocalDateTime baseTime = now.withHour(7).withMinute(0).withSecond(0).withNano(0);
         return (int) java.time.Duration.between(baseTime, now).getSeconds();
     }
 
