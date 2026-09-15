@@ -1,0 +1,290 @@
+Présentation de Groovy Morning
+
+Article 0
+
+Here is my latest project : GroovyMorningFM, a radio app that lets users customize the schedule of the radio station of their choice by swapping out segments for others, whether those are broadcast live or available on demand.
+
+For example, replacing a segment that airs at 7:50 AM with any other segment, whether from the same station or not.
+
+The start of each segment is detected by the RLAC system (Radio Live à la Carte), which uses artificial intelligence to detect as accurately as possible the beginning and end of programs, in order to work around the unpredictability of live broadcasts.
+
+The entire project and its documentation are available here: https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/en/0.general-introduction
+.html
+
+---
+
+Voici mon dernier projet : GroovyMorningFM, une application de radio qui permet aux utilisateurs de customiser la grille de la radio de leur choix en remplaçant des chroniques par d’autres, qu’elles soient diffusées en direct ou accessibles en différé.
+
+Par exemple, remplacer une chronique qui passe à 7h50 par n’importe quelle autre chronique, qu’elle soit sur la même radio ou non.
+
+Le début des chroniques sont détectées par le système RLAC (Radio Live à la Carte) qui utilise de l'intelligence artificielle pour détecter au mieux le début et la fin des programmes,  pour contrer les aléas du direct.
+
+La documentation complète du projet est disponible ici :
+https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/fr/0.introduction-generale.html
+Article 1
+Technical challenges encountered
+Live radio poses a major problem: segments almost never start exactly at their scheduled time. This means we need to be able to detect, in real time and directly within the audio stream, the exact moment each segment begins.
+But then another issue arises: even though the recorder and the RLAC detection system are listening to the same source, they don't receive it at exactly the same moment. This gap is mainly due to network latency and response times, which vary from one streaming server to another. To enable precise cuts in the radio stream on the recorder side, the streams need to be accurately calibrated against one another.
+Another problem is that detecting the start of a live segment in the stream doesn't happen at the exact moment the segment actually begins. So it's not enough to know when the detection occurred — we also need to pinpoint precisely where in the stream the segment actually starts.
+The following series of articles explains how these issues were handled within the project.
+---
+Problèmes techniques rencontrés
+La radio en direct pose un problème de taille : les chroniques ne démarrent presque jamais pile à l'heure prévue. Il faut donc pouvoir repérer en temps réel, directement dans le flux audio, le moment exact où chaque segment commence.
+Mais là, un autre souci se pose : même si l'enregistreur et le système de détection RLAC écoutent la même source, ils ne la reçoivent pas exactement au même moment. Ce décalage vient notamment de la latence réseau et des temps de réponse qui varient d'un serveur de streaming à l'autre. Pour permettre de faire des découpages précis dans le flux radio du côté de l’enregistreur, il faut s’assurer de la calibration exacte des flux entre eux.
+Autre problème, la détection dans le flux du début d’une chronique en live ne se fait pas à l’exact moment où la chronique commence. Il faut donc pouvoir localiser précisément l’endroit où la chronique commence dans le flux, pas uniquement le moment de la détection.
+La série d’articles suivants expliquera comment ces problèmes ont été gérés au sein du projet.
+
+Article 2
+
+Le projet GroovyMorning permet la personnalisation de la grille de radio (permettant de remplacer les chroniques de son choix par d’autres, passant en même temps sur d’autres radios) en détectant en live les différentes chroniques.
+Cette série technique documente la mise en place d'un pipeline complexe permettant de transformer un signal audio brut en une bibliothèque de contenus indexés.
+
+  Quatre piliers soutiennent cette architecture :
+   1. La capture haute disponibilité via un module Java.
+   2. L'intelligence artificielle pour l'identification sémantique des chroniques.
+   3. Le mécanisme de synchronisation temporelle et de fingerprinting.
+   4. Le pipeline de création de jeux de données pour l'entraînement des modèles.
+
+ L'intégralité du projet et de sa documentation est accessible ici : https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/fr/0.introduction-generale.html
+
+---
+
+The GroovyMorning project enables radio schedule personalization (allowing users to replace segments of their choice with others airing at the same time on different stations) by detecting the various segments live.
+This technical series documents the setup of a complex pipeline that transforms a raw audio signal into a library of indexed content.
+
+Four pillars support this architecture:
+1. High-availability capture via a Java module.
+2. Artificial intelligence for the semantic identification of segments.
+3. The time-synchronization and fingerprinting mechanism.
+4. The dataset creation pipeline for training the models.
+
+The full project and its documentation are available here:
+https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/en/0.general-introduction
+.html
+
+Article 3
+Identifying segments within an uninterrupted audio stream requires analysis that goes beyond the simple sound signal.
+Rather than betting on a single method, I compared several approaches: LLMs (DeepSeek, Claude) via transcription and semantic analysis, classic Machine Learning (Random Forest, hybrid models), native audio analysis (jingles, speaker changes), and Transformers for long temporal dependencies.
+
+ To compare them fairly, I imposed a standardized JSON output format, which makes the architecture agnostic with respect to the AI model used. A stream simulator reproduces live conditions to measure the accuracy and latency of each method.
+
+Technical details on AI-based detection:
+https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/en/1.ai-chronicle-detection.html
+
+---
+
+L'identification des segments au sein d'un flux audio ininterrompu nécessite une analyse qui dépasse le simple signal sonore.
+Plutôt que de parier sur une seule méthode, j'ai comparé plusieurs approches : LLM (DeepSeek, Claude) via transcription et analyse sémantique, Machine Learning classique (Random Forest, modèles hybrides), analyse audio native (jingles, changements de locuteur), et Transformers pour les dépendances temporelles longues.
+
+Pour les comparer équitablement, j'ai imposé un format de sortie JSON standardisé, ce qui rend l'architecture agnostique vis-à-vis du modèle d'IA utilisé. Un simulateur de flux reproduit les conditions du direct pour mesurer précision et latence de chaque méthode.
+Détails techniques sur la détection par IA : https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/fr/1.detection-chroniques.html
+
+
+Article 4
+In a distributed system combining Java and Python, maintaining perfect synchronization across a continuous stream is paramount. The latency introduced by AI processing (transcription, semantic analysis) necessitates a retroactive correction strategy.
+
+The chosen technical solution relies on:
+
+- A "Master Stream" system generating time-stamped segments.
+
+- The use of hard links for instantaneous segmentation without storage overhead.
+
+- A post-hoc truncation mechanism enabling precise segmentation down to the second.
+
+In-depth synchronization analysis: https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/en/2.audio-recalibration.html
+
+---
+
+Dans un système distribué associant Java et Python, le maintien d'une synchronisation parfaite sur un flux continu est primordial. La latence induite par les traitements d'IA (transcription, analyse sémantique) impose une stratégie de correction rétroactive.
+
+  La solution technique retenue repose sur :
+   - Un système de "Master Stream" générant des segments horodatés.
+   - L'utilisation de liens physiques (Hard Links) pour une segmentation instantanée sans surcoût de stockage.
+   - Un mécanisme de tronquage a posteriori permettant un découpage chirurgical à la seconde près.
+
+Analyse approfondie de la synchronisation : https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/fr/2.recalibrage-audio.html
+
+
+Article 5
+The effectiveness of a radio segmentation algorithm can only be evaluated using a rigorous framework. A benchmarking approach is employed, comparing automatic detections against a human-validated "Ground Truth".
+
+Two key metrics lie at the heart of this evaluation:
+1. Temporal Fidelity (IoU – Intersection over Union) to measure segmentation precision.
+2. Latency to quantify system responsiveness under real-world live conditions.
+
+Discover our evaluation protocol: https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/en/3.quality-evaluation.html
+
+---
+
+L'efficacité d'un algorithme de segmentation radio ne peut être évaluée que par un framework rigoureux. On utilise alors une approche de benchmarking basée sur la comparaison entre les détections automatiques et une "Vérité Terrain" validée par l'humain.
+
+Deux métriques clés sont au cœur de cette évaluation :
+1. La Fidélité Temporelle (IoU - Intersection over Union) pour mesurer la précision du découpage.
+2. La Latence pour quantifier la réactivité du système en conditions réelles de direct.
+
+Découvrez notre protocole d'évaluation : https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/fr/3.evaluation-qualite.html
+
+
+Article 6
+Several factors, such as HTTP caching delays or CPU load, introduce a time drift between two instances listening to the same radio stream. To synchronize the recorder and the analyzer, we use acoustic fingerprinting.
+
+The process involves:
+ - Extracting compact binary fingerprints from raw audio segments (PCM).
+ - Calculating maximum correlation to identify the exact offset (Delta).
+ - Dynamically applying this delta to adjust the capture points.
+
+Synchronization mechanism details: https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/en/4.latency-calculation.html
+
+---
+
+Plusieurs facteurs, tels que les délais de mise en cache HTTP ou la charge CPU, introduisent une dérive temporelle entre deux instances écoutant un même flux radio. Pour synchroniser l'enregistreur et l'analyseur, nous utilisons le fingerprinting acoustique.
+
+  Le processus comprend :
+   - L'extraction d'empreintes binaires compactes à partir de segments audio bruts (PCM).
+   - Le calcul de corrélation maximale pour identifier le décalage exact (Delta).
+   - L'application dynamique de ce delta pour ajuster les points de capture.
+
+  Détails du mécanisme de synchronisation : https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/fr/4.calcul-latence.html
+
+
+Article 7
+Isolating a radio segment requires understanding the context of transitions. On stations like France Inter, these transitions are often organic and interwoven with the spoken content.
+
+The pipeline combines:
+   - High-performance transcription (Whisper / Kyutai).
+   - Semantic analysis using DeepSeek to identify segment start and end markers.
+   - Temporal recalibration based on transcription metadata to pinpoint the exact moment the first word is spoken.
+
+Study on semantic analysis applied to radio: https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/en/5.semantic-transcription-solution.html
+
+---
+
+Isoler une chronique radio suppose de comprendre le contexte des transitions. Sur des stations comme France Inter, ces transitions sont souvent organiques et imbriquées dans le discours.
+
+Le pipeline combine :
+   - La transcription haute performance (Whisper / Kyutai).
+   - L'analyse sémantique par DeepSeek pour identifier les indices de début et de fin de segment.
+   - Le recalibrage temporel via les métadonnées de transcription pour remonter à l'instant exact du premier mot prononcé.
+
+Étude sur l'analyse sémantique appliquée à la radio : https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/fr/5.solution-retenue-transcription-analyse-semantique.html
+
+
+Article 8
+Transforming a raw audio stream into a seamless, podcast-like user experience requires complex orchestration. GroovyMorning’s architecture was designed to be modular, distributed, and resilient.
+
+  Key infrastructure highlights:
+   - Separation of concerns between capture (Java/Spring Boot) and analysis (Python/AI).
+   - Asynchronous data flow via database and REST API.
+   - Final delivery via the HLS protocol for optimal playback on mobile devices.
+
+  Architectural overview and technology choices: https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/en/6.architecture-globale.html
+
+---
+
+Le passage d'un flux audio brut à une expérience utilisateur fluide type podcast nécessite une orchestration complexe. L'architecture de GroovyMorning a été conçue pour être modulaire, distribuée et résiliente.
+
+  Points clés de l'infrastructure :
+   - Séparation des responsabilités entre la capture (Java/Spring Boot) et l'analyse (Python/IA).
+   - Flux de données asynchrone via base de données et API REST.
+   - Distribution finale via le protocole HLS pour une lecture optimale sur terminaux mobiles.
+
+  Schéma directeur et choix technologiques : https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/fr/6.architecture-globale.html
+
+
+Article 9
+The capture module serves as the project's reliability foundation. Developed in Java for its thread management capabilities and stability, it controls FFmpeg to ensure uninterrupted recording.
+
+Advanced module features:
+   - Active process monitoring via ProcessBuilder.
+   - Exponential reconnection management in the event of a stream interruption.
+   - Implementation of "Dynamic Recording," allowing the system to look back into the buffer to save a segment detected after the fact.
+
+Technical focus on Java-based capture: https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/en/7.capture-audio-java.html
+
+---
+
+Le module de capture constitue le socle de fiabilité du projet. Développé en Java pour ses capacités de gestion des threads et sa stabilité, il pilote FFmpeg pour assurer un enregistrement ininterrompu.
+
+Fonctionnalités avancées du module :
+   - Monitoring actif des processus via ProcessBuilder.
+   - Gestion des reconnexions exponentielles en cas de rupture de flux.
+   - Implémentation du "Dynamic Recording" permettant de remonter dans le buffer passé pour sauvegarder une chronique détectée tardivement.
+
+Focus technique sur la capture Java : https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/fr/7.capture-audio-java.html
+
+
+Article 10
+Validating a real-time pipeline without relying on the unpredictability of a live broadcast presents a development challenge. To address this, a fully containerized end-to-end (E2E) test environment is used.
+
+The simulation setup includes:
+   - Injection of reference audio files via Unix pipes.
+   - Orchestration of all services (Java, Python, Postgres) using Docker Compose.
+   - Automation of test scenarios to validate against regressions and assess load handling.
+
+System testing methodology: https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/en/8.tests-e2e-simulation.html
+
+---
+
+Valider un pipeline temps réel sans dépendre des aléas d'une diffusion en direct constitue un défi de développement. On utilise alors un environnement de test End-to-End (E2E) entièrement conteneurisé.
+
+Le dispositif de simulation inclut :
+   - L'injection de fichiers audio de référence via des pipes Unix.
+   - L'orchestration par Docker Compose de l'intégralité des services (Java, Python, Postgres).
+   - L'automatisation des scénarios de test pour valider la non-régression et la tenue à la charge.
+
+Méthodologie de test système : https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/fr/8.tests-e2e-simulation.html
+
+
+Article 11
+The accuracy of segmentation models depends on the quality of the "ground truth." Here, we document the automated process of creating massive datasets from official archives.
+
+The construction steps include:
+   - Scraping and temporally aligning official podcasts with the live broadcast stream.
+   - Generating synchronized transcripts using Whisper.
+   - Implementing a "human-in-the-loop" verification interface to refine labeling quality down to the millisecond.
+
+  AI data creation strategy: https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/en/9.creation-donnees-ia.html
+
+---
+
+La précision des modèles de segmentation dépend de la qualité de la "Ground Truth". On documente ici le processus automatisé de création de jeux de données massifs à partir d'archives officielles.
+
+Les étapes de construction incluent :
+   - Le scraping et l'alignement temporel des podcasts officiels avec le flux direct.
+   - La génération de transcriptions synchronisées via Whisper.
+   - La mise en place d'une interface de vérification "Human-in-the-loop" pour affiner la qualité des étiquetages au millième de seconde.
+
+  Stratégie de création de données pour l'IA : https://eglantinefonrose.github.io/GroovyMorning_RLAC/7.articles/fr/9.creation-donnees-ia.html
+
+Article 12
+La gestion et le déploiement des modèles d'IA nécessitent une infrastructure robuste, difficilement possible sur GitHub en raison de la taille des modèles. Pour centraliser les modèles et automatiser leur distribution, on a intégré l'écosystème Hugging Face au cœur du projet.
+
+  Les points clés de cette intégration :
+Centralisation et Versioning : Hébergement des modèles (Audio Segmenters, CamemBERT) et des datasets sur le Hub
+     pour un suivi strict des versions.
+Pipelines Push-to-Hub : Automatisation du transfert des poids du modèle et des snapshots de recalibrage audio
+     dès la fin des phases d'entraînement.
+Accessibilité en Production : Téléchargement dynamique des dernières versions via la bibliothèque huggingface_hub, garantissant une mise à jour du moteur de détection.
+
+---
+
+Managing and deploying AI models requires robust infrastructure, which is difficult to achieve on GitHub due to the size of the models. To centralize the models and automate their distribution, the Hugging Face ecosystem has been integrated at the core of the project.
+Key points of this integration:
+Centralization and Versioning: Hosting models (Audio Segmenters, CamemBERT) and datasets on the Hub for strict version tracking.
+Push-to-Hub Pipelines: Automating the transfer of model weights and audio recalibration snapshots as soon as training phases are completed.
+Production Accessibility: Dynamic downloading of the latest versions via the huggingface_hub library, ensuring the detection engine stays up to date.
+Article 13
+L'entraînement de modèles d'IA est un processus itératif qui nécessite un suivi. Pour transformer les expérimentations en résultats scientifiques reproductibles, on utilise Weights & Biases (WandB).
+
+Ce que nous apporte ce monitoring :
+Visualisation en temps réel : Suivi précis des métriques de performance (Loss, Precision, Recall, F1-Score) pour détecter instantanément tout signe d'overfitting.
+Comparaison systématique : Analyse comparative des runs pour valider l'impact des changements d'hyper paramètres ou d'architectures (CNN vs WavLM).
+Rigueur R&D : Documentation automatique de chaque expérience, permettant de sélectionner avec certitude le meilleur candidat pour le déploiement final.
+
+---
+
+Training AI models is an iterative process that requires careful tracking. To turn experiments into reproducible scientific results, we use Weights & Biases (WandB).
+What this monitoring brings us:
+Real-time visualization: Precise tracking of performance metrics (Loss, Precision, Recall, F1-Score) to instantly detect any sign of overfitting.
+Systematic comparison: Comparative analysis of runs to validate the impact of hyperparameter or architecture changes (CNN vs WavLM).
+R&D rigor: Automatic documentation of each experiment, making it possible to confidently select the best candidate for final deployment.
