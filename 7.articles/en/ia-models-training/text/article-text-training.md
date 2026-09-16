@@ -4,8 +4,6 @@ To detect **chronicles in radio broadcasts**, we use a **semantic** approach by 
 
 ## Global Overview of Trials
 
-Voici le code Mermaid traduit :
-
 ```mermaid
 flowchart TD
     A[SRT Transcription] --> B{Detection Strategy}
@@ -57,7 +55,47 @@ To ensure that the **trees are not all identical**, **randomness** is introduced
 - On the criteria: Each tree only looks at **part of the features** (for example, one tree might focus on punctuation, another on vocabulary).   
   This prevents the algorithm from becoming "obsessed" with a **single misleading detail**.
 
-![](assets/schema-random-forest-text.png)
+```mermaid
+graph TD
+    A[Text Segment /<br>Transcription] --> B[Feature Extraction]
+    
+    subgraph RandomForest [Random Forest]
+        direction TB
+        B --> C1[Tree 1]
+        B --> C2[Tree 2]
+        B --> C3[Tree n...]
+        
+        C1 --> F1[Lexical Density]
+        C2 --> F2[Keywords]
+        C3 --> F3[Punctuation]
+        
+        F1 --> V1{Vote}
+        F2 --> V2{Vote}
+        F3 --> V3{Vote}
+    end
+    
+    V1 -- Segment --> M[Majority Vote]
+    V2 -- Segment --> M
+    V3 -- Non-Segment --> M
+    
+    M --> D[Final Decision:<br>CHRONIC]
+
+    %% Styling to match the original image
+    style A fill:#2c2f38,stroke:#555,color:#fff
+    style B fill:#2c2f38,stroke:#555,color:#fff
+    style C1 fill:#000080,stroke:#555,color:#fff
+    style C2 fill:#000080,stroke:#555,color:#fff
+    style C3 fill:#000080,stroke:#555,color:#fff
+    style F1 fill:#2c2f38,stroke:#555,color:#fff
+    style F2 fill:#2c2f38,stroke:#555,color:#fff
+    style F3 fill:#2c2f38,stroke:#555,color:#fff
+    style V1 fill:#2c2f38,stroke:#555,color:#fff
+    style V2 fill:#2c2f38,stroke:#555,color:#fff
+    style V3 fill:#2c2f38,stroke:#555,color:#fff
+    style M fill:#ff3333,stroke:#555,color:#fff
+    style D fill:#2c2f38,stroke:#555,color:#fff
+    style RandomForest fill:#1e2129,stroke:#555,color:#fff
+```
 
 ### Technical Approach
 The model analyzes the transcription stream **segment by segment** using:
@@ -93,7 +131,37 @@ The model is based on a **three-tier** architecture:
 3.  Temporal Consistency (CRF):
     A **Conditional Random Field** layer ensures that the predicted label sequence is **logically possible** (for example, eliminating chronicles that would last 2 seconds).
 
-![](assets/schema-modele-hybride.png)
+```mermaid
+graph BT
+    A["SRT Segments"] --> B
+
+    subgraph L1 ["Layer 1: Semantic Understanding"]
+        B["CamemBERT - Segment<br>Embeddings"]
+    end
+
+    B --> C
+    subgraph L2 ["Layer 2: Sequential Modeling"]
+        C["Bi-LSTM - Bidirectional<br>Flow Analysis"]
+    end
+
+    C --> D
+    subgraph L3 ["Layer 3: Temporal Coherence"]
+        D["CRF Layer - Conditional<br>Random Field"]
+    end
+
+    D --> E["Optimized Label<br>Sequence"]
+
+    %% Styles pour correspondre aux couleurs de l'image
+    style A fill:#e6e6fa,stroke:#9370db,stroke-width:2px,color:#333
+    style B fill:#e6e6fa,stroke:#9370db,stroke-width:2px,color:#333
+    style C fill:#e6e6fa,stroke:#9370db,stroke-width:2px,color:#333
+    style D fill:#e6e6fa,stroke:#9370db,stroke-width:2px,color:#333
+    style E fill:#e6e6fa,stroke:#9370db,stroke-width:2px,color:#333
+    
+    style L1 fill:#fffff0,stroke:#bdb76b,stroke-width:2px,color:#333
+    style L2 fill:#fffff0,stroke:#bdb76b,stroke-width:2px,color:#333
+    style L3 fill:#fffff0,stroke:#bdb76b,stroke-width:2px,color:#333
+```
 
 ### Observations and Results 
 > Model score: 29.61
@@ -111,7 +179,37 @@ An **isolated** transcription segment (often very short, e.g., 2-3 seconds) rare
 - These segments are **concatenated**, with a special [SEP] token inserted to mark the separation between segments.  
 - This allows the model to capture the **structure of the broadcast** (e.g., detecting a transition, a jingle, or a summary announcement).
 
-![](assets/schema-fine-tune-camembert.png)
+```mermaid
+graph LR
+    subgraph FW ["Sliding Window (5 segments)"]
+        direction LR
+        S1["Segment n-2"] --- SEP1["SEP"]
+        SEP1 --- S2["Segment n-1"]
+        S2 --- SEP2["SEP"]
+        SEP2 --- ST(("Target<br>Segment"))
+        ST --- SEP3["SEP"]
+        SEP3 --- S3["Segment n+1"]
+        S3 --- SEP4["SEP"]
+        SEP4 --- S4["Segment n+2"]
+    end
+
+    ST --> CLASS["Chronic / Non-<br>Chronic?"]
+
+    style FW fill:#fffff0,stroke:#bdb76b,stroke-width:2px,color:#333
+    
+    style S1 fill:#e6e6fa,stroke:#9370db,stroke-width:2px,color:#333
+    style S2 fill:#e6e6fa,stroke:#9370db,stroke-width:2px,color:#333
+    style S3 fill:#e6e6fa,stroke:#9370db,stroke-width:2px,color:#333
+    style S4 fill:#e6e6fa,stroke:#9370db,stroke-width:2px,color:#333
+    
+    style SEP1 fill:#e6e6fa,stroke:#9370db,stroke-width:2px,color:#333
+    style SEP2 fill:#e6e6fa,stroke:#9370db,stroke-width:2px,color:#333
+    style SEP3 fill:#e6e6fa,stroke:#9370db,stroke-width:2px,color:#333
+    style SEP4 fill:#e6e6fa,stroke:#9370db,stroke-width:2px,color:#333
+    
+    style ST fill:#f4a460,stroke:#333,stroke-width:3px,color:#333
+    style CLASS fill:#e6e6fa,stroke:#9370db,stroke-width:2px,color:#333
+```
 
 **2. Semantic Classification**  
 The contextualized text is passed through a **fine-tuned CamemBERT (or DistilCamemBERT) model**.    
@@ -197,13 +295,52 @@ The script **observes the stream** and **signals** when it detects the start of 
 ### Improvements  
 To avoid **gross errors**, chronicles are compared with their **theoretical schedule**. A detected chronicle that has **already passed** is also **ignored**.
 
-![](assets/diagramme-sequence-detection-llm.png)
+```mermaid
+sequenceDiagram
+    participant FT as Transcription Stream
+    participant PR as Prompt (Few-Shot +<br>Chronicle List)
+    participant API as LLM API (DeepSeek-v4)
+    participant FC as Coherence Filter
+    participant U as User
+
+    FT->>PR: New sentence detected
+    PR->>API: Sentence analysis
+    
+    API-->>FC: "Start of chronicle X"
+    
+    FC->>FC: Theoretical time comparison
+    FC->>FC: Check "Already passed?"
+    
+    FC-->>U: Chronicle start notification
+```
 
 ## Chronicle Detection from Transcription and Audio of Radio Broadcasts
 
 ### Using Multiple Approaches
 
-![](../../assets/schema-multi-approche.png)
+```mermaid
+graph TD
+    A["Radio Audio Stream"] --> B["Audio Detection<br>Musical Stinger"]
+    A --> C["Diarization<br>Speaker Change"]
+    A --> D["Streaming STT<br>Local Whisper (M1)"]
+    
+    D --> E["Semantic Analysis<br>Generic Markers"]
+    
+    B --> F["Fusion & Decision<br>Audio + Semantic Break"]
+    C --> F
+    E --> F
+    
+    F --> G["Chronicle Start Detected"]
+
+    %% Styles pour correspondre aux couleurs de l'image
+    style A fill:#f0f0eb,stroke:#b0b0a0,stroke-width:2px,color:#333
+    style B fill:#e0f2f1,stroke:#4db6ac,stroke-width:2px,color:#004d40
+    style C fill:#fbe9e7,stroke:#ff8a65,stroke-width:2px,color:#bf360c
+    style D fill:#e3f2fd,stroke:#42a5f5,stroke-width:2px,color:#0d47a1
+    style E fill:#e3f2fd,stroke:#42a5f5,stroke-width:2px,color:#0d47a1
+    style F fill:#e8eaf6,stroke:#7986cb,stroke-width:2px,color:#1a237e
+    style G fill:#e8f5e9,stroke:#66bb6a,stroke-width:2px,color:#1b5e20
+```
 
 A "multi-modal" approach is used to detect the start of radio chronicles in real-time. Instead of relying on a single criterion, it merges several types of analyses to make a more robust decision.
 
