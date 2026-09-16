@@ -13,7 +13,7 @@ In this new approach, we train a model with:
 - files containing **only chronicles**.
 
 ### Technical Approach
-The default model used is a *Random Forest*.
+The default model used is a **Random Forest**.
 
 Instead of entrusting the decision to a single algorithm, the Random Forest creates a **hundred Decision Trees** (hence the name "Forest").
 - Each tree examines the **audio features** of a segment (MFCC, energy, frequency, etc.).
@@ -24,17 +24,17 @@ To ensure that the trees are **not all identical**, **randomness** is introduced
 - On the **data**: Each tree is trained on a **different sample** of the audio files.
 - On the **criteria**: Each tree only looks at **part of the features** (for example, one tree might focus on **rhythm**, another on **low frequencies**). This prevents the algorithm from becoming "obsessed" with **a single misleading detail**.
 
-![Explanatory diagram for removing missing chronicles](assets/schema-random-forest.png)
+![Explanatory diagram for removing missing chronicles](assets/schema_random_forest_en.png)
 
 ### Extracted Audio Features
-For each *3-second* segment, the system extracts a **rich acoustic signature**:
+For each **3-second** segment, the system extracts a **rich acoustic signature**:
 - MFCC (Mel-Frequency Cepstral Coefficients): Captures the **timbre** of the voice.
 - Energy per band: Analyzes the **frequency distribution**.
 - Zero-Crossing Rate: Detects the presence of **percussion** or **noise**.
 - RMS (Root Mean Square): Measures **sound intensity**.
 - Spectral Features: Centroid, Rolloff, and Bandwidth to analyze the **"brightness"** of the sound (the proportion and importance of **high frequencies** perceived in a sound).
 
-> The model scores *7.69/100* (which is not sufficient), so we switch methods to start from a pre-trained model (to benefit from a model trained on a **much larger dataset**).
+> The model scores **7.69/100** (which is not sufficient), so we switch methods to start from a pre-trained model (to benefit from a model trained on a **much larger dataset**).
 
 ## Fine-tuning Wav2Vec2
 
@@ -50,9 +50,7 @@ This approach involves **fine-tuning** (taking a model **already trained** on a 
 - Use of a **sliding window** (default 10s with 5s overlap).
 - **Prediction** of the **label** for each window.
 - **Merging** of **consecutive windows** having the **same label** to produce coherent segments.
-
-![Explanatory diagram for removing missing chronicles](assets/schema-fenetres.png)
-
+![schema-fenetre-en.png](assets/schema-fenetre-en.png)
 ### Parameter Adaptation
 To try to correctly **detect** the **chronicles**, the **values of the following parameters** were **modified**:
 - Confidence Threshold: The **confidence threshold** above which a result is **taken into account**.
@@ -71,7 +69,7 @@ The most precise method is the **percentage lever**. The script generates the da
 #### Binary Detection (chronicle or not)
 To **simplify** and **improve** chronicle detection, we ask the model to detect only the **periods where there are chronicles** (**without naming them**).
 
-> After applying all these techniques, we obtain a score of *38.09*, which is also **not sufficient**.
+> After applying all these techniques, we obtain a score of **38.09**, which is also **not sufficient**.
 
 ### Robust Prediction
 
@@ -90,9 +88,9 @@ Using a single threshold creates **oscillations**. We now use **two thresholds**
 - Activation Threshold (`threshold_start`): A **high score** (0.7) is required to **trigger the start of a chronicle**.
 - Hold Threshold (`threshold_end`): A **lower score** (0.3) is sufficient to **continue detection**.
 
-![Explanatory diagram for removing missing chronicles](assets/schema-double-seuil.png)
+![Explanatory diagram for removing missing chronicles](assets/schema-double-seuil-en.png)
 
-> Unfortunately, the final score of the model is *8.6/100*, which is **insufficient**.
+> Unfortunately, the final score of the model is **8.6/100**, or **insufficient**.
 
 ### Smooth Prediction
 This simplified version focuses solely on **temporal smoothing** via a **moving average** to stabilize detections without using the complexity of hysteresis or competitive scoring.
@@ -100,12 +98,12 @@ This simplified version focuses solely on **temporal smoothing** via a **moving 
 #### Principle of Smoothing (Moving Average)
 In classic prediction, each window is treated **independently**. If the model has a **micro-hesitation**, the chronicle is **cut**.  
 
-*The smooth approach* works like this:
+**The smooth approach** works like this:
 - It retrieves the **probability** of the **chronicle class** for each window.
 - It applies a **moving average** to these **probabilities** (instead of looking at the probability of an **isolated audio window** to decide if it's a chronicle, we look at the **average of that window** and the **surrounding windows**).
 - A decision is made on the **smoothed value** relative to a **single threshold**.
 
-> The score obtained by this method is *0.0/100*.
+> The score obtained by this method is **0.0/100**.
 
 ### Hybrid Approach: Detection by Jingles
 This approach aims to solve **precision problems** at the **start of a chronicle** by using **introductory jingles** as high-confidence **anchor points**.
@@ -126,7 +124,7 @@ The training script creates a **binary model** (Jingle vs. Background) optimized
   - Segments taken from the **middle of chronicles** (after the jingle). This teaches the model to **distinguish** between **"the chronicle's jingle"** and **"the chronicle's speech"**.
 
 #### Model Used
-  Uses *AST* (Audio Spectrogram Transformer) (MIT/ast-finetuned-audioset), because its ability to **analyze audio as an image** (via spectrograms) is superior for recognizing **repetitive musical patterns** like jingles. 
+  Uses **AST** (Audio Spectrogram Transformer) (MIT/ast-finetuned-audioset), because its ability to **analyze audio as an image** (via spectrograms) is superior for recognizing **repetitive musical patterns** like jingles. 
   
 #### Hybrid Inference
 This script combines **both models** for precise segmentation.
@@ -138,9 +136,9 @@ This script combines **both models** for precise segmentation.
 4. Segment End: The **end** is marked as soon as the chronicle model returns **low confidence** for an **extended duration** (default 15s).
 5. Resumption: Jingle scanning resumes after the **end of the detected chronicle**.
 
-![Explanatory diagram for removing missing chronicles](assets/schema-approche-jingle.png)
+![Explanatory diagram for removing missing chronicles](assets/schema_approche_jingle_en.png)
 
-> The score obtained by this method is *0.0/100*.
+> The score obtained by this method is **0.0/100**.
 
 ## Fine-tuning Different Models
 
@@ -178,7 +176,7 @@ Unfortunately, **no model** has managed to obtain a result with the **actual chr
 
 ### Using Multiple Approaches
 
-![](../../assets/schema-multi-approche.png)
+![](assets/schema_multi_approach_en.png)
 
 A "multi-modal" approach is used to detect the start of radio chronicles in real-time. Instead of relying on a single criterion, it merges several types of analyses to make a more robust decision.
 
@@ -189,7 +187,7 @@ The system retrieves the **audio stream** (either from a file or a live stream l
 
 **2. The "Fast Path" (Acoustic Fingerprinting)**  
 Before launching heavy computations, the system checks if the audio segment **resembles a known jingle**.
-- It generates a *digital fingerprint* of the sound.
+- It generates a **digital fingerprint** of the sound.
 - If there is a match in its **database** (e.g., the specific jingle of a show), it triggers the **detection immediately**.
 
 **3. Parallel Sensors (Multi-Approach)**   

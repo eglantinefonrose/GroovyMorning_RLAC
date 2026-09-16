@@ -28,7 +28,7 @@ The technique currently used is 100% automatic and requires no human interventio
 - **Text and Audio File Adjustment**: Since some chronicles are missing, they should not be labeled as 'non-chronicle'. A third program deduces the list of missing chronicles from the theoretical list of chronicles present in the broadcast, removes the parts with missing chronicles from the audio, and adjusts the text file accordingly, taking into account the new audio and the missing chronicles.
 - **Full Transcription**: The entire broadcast is transcribed using kyutai.
 
-![Explanatory diagram for removing missing chronicles](assets/schema-emission-entiere.png)
+![Explanatory diagram for removing missing chronicles](../audio/assets/schema_emission_entiere_en.png)
 
 #### Extraction of Initial Sentences
 We then created a second dataset containing the opening sentences of the chronicles.  

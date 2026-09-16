@@ -4,7 +4,26 @@ To detect **chronicles in radio broadcasts**, we use a **semantic** approach by 
 
 ## Global Overview of Trials
 
-![](assets/schema-recapitulatif-approche-text.png)
+Voici le code Mermaid traduit :
+
+```mermaid
+flowchart TD
+    A[SRT Transcription] --> B{Detection Strategy}
+    B --> C[Classic ML Approach]
+    B --> D[Deep Learning Approach]
+    B --> E[LLM Approach]
+
+    C --> F[Random Forest]
+    F --> G[Features: TF-IDF, stats, duration]
+
+    D --> H[Hybrid CamemBERT + Bi-LSTM + CRF]
+    D --> I[CamemBERT Fine-tuning]
+    I --> J[5-segment Sliding Window]
+
+    E --> K[Few-Shot Prompting]
+    K --> L[Mistral / Qwen]
+    K --> M[Claude API / DeepSeek API]
+```
 
 ## Transcription and Isolation of Chronicles via LLM
 
@@ -13,7 +32,7 @@ This approach relies on the **semantic intelligence** of language models (**LLM*
 ### Technical Approach
 
 The approach uses a **Few-Shot Prompting** technique (learning from examples):
-1.  Data Extraction: A script loads several **transcriptions** in **SRT** format (**time-stamped text**) which serve as *ground truth*.
+1.  Data Extraction: A script loads several **transcriptions** in **SRT** format (**time-stamped text**) which serve as **ground truth**.
 2.  Prompt Construction: A **massive prompt** is built containing:
     - The **transcription** of the file to analyze
     - A **series of examples from past broadcasts** with their full transcriptions and the **exact timecodes of their chronicles**
@@ -31,7 +50,7 @@ Instead of entrusting the decision to **a single algorithm**, the Random Forest 
 
 Each tree examines the **textual features** from the **transcription of a segment** (lexical density, punctuation, sentence length, etc.).  
 Each tree gives its **opinion**: "It's a chronicle" or "It's not a chronicle."  
-The **final result** is the one that received the most votes (**majority** wins).
+Le **final result** is the one that received the most votes (**majority** wins).
 
 To ensure that the **trees are not all identical**, **randomness** is introduced in two ways:
 - On the data: Each tree is trained on a **different sample of the text segments**.
@@ -84,7 +103,7 @@ The model is based on a **three-tier** architecture:
 This approach relies on using a **CamemBERT model** (BERT for French) to detect chronicles in radio broadcast transcriptions.
 
 ### Technical Approach
-Chronicle detection relies on a *Transformer* architecture (CamemBERT) specialized in **sequence classification**. The approach breaks down into **three major steps**:  
+Chronicle detection relies on a **Transformer** architecture (CamemBERT) specialized in **sequence classification**. The approach breaks down into **three major steps**:  
 
 **1. Semantic Augmentation (Context)**  
 An **isolated** transcription segment (often very short, e.g., 2-3 seconds) rarely contains enough information to be classified with certainty.  
@@ -109,7 +128,7 @@ Smoothing: Single-segment "holes" within a detection block are **automatically f
 Duration Filter: Only **continuous blocks of more than 30 seconds** are kept, thus eliminating **false positives** on brief interventions or headlines.
 
 ### Observations and Results
-> Model score: *2.8/100*
+> Model score: **2.8/100**
 
 ## Fine-tuning the Semantic BERT Model to Detect the Start of a Chronicle
 
@@ -128,18 +147,18 @@ The script displays a **numbered list** of **sentences** identified as being **c
 At the time of inference, we choose to display the **first 3 sentences of the chronicle** instead of only the first sentence. We observe that detection is often made **slightly too early**.
 
 ### Observations and Results
-> Model score: *28.2/100*
+> Model score: **28.2/100**
 
 **Improvement 2**
 - Transition Management: The model finally learns to handle the **transition from one segment to another**. We generate **mixed examples** (e.g., [Last sentence of chronicle A, Transition sentence, First sentence of chronicle B]) labeled as chronicle start.
 - Length Bias Removal: All examples now consist of **exactly 3 sentences**. The model can no longer **cheat** by associating "short text" with "chronicle start."
 - Data Leakage Elimination: We no longer ask the model to detect chronicles in broadcasts that were **part of its training**. The model can no longer *memorize* a transition it would find in validation in an **almost identical form**.
-- Inclusion of the **full transcription of the broadcast** to integrate more *negative* examples (non-chronicle starts).
+- Inclusion of the **full transcription of the broadcast** to integrate more **negative** examples (non-chronicle starts).
 
 NB: Training sessions were done by **improving an already trained model** (with the first improvements); a model was not re-generated from scratch.
 
 ### Observations and Results
-> Model score: *22.4/100*
+> Model score: **22.4/100**
 
 ## Using an LLM to Detect Just the Start of Chronicles
 After discovering that Claude can **perfectly extract chronicle opening sentences**, Qwen is used to try to extract chronicle opening sentences.
@@ -173,7 +192,7 @@ The **DeepSeek API** (*deepseek-v4-flash*) is called to detect sentences corresp
 The script **observes the stream** and **signals** when it detects the start of a chronicle and its name.
 
 ### Observations and Results  
-> Model score: *67.10*
+> Model score: **67.10**
 
 ### Improvements  
 To avoid **gross errors**, chronicles are compared with their **theoretical schedule**. A detected chronicle that has **already passed** is also **ignored**.
@@ -195,7 +214,7 @@ Here are the main steps of the method:
 
 **2. The "Fast Path" (Acoustic Fingerprinting)**  
    Before launching heavy computations, the system checks if the audio segment **resembles a known jingle**.
-- It generates a *digital fingerprint* (fingerprint) of the sound.
+- It generates a **digital fingerprint** (fingerprint) of the sound.
 - If there is a match in its **database** (e.g., the specific jingle of a show), it triggers **immediate detection**.
 
 **3. Parallel Sensors (Multi-Approach)**   
@@ -213,6 +232,6 @@ Here are the main steps of the method:
 **5. Learning (Feedback Loop)**  
    As soon as a chronicle is detected with **certainty**, the system records the **sound fingerprint** of that moment. If it was a jingle, it will recognize it even faster next time thanks to the *Fast Path*.
 
-> Model score: *0.00/100*
+> Model score: **0.00/100**
 
 [Version Française](../../../fr/ia-models-training/text/ARTICLE_TEXT_TRAINING.md)

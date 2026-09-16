@@ -23,6 +23,6 @@ The technique currently used is 100% automatic and requires no human interventio
 - **Chronicle Detection**: A second program analyzes the full audio and finds the chronicles within it to deduce their position and create the text file providing the chronicle locations in the audio.
 - **Audio File Adjustment**: Since some chronicles are missing, they should not be labeled as 'non-chronicle'. A third program deduces the list of missing chronicles from the theoretical list of chronicles present in the broadcast, removes the parts with missing chronicles from the audio, and adjusts the text file accordingly, taking into account the new audio and the missing chronicles.
 
-![Explanatory diagram for removing missing chronicles](../text/assets/schema-emission-entiere.png)
+![Explanatory diagram for removing missing chronicles](assets/schema_emission_entiere_en.png)
 
 [Version Française](../../../fr/ia-models-training/audio/ARTICLE_DATA_CREATION_AUDIO.md)
