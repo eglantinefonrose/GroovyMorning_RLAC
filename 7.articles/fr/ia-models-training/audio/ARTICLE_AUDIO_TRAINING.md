@@ -105,6 +105,11 @@ Dans une prédiction classique, chaque fenêtre est traitée **indépendamment**
 - Elle applique une **moyenne glissante** sur ces **probabilités** (au lieu de regarder la probabilité d'une **fenêtre audio isolée** pour décider s'il s'agit d'une chronique, on regarde la **moyenne de cette fenêtre** et des **fenêtres qui l'entourent**).
 - Une décision est prise sur la **valeur lissée** par rapport à un **seuil unique**.
 
+*Exemple :*  
+Prenons une suite de nombres représentant la probabilité qu'une chronique soit en cours à chaque seconde :
+[0.1, 0.2, 0.9, 0.1, 0.8, 0.9, 0.9].  
+Le pic à 0.1 au milieu du 0.9 est probablement une erreur du modèle.
+
 > Le score obtenu par cette méthode est de *0.0/100*.
 
 ### Approche hybride : Détection par jingles
