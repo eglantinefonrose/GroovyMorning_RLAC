@@ -15,12 +15,18 @@ It consists of a Java backend for **recording**, a Python service for **AI-power
 ## Key Features
 
 - **Intelligent Scheduling**: Schedule your favorite radio chronicles based on the official program grid.
-![](7.articles/en/assets/schema-models-audio.png)
-- ![](7.articles/en/assets/text-models.png)
 - **AI-Powered Segmentation**: Automatic detection of chronicle starts and ends using jingle recognition or DeepSeek LLM analysis of transcriptions.
 - **HLS Recording**: High-quality audio recording using FFmpeg, segmented for smooth streaming and seeking.
 - **Multi-Platform Support**: Android and iOS (demo) applications for remote control and playback.
 - **Privacy-First**: Your recordings and planning stay on your local machine.
+
+---
+
+## R&D
+
+**Research and development** phase to find the **best solution** for **detecting segments within the live stream** with **IA**.
+![](7.articles/en/assets/schema-models-audio.png)
+![](7.articles/en/assets/text-models.png)
 
 ---
 
